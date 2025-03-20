@@ -92,7 +92,6 @@ const HeaderPage = () => {
               justifyContent: "center",
             }}
           >
-            HomeCare provides top-notch home maintenance services to ensure comfort and reliability for your household needs.
           </Typography>
 
           <Box

@@ -49,7 +49,6 @@ const ServiceProviderCard = ({ id, name, surname, location, price, imageUrl, rat
           </Box>
         </Box>
         
-        {/* Service type with icon */}
         {service && (
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <WorkIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
