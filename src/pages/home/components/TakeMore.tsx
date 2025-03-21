@@ -8,18 +8,24 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import WcIcon from '@mui/icons-material/Wc';
 import PestControlIcon from '@mui/icons-material/PestControl';
 import StarIcon from '@mui/icons-material/Star';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import PersonIcon from '@mui/icons-material/Person';
 import HomeIcon from '@mui/icons-material/Home';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
 import CategoryIcon from '@mui/icons-material/Category';
-import WorkIcon from '@mui/icons-material/Work';
+import { useNavigate } from "react-router-dom";
 
 // Define the enhanced service provider card component
 const ServiceProviderCard = ({ id, name, surname, location, price, imageUrl, rating, category, gender, age, village, city, service }) => {
+  const navigate = useNavigate();
+  
   // Format price to have commas
   const formatPrice = (price) => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " Kip";
+  };
+  
+  // Handle viewing service details
+  const handleViewDetails = () => {
+    navigate(`/service-detail/${id}`);
   };
   
   return (
@@ -49,9 +55,9 @@ const ServiceProviderCard = ({ id, name, surname, location, price, imageUrl, rat
           </Box>
         </Box>
         
+        {/* Service type with icon */}
         {service && (
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <WorkIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
             <Typography variant="body2" color="text.secondary">{service}</Typography>
           </Box>
         )}
@@ -112,6 +118,7 @@ const ServiceProviderCard = ({ id, name, surname, location, price, imageUrl, rat
         <Button 
           variant="contained" 
           fullWidth
+          onClick={handleViewDetails}
           sx={{ 
             bgcolor: '#611463', 
             '&:hover': { bgcolor: '#611463' }, 
@@ -159,6 +166,7 @@ const ServiceCategoryChip = ({ icon, title, isActive, onClick }) => {
 };
 
 const HomeCareServices = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState(null);
   const [filteredProviders, setFilteredProviders] = useState([]);
@@ -190,7 +198,6 @@ const HomeCareServices = () => {
       age: 21,
       village: 'ບ້ານ ໂນນສະຫວ່າງ',
       city: 'ວຽງຈັນ',
-      service: 'ດູດຝຸ່ນ, ທຳຄວາມສະອາດ'
     },
     { 
       id: 2, 
@@ -206,7 +213,6 @@ const HomeCareServices = () => {
       age: 35,
       village: 'ບ້ານ ຊຽງຢືນ',
       city: 'ວຽງຈັນ',
-      service: 'ຕິດຕັ້ງອຸປະກອນໄຟຟ້າ'
     },
     { 
       id: 3, 
@@ -222,7 +228,6 @@ const HomeCareServices = () => {
       age: 28,
       village: 'ບ້ານ ທົ່ງສາງ',
       city: 'ຊີສັດຕະນາກ',
-      service: 'ສ້ອມແປງແອໃນບ້ານ'
     },
     { 
       id: 4, 
@@ -238,7 +243,6 @@ const HomeCareServices = () => {
       age: 40,
       village: 'ບ້ານ ຫ້ວຍຮັງ',
       city: 'ຊີສັດຕະນາກ',
-      service: 'ແກ້ໄຂລະບົບນ້ຳປະປາ'
     },
     { 
       id: 5, 
@@ -254,7 +258,6 @@ const HomeCareServices = () => {
       age: 32,
       village: 'ບ້ານ ນາດີ',
       city: 'ເມືອງຫຼວງ',
-      service: 'ຂົນສົ່ງເຄື່ອງຫຍ້າຍບ້ານ'
     },
     { 
       id: 6, 
@@ -270,7 +273,6 @@ const HomeCareServices = () => {
       age: 45,
       village: 'ບ້ານ ຂອນແກ່ນ',
       city: 'ປາກເຊ',
-      service: 'ສ້ອມແປງຫ້ອງນ້ຳ'
     },
     { 
       id: 7, 
@@ -286,7 +288,6 @@ const HomeCareServices = () => {
       age: 38,
       village: 'ບ້ານ ຈອມແກ້ວ',
       city: 'ປາກເຊ',
-      service: 'ກຳຈັດແມງໄມ້, ຫນູ'
     },
     { 
       id: 8, 
@@ -302,7 +303,6 @@ const HomeCareServices = () => {
       age: 25,
       village: 'ບ້ານ ຫນອງໄຮ',
       city: 'ວັງວຽງ',
-      service: 'ທຳຄວາມສະອາດທົ່ວໄປ'
     }
   ];
 

@@ -14,23 +14,27 @@ import {
   Chip,
   useMediaQuery,
   useTheme,
+  Card,
+  CardContent,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PersonIcon from "@mui/icons-material/Person";
 import CategoryIcon from "@mui/icons-material/Category";
 import WorkIcon from "@mui/icons-material/Work";
-import LocationCityIcon from "@mui/icons-material/LocationCity";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import HomeIcon from "@mui/icons-material/Home";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import StarIcon from "@mui/icons-material/Star";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { LOCATION_PATH } from "../../../routes/path";
 
 // Font size constants with responsive adjustments
 const getFontSize = (isSmallScreen) => ({
-  title: isSmallScreen ? "1.3rem" : "1.5rem",
-  subtitle: isSmallScreen ? "0.9rem" : "1rem",
-  text: isSmallScreen ? "0.85rem" : "0.9rem",
-  button: isSmallScreen ? "0.9rem" : "1rem",
+  title: isSmallScreen ? "1.4rem" : "1.7rem",
+  subtitle: isSmallScreen ? "1rem" : "1.2rem",
+  text: isSmallScreen ? "0.9rem" : "1rem",
+  button: isSmallScreen ? "0.95rem" : "1.05rem",
 });
 
 const ServiceDetailsPage = () => {
@@ -40,10 +44,10 @@ const ServiceDetailsPage = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isMediumScreen = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"));
-  
+
   // Apply font sizes based on screen size
   const fontSize = getFontSize(isSmallScreen);
-  
+
   const [serviceData, setServiceData] = useState({
     id: 1,
     name: "ດູດຝຸ່ນ, ທຳຄວາມສະອາດ",
@@ -60,20 +64,11 @@ const ServiceDetailsPage = () => {
     skills: "ຂ້ອຍມີປະສົບການ 3 ປີໃນການເປັນແມ່ບ້ານ. ຂ້ອຍສາມາດດູດຝຸ່ນ, ອະນາໄມເຮືອນ, ຊັກເຄື່ອງ, ແລະ ປຸງແຕ່ງອາຫານໄດ້. ຂ້ອຍເຮັດວຽກຢ່າງຂະຫຍັນຂັນແຂ່ງ ແລະ ຮັບຜິດຊອບສູງ.",
     rating: 4.5,
     reviews: [
-      { id: 1, rating: 5, comment: "ດີຫຼາຍ" },
-      { id: 2, rating: 4, comment: "ດີຫຼາຍ" },
-      { id: 3, rating: 4, comment: "ດີຫຼາຍ" },
+      { id: 1, rating: 5, comment: "ດີຫຼາຍ", user: "ນາງ ກອນນະລີ", date: "15 ມີນາ 2025" },
+      { id: 2, rating: 4, comment: "ດີຫຼາຍ", user: "ທ້າວ ສົມສະໄໝ", date: "10 ມີນາ 2025" },
+      { id: 3, rating: 4, comment: "ດີຫຼາຍ", user: "ນາງ ວັນນິດາ", date: "28 ກຸມພາ 2025" },
     ],
   });
-
-  // Format currency
-  const formatCurrency = (value) => {
-    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " KIP";
-  };
-
-  const handleBookService = () => {
-    navigate(`/order-confirmation/${id}`);
-  };
 
   // Calculate container width based on screen size
   const getContainerWidth = () => {
@@ -84,229 +79,369 @@ const ServiceDetailsPage = () => {
 
   // Get consistent max width for content
   const getContentMaxWidth = () => {
-    return isLargeScreen ? "800px" : "100%";
+    return isLargeScreen ? "850px" : "100%";
   };
 
   return (
-    <Container 
-      maxWidth={getContainerWidth()} 
-      sx={{ 
-        p: 0, 
-        mb: 4,
+    <Container
+      maxWidth={getContainerWidth()}
+      sx={{
+        p: 0,
+        mb: 8,
         mx: "auto",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center"
+        alignItems: "center",
+        backgroundColor: "#f8f9fa",
+        minHeight: "100vh",
       }}
     >
       {/* Content wrapper with max width for large screens */}
-      <Box 
-        sx={{ 
-          width: "100%", 
+      <Box
+        sx={{
+          width: "100%",
           maxWidth: getContentMaxWidth(),
           mx: "auto"
         }}
       >
-        {/* Header section with purple background */}
+        {/* Header section with gradient background */}
         <Box
           sx={{
-            backgroundColor: "#611463",
+            background: "linear-gradient(135deg, #7d1f82 0%, #4a0d4c 100%)",
             color: "white",
-            borderRadius: { xs: "0 0 20px 20px", md: "0 0 30px 30px" },
-            p: { xs: 2, sm: 3 },
-            pb: { xs: 3, sm: 4 },
-            mb: 2,
+            borderRadius: { xs: "0 0 30px 30px", md: "0 0 40px 40px" },
+            p: { xs: 3, sm: 4 },
+            pb: { xs: 4, sm: 5 },
+            mb: 3,
             position: "relative",
-            width: "100%"
+            width: "100%",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
           }}
         >
           {/* Navigation */}
-          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
             <IconButton
               onClick={() => navigate("/Service")}
-              sx={{ color: "white", mr: 1 }}
+              sx={{ 
+                color: "white", 
+                mr: 1,
+                "&:hover": { 
+                  backgroundColor: "rgba(255,255,255,0.1)" 
+                }
+              }}
               aria-label="Go back"
             >
               <ArrowBackIcon />
             </IconButton>
-            <Typography variant="h6" sx={{ fontSize: fontSize.title, fontWeight: "bold" }}>
-              ລາຍລະອຽດ
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                fontSize: fontSize.title, 
+                fontWeight: "bold",
+                letterSpacing: "0.5px"
+              }}
+            >
+              ລາຍລະອຽດການບໍລິການ
             </Typography>
           </Box>
 
-          {/* Profile info */}
-          <Box sx={{ display: "flex", alignItems: "flex-start", mb: 3 }}>
+          {/* Profile info with improved styling */}
+          <Box sx={{ 
+            display: "flex", 
+            alignItems: "flex-start", 
+            mb: 3, 
+            background: "rgba(255,255,255,0.1)",
+            borderRadius: 3,
+            p: 2
+          }}>
             <Avatar
               src={serviceData.image}
-              sx={{ 
-                width: { xs: 60, sm: 70 }, 
-                height: { xs: 60, sm: 70 }, 
-                mr: 2 
+              sx={{
+                width: { xs: 80, sm: 100 },
+                height: { xs: 80, sm: 100 },
+                mr: 2.5,
+                border: "3px solid white",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.2)"
               }}
             />
             <Box sx={{ flexGrow: 1 }}>
-              <Typography sx={{ fontSize: fontSize.subtitle, fontWeight: "bold" }}>
+              <Typography sx={{ 
+                fontSize: fontSize.subtitle, 
+                fontWeight: "bold",
+                mb: 0.5,
+                letterSpacing: "0.5px"
+              }}>
                 {serviceData.firstName} {serviceData.surname}
               </Typography>
-              <Typography sx={{ fontSize: fontSize.text, mt: 0.5 }}>
-                {serviceData.age} ປີ | {serviceData.gender}
-              </Typography>
-              <Typography sx={{ fontSize: fontSize.text }}>
-                {serviceData.village}, {serviceData.city}
-              </Typography>
-              {/* Category in white box */}
-              <Paper
-                elevation={2}
-                sx={{
-                  p: 1,
-                  borderRadius: 2,
-                  mt: 2,
-                  display: "flex",
-                  alignItems: "center",
-                  backgroundColor: "white",
-                  maxWidth: "fit-content" 
-                }}
-              >
-                <CategoryIcon sx={{ color: "#611463", mr: 1.5, fontSize: isSmallScreen ? "1rem" : "1.2rem" }} />
-                <Typography sx={{ fontSize: fontSize.text, color: "#611463", fontWeight: "bold" }}>
-                  {serviceData.category}
+              
+              <Stack direction="row" spacing={2} sx={{ mb: 1.5 }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <CalendarTodayIcon sx={{ fontSize: "1rem", mr: 0.5, opacity: 0.8 }} />
+                  <Typography sx={{ fontSize: fontSize.text }}>
+                    {serviceData.age} ປີ
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <PersonIcon sx={{ fontSize: "1rem", mr: 0.5, opacity: 0.8 }} />
+                  <Typography sx={{ fontSize: fontSize.text }}>
+                    {serviceData.gender}
+                  </Typography>
+                </Box>
+              </Stack>
+              
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <LocationOnIcon sx={{ fontSize: "1.1rem", mr: 0.7, opacity: 0.8 }} />
+                <Typography sx={{ fontSize: fontSize.text }}>
+                  {serviceData.village}, {serviceData.city}
                 </Typography>
-              </Paper>
+              </Box>
+              
+              {/* Rating display */}
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <Rating
+                  value={serviceData.rating}
+                  readOnly
+                  precision={0.5}
+                  size="small"
+                  sx={{
+                    mr: 1,
+                    "& .MuiRating-iconFilled": {
+                      color: "#FFD700",
+                    },
+                  }}
+                />
+                <Typography sx={{ fontSize: fontSize.text, fontWeight: "medium" }}>
+                  {serviceData.rating}
+                </Typography>
+              </Box>
+              
+              {/* Category in stylish chip */}
+              <Chip
+                icon={<CategoryIcon style={{ color: "#611463" }} />}
+                label={serviceData.category}
+                sx={{
+                  borderRadius: "16px",
+                  backgroundColor: "white",
+                  color: "#611463",
+                  fontWeight: "bold",
+                  fontSize: fontSize.text,
+                  "& .MuiChip-icon": {
+                    color: "#611463",
+                  },
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                }}
+              />
             </Box>
           </Box>
 
-          {/* Price in purple box - Aligned to the right */}
+          {/* Price in glass-morphism box */}
           <Box sx={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-end", // Right-align the entire price section
-            mt: 2
+            justifyContent: "center",
+            mt: 3,
+            backgroundColor: "rgba(255,255,255,0.15)",
+            backdropFilter: "blur(10px)",
+            borderRadius: 3,
+            p: 2,
+            boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
           }}>
-            <Typography sx={{ fontSize: fontSize.text, fontWeight: "medium", mr: 1 }}>
-              ລາຄາ:
-            </Typography>
-            <Typography sx={{
-              fontSize: fontSize.subtitle,
-              fontWeight: "bold",
-              color: "white"
-            }}>
-              {serviceData.priceFormatted}
-            </Typography>
+            <MonetizationOnIcon sx={{ mr: 1.5, fontSize: "1.5rem" }} />
+            <Box>
+              <Typography sx={{ fontSize: fontSize.text, opacity: 0.8 }}>
+                ລາຄາຄ່າບໍລິການ
+              </Typography>
+              <Typography sx={{
+                fontSize: { xs: "1.5rem", sm: "1.8rem" },
+                fontWeight: "bold",
+                color: "white"
+              }}>
+                {serviceData.priceFormatted}
+              </Typography>
+            </Box>
           </Box>
         </Box>
 
         {/* Service details section */}
-        <Box sx={{ p: { xs: 2, sm: 3 }, width: "100%" }}>
-          <Typography sx={{ fontSize: fontSize.subtitle, fontWeight: "bold", mb: 2 }}>
+        <Box sx={{ px: { xs: 2, sm: 3 }, width: "100%" }}>
+          {/* Skills section with improved card design */}
+          <Typography sx={{ 
+            fontSize: fontSize.subtitle, 
+            fontWeight: "600", 
+            mb: 2,
+            ml: 1,
+            display: "flex",
+            alignItems: "center",
+          }}>
+            <WorkIcon sx={{ mr: 1.5, color: "#611463" }} />
             ການບໍລິການ ແລະ ທັກສະ
           </Typography>
 
-          <Paper
+          <Card
             elevation={2}
             sx={{
-              p: { xs: 2, sm: 2.5 },
-              borderRadius: 2,
-              mb: 3,
-              boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
+              p: { xs: 0, sm: 0 },
+              borderRadius: 4,
+              mb: 4,
+              boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
+              overflow: "hidden",
+              border: "1px solid rgba(0,0,0,0.05)",
             }}
           >
-            <Typography sx={{ fontSize: fontSize.text, lineHeight: 1.6 }}>
-              {serviceData.skills}
-            </Typography>
-          </Paper>
+            <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
+              <Typography sx={{ 
+                fontSize: fontSize.text, 
+                lineHeight: 1.8,
+                color: "#424242"
+              }}>
+                {serviceData.skills}
+              </Typography>
+            </CardContent>
+          </Card>
 
-         
-
-          {/* Reviews section */}
-          <Typography sx={{ fontSize: fontSize.subtitle, fontWeight: "bold", mb: 2 }}>
-            ລີວິວ
+          {/* Reviews section with enhanced cards */}
+          <Typography sx={{ 
+            fontSize: fontSize.subtitle, 
+            fontWeight: "600", 
+            mb: 2,
+            ml: 1,
+            display: "flex",
+            alignItems: "center",
+          }}>
+            <StarIcon sx={{ mr: 1.5, color: "#611463" }} />
+            ລີວິວຈາກລູກຄ້າ
           </Typography>
 
-          <Paper
-            elevation={2}
-            sx={{
-              borderRadius: 2,
-              p: 0,
-              mb: 3,
-              boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
-              overflow: "hidden"
-            }}
-          >
-            {serviceData.reviews.map((review, index) => (
-              <React.Fragment key={review.id}>
-                <Box sx={{ p: { xs: 1.5, sm: 2 } }}>
-                  <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+          <Stack spacing={2} sx={{ mb: 4 }}>
+            {serviceData.reviews.map((review) => (
+              <Card
+                key={review.id}
+                sx={{
+                  borderRadius: 4,
+                  boxShadow: "0 4px 15px rgba(0,0,0,0.06)",
+                  border: "1px solid rgba(0,0,0,0.03)",
+                  overflow: "hidden",
+                  transition: "transform 0.2s, box-shadow 0.2s",
+                  "&:hover": {
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
+                  }
+                }}
+              >
+                <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+                  <Box sx={{ display: "flex", alignItems: "flex-start" }}>
                     <Avatar
-                      src={serviceData.image}
-                      sx={{ width: { xs: 35, sm: 40 }, height: { xs: 35, sm: 40 }, mr: 2 }}
-                    />
+                      sx={{ 
+                        width: 45, 
+                        height: 45, 
+                        mr: 2,
+                        bgcolor: "#611463"
+                      }}
+                    >
+                      {review.user.charAt(0)}
+                    </Avatar>
                     <Box sx={{ flexGrow: 1 }}>
-                      <Typography sx={{ fontSize: fontSize.text, fontWeight: "bold" }}>
-                        {serviceData.firstName} {serviceData.surname}
-                      </Typography>
-                      <Typography sx={{ fontSize: isSmallScreen ? "0.75rem" : "0.8rem" }}>
-                        {review.comment}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Box sx={{ 
+                        display: "flex", 
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 0.7
+                      }}>
+                        <Typography sx={{ 
+                          fontSize: fontSize.text, 
+                          fontWeight: "600" 
+                        }}>
+                          {review.user}
+                        </Typography>
+                        <Typography sx={{ 
+                          fontSize: "0.75rem", 
+                          color: "text.secondary" 
+                        }}>
+                          {review.date}
+                        </Typography>
+                      </Box>
                       <Rating
                         value={review.rating}
                         readOnly
                         size="small"
                         sx={{
+                          mb: 1,
                           "& .MuiRating-iconFilled": {
                             color: "#FFD700",
                           },
                         }}
                       />
+                      <Typography sx={{ 
+                        fontSize: fontSize.text,
+                        color: "#424242",
+                        fontStyle: "italic"
+                      }}>
+                        "{review.comment}"
+                      </Typography>
                     </Box>
                   </Box>
-                </Box>
-                {index < serviceData.reviews.length - 1 && <Divider />}
-              </React.Fragment>
+                </CardContent>
+              </Card>
             ))}
-          </Paper>
-          
-          {/* Button container placed below reviews */}
-          <Box sx={{ 
-            width: "100%", 
-            display: "flex",
-            justifyContent: "center",
-            mt: 2,
-            mb: 2,
-            p: { xs: 1, sm: 2 },
-            backgroundColor: "white",
-            borderRadius: 2,
-          }}>
+          </Stack>
+
+          {/* Button container with floating effect */}
+          <Paper
+            elevation={3}
+            sx={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "space-between",
+              p: { xs: 2.5, sm: 3 },
+              backgroundColor: "white",
+              borderRadius: 4,
+              position: "sticky",
+              bottom: 16,
+              zIndex: 10,
+              boxShadow: "0 8px 25px rgba(0,0,0,0.12)",
+              mb: 3
+            }}
+          >
             <Button
-              variant="contained"
+              variant="outlined"
               color="error"
               sx={{
-                width: "45%",
-                mx: 1,
                 fontSize: fontSize.button,
-                borderRadius: 5,
-                py: { xs: 0.8, sm: 1 },
+                px: 4,
+                py: 1.5,
+                width: "48%",
+                borderRadius: 2,
+                borderWidth: 2,
+                "&:hover": { 
+                  borderWidth: 2,
+                  backgroundColor: "rgba(211, 47, 47, 0.04)"
+                },
               }}
-              onClick={() => navigate("/Service")}            >
+              onClick={() => navigate("/Service")}
+            >
               ຍົກເລີກ
             </Button>
             <Button
               variant="contained"
               sx={{
-                width: "45%",
-                mx: 1,
                 fontSize: fontSize.button,
-                borderRadius: 5,
-                py: { xs: 0.8, sm: 1 },
-                backgroundColor: "#39b54a",
-                "&:hover": { backgroundColor: "#2e9a3e" },
+                px: 4,
+                py: 1.5,
+                width: "48%",
+                borderRadius: 2,
+                background: "linear-gradient(45deg, #611463 30%, #8a1b92 90%)",
+                boxShadow: "0 4px 15px rgba(97, 20, 99, 0.4)",
+                "&:hover": { 
+                  background: "linear-gradient(45deg, #4a0d4c 30%, #7d1f82 90%)",
+                  boxShadow: "0 6px 20px rgba(97, 20, 99, 0.5)",
+                },
+                transition: "all 0.3s ease",
               }}
-              onClick={() => navigate(LOCATION_PATH)}            
+              onClick={() => navigate(LOCATION_PATH)}
             >
-              ເລືອກ
+              ເລືອກບໍລິການ
             </Button>
-          </Box>
+          </Paper>
         </Box>
       </Box>
     </Container>

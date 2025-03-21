@@ -11,14 +11,24 @@ import {
   FormControlLabel,
   Link,
   InputAdornment,
+  Paper,
+  Avatar,
+  Divider,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import { 
   Visibility, 
   VisibilityOff, 
   PersonOutline, 
-  LockOutlined 
+  LockOutlined,
+  SendIcon
 } from "@mui/icons-material";
 import RegisterDialog from "./dialog-signup";
+
+// Assuming you have this logo image in your assets folder
+// If not, replace with your actual logo path
+import LOGO_HOMECARE from "../../assets/icons/HomeCareLogo.png";
 
 interface LoginDialogProps {
   open: boolean;
@@ -30,8 +40,10 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-
   const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleOpenRegister = () => {
     onClose();
@@ -61,34 +73,72 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
         maxWidth="sm"
         PaperProps={{
           sx: {
-            borderRadius: 2,
-            width: "450px",
+            borderRadius: 4,
+            width: "500px",
             overflow: "hidden",
             m: 0,
             p: 0,
-            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+            boxShadow: "0 12px 24px rgba(0,0,0,0.15)",
+            transition: "transform 0.3s ease-in-out",
+            "&:hover": {
+              transform: "translateY(-5px)",
+            },
           },
         }}
       >
-        <DialogContent sx={{ p: 0, display: "flex", height: "auto" }}>
+        <DialogContent sx={{ p: 0, display: "flex", flexDirection: "column", height: "auto" }}>
+          {/* Header with Gradient Background */}
+          <Box 
+            sx={{ 
+              background: "linear-gradient(45deg, #611463 30%, #611463 90%)",
+              p: 3,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              color: "#fff"
+            }}
+          >
+            <img 
+              src={LOGO_HOMECARE} 
+              alt="HomeCare Logo" 
+              style={{ 
+                maxWidth: isMobile ? "80px" : "100px", 
+                marginBottom: "16px",
+                filter: "drop-shadow(1px 2px 3px rgba(0,0,0,0.2))"
+              }} 
+            />
+            <Typography 
+              variant="h4" 
+              fontWeight={700}
+              sx={{ 
+                textAlign: "center",
+                textShadow: "1px 1px 3px rgba(0,0,0,0.2)"
+              }}
+            >
+              Welcome Back
+            </Typography>
+            <Typography 
+              variant="body1" 
+              sx={{ 
+                opacity: 0.9,
+                textAlign: "center",
+                mt: 1
+              }}
+            >
+              Log in to access your HomeCare account
+            </Typography>
+          </Box>
+
           {/* Form */}
           <Box sx={{ 
-            flex: 1, 
-            p: 3, 
+            p: 4, 
             display: "flex", 
             flexDirection: "column",
-            gap: 1.5 
+            gap: 2.5 
           }}>
-            <Typography
-              variant="h5"
-              sx={{ fontWeight: "bold", color: "#003333", mb: 1 }}
-            >
-              Log In 
-            </Typography>
-
             <TextField
               fullWidth
-              placeholder="Full Name"
+              label="Full Name"
               variant="outlined"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
@@ -98,18 +148,18 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
                     <PersonOutline color="action" />
                   </InputAdornment>
                 ),
+                sx: {
+                  borderRadius: 2,
+                  "&:hover": {
+                    borderColor: "#f7931e"
+                  }
+                }
               }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "8px",
-                },
-              }}
-              size="small"
             />
 
             <TextField
               fullWidth
-              placeholder="Password"
+              label="Password"
               type={showPassword ? "text" : "password"}
               variant="outlined"
               value={password}
@@ -131,56 +181,97 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
                     </IconButton>
                   </InputAdornment>
                 ),
+                sx: {
+                  borderRadius: 2,
+                  "&:hover": {
+                    borderColor: "#f7931e"
+                  }
+                }
               }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "8px",
-                },
-              }}
-              size="small"
             />
 
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  size="small"
-                />
-              }
-              label={<Typography variant="body2">Keep me logged in</Typography>}
-            />
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    size="small"
+                    sx={{
+                      color: "#611463",
+                      '&.Mui-checked': {
+                        color: "#611463",
+                      },
+                    }}
+                  />
+                }
+                label={<Typography variant="body2">Keep me logged in</Typography>}
+              />
+              
+              <Link
+                component="button"
+                variant="body2"
+                onClick={() => {}}
+                sx={{
+                  color: "#611463",
+                  textDecoration: "none",
+                  fontWeight: 500,
+                  '&:hover': {
+                    color: "#f7931e",
+                  },
+                }}
+              >
+                Forgot Password?
+              </Link>
+            </Box>
 
             <Button
               variant="contained"
               fullWidth
               onClick={handleLogin}
               sx={{
-                bgcolor: "#611463",
-                borderRadius: "24px",
-                py: 1,
+                mt: 1,
+                py: 1.5,
+                borderRadius: 8,
                 textTransform: "none",
-                mt: 0.5,
+                fontSize: "1rem",
+                fontWeight: 600,
+                background: "linear-gradient(45deg, #611463 30%, #8e24aa 90%)",
+                boxShadow: "0 3px 5px 2px rgba(97, 20, 99, .3)",
+                transition: "all 0.3s ease",
                 "&:hover": {
-                  bgcolor: "#f7931e",
-                },
+                  background: "linear-gradient(45deg, #f7931e 30%, #ffa726 90%)",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 6px 10px 2px rgba(247, 147, 30, .4)"
+                }
               }}
             >
               Log In
             </Button>
 
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+            <Divider sx={{ my: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                OR
+              </Typography>
+            </Divider>
+
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
               <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                Don't have an account ?&nbsp;
+                Don't have an account?&nbsp;
                 <Link
                   onClick={handleOpenRegister}
                   sx={{
                     color: "#f7931e",
                     textDecoration: "none",
                     cursor: "pointer",
+                    fontWeight: 600,
+                    '&:hover': {
+                      color: "#611463",
+                      textDecoration: "underline",
+                    },
                   }}
                 >
-                  Sign up
+                  Sign up now
                 </Link>
               </Typography>
             </Box>

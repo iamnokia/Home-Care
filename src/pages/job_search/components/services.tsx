@@ -8,16 +8,14 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import WcIcon from '@mui/icons-material/Wc';
 import PestControlIcon from '@mui/icons-material/PestControl';
 import StarIcon from '@mui/icons-material/Star';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import PersonIcon from '@mui/icons-material/Person';
 import HomeIcon from '@mui/icons-material/Home';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
 import CategoryIcon from '@mui/icons-material/Category';
-import WorkIcon from '@mui/icons-material/Work';
-import imageUrl from '../../../assets/icons/HomeCareAds.png';
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-// Define the enhanced service provider card component
+// Service Provider Card Component
+// This should match your existing ServiceProviderCard.jsx exactly
 const ServiceProviderCard = ({ id, name, surname, location, price, imageUrl, rating, category, gender, age, village, city, service }) => {
   const navigate = useNavigate();
   
@@ -26,20 +24,29 @@ const ServiceProviderCard = ({ id, name, surname, location, price, imageUrl, rat
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " Kip";
   };
   
+  // Handle click to navigate to service detail page
+  const handleCardClick = () => {
+    navigate(`/service-detail/${id}`);
+  };
+  
   return (
-    <Box sx={{ 
-      width: '100%', 
-      border: '1px solid #eee', 
-      borderRadius: 2, 
-      overflow: 'hidden',
-      mb: 3,
-      boxShadow: '0px 2px 8px rgba(0,0,0,0.05)',
-      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-      '&:hover': {
-        transform: 'translateY(-5px)',
-        boxShadow: '0px 6px 12px rgba(0,0,0,0.1)'
-      }
-    }}>
+    <Box 
+      sx={{ 
+        width: '100%', 
+        border: '1px solid #eee', 
+        borderRadius: 2, 
+        overflow: 'hidden',
+        mb: 3,
+        boxShadow: '0px 2px 8px rgba(0,0,0,0.05)',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        '&:hover': {
+          transform: 'translateY(-5px)',
+          boxShadow: '0px 6px 12px rgba(0,0,0,0.1)'
+        },
+        cursor: 'pointer'
+      }}
+      onClick={handleCardClick}
+    >
       <Box sx={{ height: 200, overflow: 'hidden' }}>
         <img src={imageUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </Box>
@@ -55,7 +62,6 @@ const ServiceProviderCard = ({ id, name, surname, location, price, imageUrl, rat
         
         {/* Service type with icon */}
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <WorkIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
           <Typography variant="body2" color="text.secondary">{service}</Typography>
         </Box>
         
@@ -98,7 +104,10 @@ const ServiceProviderCard = ({ id, name, surname, location, price, imageUrl, rat
         <Typography variant="h6" color="warning.main" sx={{ mb: 2 }}>{formatPrice(price)}</Typography>
         <Button 
           variant="contained" 
-          onClick={() => navigate(`/service-detail/${id}`)}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/service-detail/${id}`);
+          }}
           fullWidth
           sx={{ 
             bgcolor: '#611463', 
@@ -147,6 +156,7 @@ const ServiceCategoryChip = ({ icon, title, isActive, onClick }) => {
 };
 
 const Services = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState(null);
   const [filteredProviders, setFilteredProviders] = useState([]);
@@ -178,7 +188,6 @@ const Services = () => {
       age: 21,
       village: 'ບ້ານ ໂນນສະຫວ່າງ',
       city: 'ວຽງຈັນ',
-      service: 'ດູດຝຸ່ນ, ທຳຄວາມສະອາດ'
     },
     { 
       id: 2, 
@@ -194,7 +203,6 @@ const Services = () => {
       age: 35,
       village: 'ບ້ານ ຊຽງຢືນ',
       city: 'ວຽງຈັນ',
-      service: 'ຕິດຕັ້ງອຸປະກອນໄຟຟ້າ'
     },
     { 
       id: 3, 
@@ -210,7 +218,6 @@ const Services = () => {
       age: 28,
       village: 'ບ້ານ ທົ່ງສາງ',
       city: 'ຊີສັດຕະນາກ',
-      service: 'ສ້ອມແປງແອໃນບ້ານ'
     },
     { 
       id: 4, 
@@ -226,7 +233,6 @@ const Services = () => {
       age: 40,
       village: 'ບ້ານ ຫ້ວຍຮັງ',
       city: 'ຊີສັດຕະນາກ',
-      service: 'ແກ້ໄຂລະບົບນ້ຳປະປາ'
     },
     { 
       id: 5, 
@@ -242,7 +248,6 @@ const Services = () => {
       age: 32,
       village: 'ບ້ານ ນາດີ',
       city: 'ເມືອງຫຼວງ',
-      service: 'ຂົນສົ່ງເຄື່ອງຫຍ້າຍບ້ານ'
     },
     { 
       id: 6, 
@@ -258,7 +263,6 @@ const Services = () => {
       age: 45,
       village: 'ບ້ານ ຂອນແກ່ນ',
       city: 'ປາກເຊ',
-      service: 'ສ້ອມແປງຫ້ອງນ້ຳ'
     },
     { 
       id: 7, 
@@ -274,7 +278,6 @@ const Services = () => {
       age: 38,
       village: 'ບ້ານ ຈອມແກ້ວ',
       city: 'ປາກເຊ',
-      service: 'ກຳຈັດແມງໄມ້, ຫນູ'
     },
     { 
       id: 8, 
@@ -285,12 +288,11 @@ const Services = () => {
       imageUrl: '/api/placeholder/400/300', 
       rating: 5,
       categoryType: 'cleaning',
-      category: 'ແມ່ບ້ານ',
+      category: 'ທຳຄວາມສະອາດ',
       gender: 'ຍິງ',
       age: 25,
       village: 'ບ້ານ ຫນອງໄຮ',
       city: 'ວັງວຽງ',
-      service: 'ທຳຄວາມສະອາດທົ່ວໄປ'
     }
   ];
 
@@ -443,7 +445,6 @@ const Services = () => {
                       age={provider.age}
                       village={provider.village}
                       city={provider.city}
-                      service={provider.service}
                     />
                   </Grid>
                 ))}

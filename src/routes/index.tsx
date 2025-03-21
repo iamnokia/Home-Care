@@ -11,6 +11,9 @@ import ServiceStatus from "../pages/job_search/components/serviceStstus";
 import LocationPage from "../pages/location/components/location";
 import LocationDetailPage from "../pages/loDetail/components/lomore";
 import PaymentPage from "../pages/payment/components/paymemt";
+import TermsAndPrivacyPage from "../pages/privacy/components";
+import SettingsPage from "../pages/setting/components/setting";
+
 
 import {
   BLOG_PROFILE_PATH,
@@ -23,6 +26,8 @@ import {
   PAYMENT_PATH,
   SERVICE_PATH,
   SERVICE_STATUS_PATH,
+  SETTING_PATH,
+  TERMS_PRIVACY_PATH,
 } from "./path";
 import { useRoutes } from "react-router-dom";
 
@@ -42,6 +47,8 @@ const RoutesComponent = () => {
         { path: PAYMENT_PATH, element: <PaymentPage/> },
         { path: SERVICE_STATUS_PATH, element: <ServiceStatus/> },
         { path: COMMENT_PATH, element: <CommentPage/> },
+        { path: TERMS_PRIVACY_PATH, element: <TermsAndPrivacyPage/> },
+        { path: SETTING_PATH, element: <SettingsPage/> },
         { path: "/service-detail/:id", element: <ServiceDetail/>},
 
       ],

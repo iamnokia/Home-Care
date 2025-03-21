@@ -16,6 +16,9 @@ import {
   FormControl,
   FormLabel,
   Link,
+  useTheme,
+  useMediaQuery,
+  Paper,
 } from "@mui/material";
 import { 
   Visibility, 
@@ -30,10 +33,14 @@ import {
   Badge
 } from "@mui/icons-material";
 
+// Assuming you have this logo image in your assets folder
+// If not, replace with your actual logo path
+import LOGO_HOMECARE from "../../assets/icons/HomeCareLogo.png";
+
 interface RegisterDialogProps {
   open: boolean;
   onClose: () => void;
-  onSwitchToLogin?: () => void; // New prop for handling the switch to login
+  onSwitchToLogin?: () => void;
 }
 
 const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitchToLogin }) => {
@@ -48,6 +55,9 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -85,12 +95,16 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
       maxWidth="sm"
       PaperProps={{
         sx: {
-          borderRadius: 2,
-          width: "450px",
+          borderRadius: 4,
+          width: "500px",
           overflow: "hidden",
           m: 0,
           p: 0,
-          boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+          boxShadow: "0 12px 24px rgba(0,0,0,0.15)",
+          transition: "transform 0.3s ease-in-out",
+          "&:hover": {
+            transform: "translateY(-5px)",
+          },
         },
       }}
     >
@@ -98,23 +112,69 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
         sx={{ 
           p: 0, 
           display: "flex", 
+          flexDirection: "column",
           height: "auto", 
           maxHeight: "90vh", 
-          overflowY: "auto" 
+          overflowY: "auto",
+          "&::-webkit-scrollbar": {
+            width: "8px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "rgba(0,0,0,0.2)",
+            borderRadius: "4px",
+          },
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: "rgba(0,0,0,0.05)",
+          },
         }}
       >
-        {/* Form */}
-        <Box sx={{ flex: 1, p: 3, display: "flex", flexDirection: "column", gap: 1.5 }}>
-          <Typography
-            variant="h5"
-            sx={{ fontWeight: "bold", color: "#003333", mb: 1 }}
+        {/* Header with Gradient Background */}
+        <Box 
+          sx={{ 
+            background: "linear-gradient(45deg, #611463 30%, #611463 90%)",
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            color: "#fff"
+          }}
+        >
+          <img 
+            src={LOGO_HOMECARE} 
+            alt="HomeCare Logo" 
+            style={{ 
+              maxWidth: isMobile ? "80px" : "100px", 
+              marginBottom: "16px",
+              filter: "drop-shadow(1px 2px 3px rgba(0,0,0,0.2))"
+            }} 
+          />
+          <Typography 
+            variant="h4" 
+            fontWeight={700}
+            sx={{ 
+              textAlign: "center",
+              textShadow: "1px 1px 3px rgba(0,0,0,0.2)"
+            }}
           >
-            Sign Up 
+            Create Account
           </Typography>
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              opacity: 0.9,
+              textAlign: "center",
+              mt: 1
+            }}
+          >
+            Join HomeCare to get premium home services
+          </Typography>
+        </Box>
 
+        {/* Form */}
+        <Box sx={{ flex: 1, p: 4, display: "flex", flexDirection: "column", gap: 2 }}>
           <TextField
             fullWidth
-            placeholder="Username"
+            label="Username"
             variant="outlined"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -124,19 +184,19 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
                   <Badge fontSize="small" color="action" />
                 </InputAdornment>
               ),
+              sx: {
+                borderRadius: 2,
+                "&:hover": {
+                  borderColor: "#f7931e"
+                }
+              }
             }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "8px",
-              },
-            }}
-            size="small"
           />
 
           <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
               fullWidth
-              placeholder="First Name"
+              label="First Name"
               variant="outlined"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
@@ -146,18 +206,18 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
                     <Person fontSize="small" color="action" />
                   </InputAdornment>
                 ),
+                sx: {
+                  borderRadius: 2,
+                  "&:hover": {
+                    borderColor: "#f7931e"
+                  }
+                }
               }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "8px",
-                },
-              }}
-              size="small"
             />
             
             <TextField
               fullWidth
-              placeholder="Last Name"
+              label="Last Name"
               variant="outlined"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
@@ -167,19 +227,19 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
                     <Person fontSize="small" color="action" />
                   </InputAdornment>
                 ),
+                sx: {
+                  borderRadius: 2,
+                  "&:hover": {
+                    borderColor: "#f7931e"
+                  }
+                }
               }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "8px",
-                },
-              }}
-              size="small"
             />
           </Box>
 
           <TextField
             fullWidth
-            placeholder="Phone Number"
+            label="Phone Number"
             variant="outlined"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
@@ -189,57 +249,102 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
                   <Phone fontSize="small" color="action" />
                 </InputAdornment>
               ),
+              sx: {
+                borderRadius: 2,
+                "&:hover": {
+                  borderColor: "#f7931e"
+                }
+              }
             }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "8px",
-              },
-            }}
-            size="small"
           />
 
-          <FormControl component="fieldset">
-            <FormLabel component="legend" sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
-              Gender
-            </FormLabel>
-            <RadioGroup
-              row
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-            >
-              <FormControlLabel 
-                value="male" 
-                control={<Radio size="small" />} 
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Man fontSize="small" sx={{ mr: 0.5 }} /> Male
-                  </Box>
-                } 
-              />
-              <FormControlLabel 
-                value="female" 
-                control={<Radio size="small" />} 
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Woman fontSize="small" sx={{ mr: 0.5 }} /> Female
-                  </Box>
-                } 
-              />
-              <FormControlLabel 
-                value="other" 
-                control={<Radio size="small" />} 
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Transgender fontSize="small" sx={{ mr: 0.5 }} /> Other
-                  </Box>
-                } 
-              />
-            </RadioGroup>
-          </FormControl>
+          <Paper 
+            elevation={0}
+            sx={{ 
+              p: 2, 
+              borderRadius: 2, 
+              bgcolor: "rgba(97, 20, 99, 0.05)",
+              border: "1px solid rgba(97, 20, 99, 0.1)"
+            }}
+          >
+            <FormControl component="fieldset">
+              <FormLabel 
+                component="legend" 
+                sx={{ 
+                  color: "#611463", 
+                  fontSize: "0.95rem",
+                  fontWeight: 500,
+                  mb: 1
+                }}
+              >
+                Gender
+              </FormLabel>
+              <RadioGroup
+                row
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+              >
+                <FormControlLabel 
+                  value="male" 
+                  control={
+                    <Radio 
+                      sx={{
+                        color: "#611463",
+                        '&.Mui-checked': {
+                          color: "#611463",
+                        },
+                      }}
+                    />
+                  } 
+                  label={
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Man fontSize="small" sx={{ mr: 0.5 }} /> Male
+                    </Box>
+                  } 
+                />
+                <FormControlLabel 
+                  value="female" 
+                  control={
+                    <Radio 
+                      sx={{
+                        color: "#611463",
+                        '&.Mui-checked': {
+                          color: "#611463",
+                        },
+                      }}
+                    />
+                  } 
+                  label={
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Woman fontSize="small" sx={{ mr: 0.5 }} /> Female
+                    </Box>
+                  } 
+                />
+                <FormControlLabel 
+                  value="other" 
+                  control={
+                    <Radio 
+                      sx={{
+                        color: "#611463",
+                        '&.Mui-checked': {
+                          color: "#611463",
+                        },
+                      }}
+                    />
+                  } 
+                  label={
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Transgender fontSize="small" sx={{ mr: 0.5 }} /> Other
+                    </Box>
+                  } 
+                />
+              </RadioGroup>
+            </FormControl>
+          </Paper>
 
           <TextField
             fullWidth
-            placeholder="Email Address"
+            label="Email Address"
             type="email"
             variant="outlined"
             value={email}
@@ -250,18 +355,18 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
                   <Email fontSize="small" color="action" />
                 </InputAdornment>
               ),
+              sx: {
+                borderRadius: 2,
+                "&:hover": {
+                  borderColor: "#f7931e"
+                }
+              }
             }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "8px",
-              },
-            }}
-            size="small"
           />
 
           <TextField
             fullWidth
-            placeholder="Password"
+            label="Password"
             type={showPassword ? "text" : "password"}
             variant="outlined"
             value={password}
@@ -283,18 +388,18 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
                   </IconButton>
                 </InputAdornment>
               ),
+              sx: {
+                borderRadius: 2,
+                "&:hover": {
+                  borderColor: "#f7931e"
+                }
+              }
             }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "8px",
-              },
-            }}
-            size="small"
           />
 
           <TextField
             fullWidth
-            placeholder="Confirm Password"
+            label="Confirm Password"
             type={showConfirmPassword ? "text" : "password"}
             variant="outlined"
             value={confirmPassword}
@@ -316,13 +421,13 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
                   </IconButton>
                 </InputAdornment>
               ),
+              sx: {
+                borderRadius: 2,
+                "&:hover": {
+                  borderColor: "#f7931e"
+                }
+              }
             }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "8px",
-              },
-            }}
-            size="small"
           />
 
           <FormControlLabel
@@ -330,10 +435,32 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
               <Checkbox
                 checked={agreeToTerms}
                 onChange={(e) => setAgreeToTerms(e.target.checked)}
-                size="small"
+                sx={{
+                  color: "#611463",
+                  '&.Mui-checked': {
+                    color: "#611463",
+                  },
+                }}
               />
             }
-            label={<Typography variant="body2">I agree to the Terms and Conditions</Typography>}
+            label={
+              <Typography variant="body2">
+                I agree to the{" "}
+                <Link
+                  href="#"
+                  sx={{
+                    color: "#f7931e",
+                    textDecoration: "none",
+                    fontWeight: 500,
+                    '&:hover': {
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  Terms and Conditions
+                </Link>
+              </Typography>
+            }
           />
 
           <Button
@@ -341,32 +468,48 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
             fullWidth
             onClick={handleRegister}
             sx={{
-              bgcolor: "#611463",
-              borderRadius: "24px",
-              py: 1,
+              mt: 1,
+              py: 1.5,
+              borderRadius: 8,
               textTransform: "none",
-              mt: 0.5,
+              fontSize: "1rem",
+              fontWeight: 600,
+              background: "linear-gradient(45deg, #611463 30%, #8e24aa 90%)",
+              boxShadow: "0 3px 5px 2px rgba(97, 20, 99, .3)",
+              transition: "all 0.3s ease",
               "&:hover": {
-                bgcolor: "#f7931e",
-              },
+                background: "linear-gradient(45deg, #f7931e 30%, #ffa726 90%)",
+                transform: "translateY(-2px)",
+                boxShadow: "0 6px 10px 2px rgba(247, 147, 30, .4)"
+              }
             }}
           >
-            Sign Up
+            Create Account
           </Button>
           
-          {/* New section for switching to login */}
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+          <Divider sx={{ my: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              OR
+            </Typography>
+          </Divider>
+
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              Already have an account ?&nbsp;
+              Already have an account?&nbsp;
               <Link
                 onClick={handleOpenLogin}
                 sx={{
                   color: "#f7931e",
                   textDecoration: "none",
                   cursor: "pointer",
+                  fontWeight: 600,
+                  '&:hover': {
+                    color: "#611463",
+                    textDecoration: "underline",
+                  },
                 }}
               >
-                Log in
+                Log in now
               </Link>
             </Typography>
           </Box>
@@ -377,4 +520,3 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
 };
 
 export default RegisterDialog;
-

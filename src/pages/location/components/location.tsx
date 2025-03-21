@@ -10,9 +10,6 @@ import {
   Avatar,
   Stack,
   InputAdornment,
-  FormControl,
-  InputLabel,
-  OutlinedInput,
   Divider,
   Paper,
   Grid,
@@ -21,7 +18,6 @@ import {
   IconButton,
   Snackbar,
   Alert,
-  Chip,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -36,10 +32,9 @@ import WorkIcon from "@mui/icons-material/Work";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { LOCATION_DETAIL_PATH, PAYMENT_PATH, SERVICE_PATH } from "../../../routes/path";
 
-
 const fontSize = {
-  title: "1.5rem",
-  subtitle: "1rem",
+  title: "1.6rem",
+  subtitle: "1.1rem",
   text: "0.9rem",
   button: "1rem",
 };
@@ -50,7 +45,6 @@ const locations = [
     id: 1,
     firstName: "ອຳມະລິນ",
     surname: "ອຸນາລົມ",
-    service: "ດູດຝຸ່ນ, ທຳຄວາມສະອາດ",
     image: "https://via.placeholder.com/40",
     category: "ແມ່ບ້ານ",
     gender: "ຍິງ",
@@ -132,52 +126,85 @@ const LocationPage = () => {
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: '100vh',
-      backgroundColor: '#611463',
+      background: 'linear-gradient(135deg, #611463 0%, #8a1c8d 100%)',
       p: 2
     }}>
       <Container
         maxWidth="md"
         sx={{
           width: {
-            xs: '100%',  // full width on mobile
-            sm: '90%',   // slightly less on tablet
-            md: '80%',   // even less on desktop
+            xs: '100%',
+            sm: '90%',
+            md: '80%',
             lg: '60%',
           }
         }}
       >
         <Paper
-          elevation={3}
+          elevation={8}
           sx={{
             p: { xs: 2, sm: 3, md: 4 },
-            borderRadius: 2,
+            borderRadius: 3,
             maxWidth: '100%',
             mx: 'auto',
+            boxShadow: '0 8px 24px rgba(97, 20, 99, 0.2)',
+            overflow: 'hidden',
+            position: 'relative',
           }}
         >
-          <IconButton
-            onClick={() => navigate('/service-detail/:id')}
-            sx={{ mr: 2 }}
+          {/* Header with back button */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            mb: 2,
+            position: 'relative'
+          }}>
+            <IconButton
+              onClick={() => navigate('/service-detail/:id')}
+              sx={{ 
+                color: '#611463',
+                '&:hover': {
+                  backgroundColor: 'rgba(97, 20, 99, 0.08)',
+                  transform: 'scale(1.1)',
+                },
+                transition: 'all 0.2s ease',
+              }}
             >
-            <ArrowBackIcon />
+              <ArrowBackIcon />
             </IconButton>
-          {/* Title */}
-          <Typography
-            variant="h5"
-            color="#611463"
-            gutterBottom
-            sx={{
-              fontSize: fontSize.title,
-              textAlign: "center",
-              fontWeight: "bold"
-            }}
-          >
-            ຢືນຢັນຄຳສັ່ງ
-          </Typography>
+            
+            {/* Title */}
+            <Typography
+              variant="h5"
+              gutterBottom
+              sx={{
+                fontSize: fontSize.title,
+                textAlign: "center",
+                fontWeight: "bold",
+                color: '#611463',
+                flexGrow: 1,
+                mb: 0, 
+                background: 'linear-gradient(90deg, #611463 0%, #8a1c8d 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                letterSpacing: '0.5px',
+              }}
+            >
+              ຢືນຢັນຄຳສັ່ງ
+            </Typography>
+            <Box sx={{ width: 40 }} /> {/* Spacer for alignment */}
+          </Box>
 
           {/* Address Input (Clickable) */}
-          <Box sx={{ mb: 3, mt: 3 }}>
-            <Typography color="textSecondary" sx={{ fontSize: fontSize.subtitle, mb: 1 }}>
+          <Box sx={{ mb: 4, mt: 3 }}>
+            <Typography 
+              color="textSecondary" 
+              sx={{ 
+                fontSize: fontSize.subtitle, 
+                mb: 1,
+                fontWeight: 500,
+              }}
+            >
               ທີ່ຢູ່
             </Typography>
             <TextField
@@ -190,22 +217,32 @@ const LocationPage = () => {
                 readOnly: true,
                 startAdornment: (
                   <InputAdornment position="start">
-                    <LocationOnIcon color="action" />
+                    <LocationOnIcon sx={{ color: '#611463' }} />
                   </InputAdornment>
                 ),
                 endAdornment: (
                   <InputAdornment position="end">
-                    <KeyboardArrowRightIcon color="action" />
+                    <KeyboardArrowRightIcon sx={{ color: '#611463' }} />
                   </InputAdornment>
-                )
+                ),
+                sx: {
+                  fontSize: fontSize.text,
+                  borderRadius: 2,
+                  transition: 'all 0.3s ease',
+                }
               }}
               sx={{
-                backgroundColor: "#f5f5f5",
+                backgroundColor: "#f8f6f9",
                 cursor: "pointer",
-                "&:hover": { backgroundColor: "#e0e0e0" },
+                "&:hover": { 
+                  backgroundColor: "#efe8f0",
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(97, 20, 99, 0.15)'
+                },
                 fontSize: fontSize.text,
-                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                borderRadius: 1,
+                boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
               }}
             />
           </Box>
@@ -213,42 +250,72 @@ const LocationPage = () => {
           {/* Service Items List */}
           <Typography
             variant="subtitle1"
-            color="#611463"
             fontWeight="bold"
             gutterBottom
-            sx={{ fontSize: fontSize.subtitle, mb: 2 }}
+            sx={{ 
+              fontSize: fontSize.subtitle, 
+              mb: 2,
+              color: '#611463',
+              borderLeft: '4px solid #611463',
+              pl: 1.5,
+              py: 0.5,
+            }}
           >
             ລາຍການເອີ້ນໃຊ້
           </Typography>
 
-          <Box sx={{ maxHeight: '300px', overflowY: 'auto', mb: 2 }}>
+          <Box sx={{ maxHeight: '300px', overflowY: 'auto', mb: 3, pr: 1 }}>
             {locations.map((location) => (
               <Card
                 key={location.id}
                 sx={{
                   mb: 2,
-                  borderRadius: 2,
-                  boxShadow: "0 2px 5px rgba(0,0,0,0.08)",
-                  transition: "transform 0.2s",
-                  "&:hover": { transform: "translateY(-2px)" }
+                  borderRadius: 3,
+                  boxShadow: "0 3px 10px rgba(0,0,0,0.06)",
+                  transition: "all 0.3s ease",
+                  "&:hover": { 
+                    transform: "translateY(-3px)",
+                    boxShadow: "0 6px 15px rgba(97, 20, 99, 0.15)" 
+                  }
                 }}
               >
-                <CardContent sx={{ p: 2 }}>
+                <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                   {/* Main info row */}
-                  <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
-                    <Avatar src={location.image} sx={{ mr: 2, width: 48, height: 48 }} />
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                    <Avatar 
+                      src={location.image} 
+                      sx={{ 
+                        mr: 2, 
+                        width: 56, 
+                        height: 56,
+                        border: '2px solid #f0f0f0',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                      }} 
+                    />
                     <Box flexGrow={1} sx={{ textAlign: "left" }}>
-                      <Typography sx={{ fontSize: fontSize.text, fontWeight: "bold" }}>
+                      <Typography sx={{ 
+                        fontSize: fontSize.subtitle, 
+                        fontWeight: "bold",
+                        color: '#611463' 
+                      }}>
                         {location.firstName} {location.surname}
                       </Typography>
                       <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
-                        <WorkIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem', mr: 1.5 }}>
+                        <Typography variant="body2" sx={{ fontSize: '0.85rem', mr: 1.5, color: '#555' }}>
                           {location.service}
                         </Typography>
                       </Box>
                     </Box>
-                    <Typography fontWeight="bold" sx={{ fontSize: fontSize.text }}>
+                    <Typography 
+                      fontWeight="bold" 
+                      sx={{ 
+                        fontSize: fontSize.text,
+                        bgcolor: '#f8f6f9',
+                        color: '#611463',
+                        p: 1,
+                        borderRadius: 2
+                      }}
+                    >
                       {location.priceFormatted}
                     </Typography>
                   </Box>
@@ -257,18 +324,34 @@ const LocationPage = () => {
                   <Box sx={{
                     display: "flex",
                     alignItems: "center",
-                    mb: 1.5,
+                    mb: 2,
                     flexWrap: "wrap"
                   }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mr: 2, mb: { xs: 1, sm: 0 } }}>
-                      <CategoryIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+                    <Box sx={{ 
+                      display: "flex", 
+                      alignItems: "center", 
+                      mr: 2, 
+                      mb: { xs: 1, sm: 0 },
+                      bgcolor: '#f8f6f9',
+                      borderRadius: 5,
+                      px: 1.5,
+                      py: 0.5
+                    }}>
+                      <CategoryIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
                         {location.category}
                       </Typography>
                     </Box>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <PersonIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+                    <Box sx={{ 
+                      display: "flex", 
+                      alignItems: "center",
+                      bgcolor: '#f8f6f9',
+                      borderRadius: 5,
+                      px: 1.5,
+                      py: 0.5
+                    }}>
+                      <PersonIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
                         {location.gender}, {location.age} ປີ
                       </Typography>
                     </Box>
@@ -278,20 +361,21 @@ const LocationPage = () => {
                   <Box sx={{
                     display: "flex",
                     alignItems: "center",
-                    backgroundColor: "#f5f5f5",
-                    borderRadius: 1,
-                    p: 1,
-                    flexWrap: { xs: "wrap", sm: "nowrap" }
+                    backgroundColor: "#f0e9f1",
+                    borderRadius: 2,
+                    p: 1.5,
+                    flexWrap: { xs: "wrap", sm: "nowrap" },
+                    borderLeft: '3px solid #8a1c8d'
                   }}>
                     <Box sx={{ display: "flex", alignItems: "center", mr: 2, mb: { xs: 1, sm: 0 }, minWidth: "45%" }}>
-                      <HomeIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+                      <HomeIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
                         {location.village}
                       </Typography>
                     </Box>
                     <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <LocationCityIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+                      <LocationCityIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
                         {location.city}
                       </Typography>
                     </Box>
@@ -301,7 +385,11 @@ const LocationPage = () => {
             ))}
           </Box>
 
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ 
+            my: 3,
+            borderColor: 'rgba(97, 20, 99, 0.1)',
+            borderWidth: 1
+          }} />
 
           {/* Two-column layout on larger screens */}
           <Grid container spacing={3}>
@@ -318,12 +406,30 @@ const LocationPage = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <LocalOfferIcon color="action" fontSize="small" />
+                          <LocalOfferIcon sx={{ color: '#8a1c8d' }} fontSize="small" />
                         </InputAdornment>
                       ),
-                      sx: { fontSize: fontSize.text }
+                      sx: { 
+                        fontSize: fontSize.text,
+                        borderRadius: 2,
+                      }
                     }}
-                    InputLabelProps={{ sx: { fontSize: fontSize.text } }}
+                    InputLabelProps={{ 
+                      sx: { 
+                        fontSize: fontSize.text,
+                        color: '#611463'
+                      } 
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#611463',
+                        },
+                      },
+                      '& label.Mui-focused': {
+                        color: '#611463',
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid item xs={isMobile ? 3 : 4}>
@@ -334,7 +440,14 @@ const LocationPage = () => {
                     sx={{
                       height: "100%",
                       backgroundColor: "#611463",
-                      "&:hover": { backgroundColor: "#4a0d4c" }
+                      borderRadius: 2,
+                      boxShadow: '0 4px 8px rgba(97, 20, 99, 0.25)',
+                      transition: 'all 0.3s ease',
+                      "&:hover": { 
+                        backgroundColor: "#4a0d4c",
+                        boxShadow: '0 6px 12px rgba(97, 20, 99, 0.35)',
+                        transform: 'translateY(-2px)'
+                      }
                     }}
                     onClick={applyDiscountCode}
                   >
@@ -351,12 +464,15 @@ const LocationPage = () => {
                     alignItems: "center",
                     mb: 2,
                     p: 1.5,
-                    backgroundColor: "#f0f7ff",
-                    borderRadius: 1
+                    backgroundColor: "#e6f7e9",
+                    borderRadius: 2,
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+                    border: '1px solid #c8e6cc',
+                    transition: 'all 0.3s ease'
                   }}
                 >
-                  <CheckIcon sx={{ color: "green", mr: 1 }} />
-                  <Typography sx={{ fontSize: fontSize.text, color: "green" }}>
+                  <CheckIcon sx={{ color: "#2e7d32", mr: 1 }} />
+                  <Typography sx={{ fontSize: fontSize.text, color: "#2e7d32" }}>
                     ນຳໃຊ້ລະຫັດ "{appliedCode}" - ສ່ວນຫຼຸດ {discountPercentage}%
                   </Typography>
                 </Box>
@@ -366,13 +482,33 @@ const LocationPage = () => {
               <TextField
                 label="ໝາຍເຫດ"
                 fullWidth
-                sx={{ mb: { xs: 2, md: 0 } }}
+                sx={{ 
+                  mb: { xs: 2, md: 0 },
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#611463',
+                    },
+                  },
+                  '& label.Mui-focused': {
+                    color: '#611463',
+                  },
+                }}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 multiline
                 rows={isMobile ? 2 : 4}
-                InputProps={{ sx: { fontSize: fontSize.text } }}
-                InputLabelProps={{ sx: { fontSize: fontSize.text } }}
+                InputProps={{ 
+                  sx: { 
+                    fontSize: fontSize.text,
+                  } 
+                }}
+                InputLabelProps={{ 
+                  sx: { 
+                    fontSize: fontSize.text,
+                    color: '#611463'
+                  } 
+                }}
               />
             </Grid>
 
@@ -380,61 +516,90 @@ const LocationPage = () => {
             <Grid item xs={12} md={6}>
               <Card
                 sx={{
-                  backgroundColor: "#f9f9f9",
+                  backgroundColor: "#f8f6f9",
                   mb: 2,
-                  borderRadius: 2,
+                  borderRadius: 3,
                   height: { md: '100%' },
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(97, 20, 99, 0.1)',
+                  border: '1px solid rgba(97, 20, 99, 0.08)',
+                  transition: 'all 0.3s ease',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  '&:hover': {
+                    boxShadow: '0 6px 15px rgba(97, 20, 99, 0.15)',
+                  },
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '5px',
+                    background: 'linear-gradient(90deg, #611463, #8a1c8d)',
+                  }
                 }}
               >
-                <CardContent>
+                <CardContent sx={{ p: 3 }}>
                   <Typography
                     sx={{
                       fontSize: fontSize.subtitle,
                       fontWeight: "bold",
-                      mb: 2,
-                      color: "#611463"
+                      mb: 3,
+                      color: "#611463",
+                      borderBottom: '2px solid rgba(97, 20, 99, 0.1)',
+                      paddingBottom: 1
                     }}
                   >
                     ສະຫຼຸບລາຄາ
                   </Typography>
 
-                  <Grid container spacing={1}>
+                  <Grid container spacing={2}>
                     <Grid item xs={8}>
-                      <Typography sx={{ fontSize: fontSize.text }}>
+                      <Typography sx={{ fontSize: fontSize.text, color: '#555' }}>
                         ລາຄາ:
                       </Typography>
                     </Grid>
                     <Grid item xs={4} sx={{ textAlign: "right" }}>
-                      <Typography sx={{ fontSize: fontSize.text }}>
+                      <Typography sx={{ fontSize: fontSize.text, fontWeight: 500 }}>
                         {formatCurrency(totalBeforeDiscount)}
                       </Typography>
                     </Grid>
 
                     <Grid item xs={8}>
-                      <Typography sx={{ fontSize: fontSize.text }}>
+                      <Typography sx={{ fontSize: fontSize.text, color: '#555' }}>
                         ສ່ວນຫຼຸດ ({discountPercentage}%):
                       </Typography>
                     </Grid>
                     <Grid item xs={4} sx={{ textAlign: "right" }}>
-                      <Typography sx={{ fontSize: fontSize.text, color: "#d32f2f" }}>
+                      <Typography sx={{ fontSize: fontSize.text, color: "#d32f2f", fontWeight: 500 }}>
                         -{formatCurrency(discountAmount)}
                       </Typography>
                     </Grid>
 
                     <Grid item xs={12}>
-                      <Divider sx={{ my: 1 }} />
+                      <Divider sx={{ my: 2, borderStyle: 'dashed', borderColor: 'rgba(97, 20, 99, 0.15)' }} />
                     </Grid>
 
                     <Grid item xs={7}>
-                      <Typography sx={{ fontSize: fontSize.subtitle, fontWeight: "bold" }}>
+                      <Typography sx={{ fontSize: fontSize.subtitle, fontWeight: "bold", color: '#611463' }}>
                         ລາຄາລວມ:
                       </Typography>
                     </Grid>
                     <Grid item xs={5} sx={{ textAlign: "right" }}>
-                      <Typography sx={{ fontSize: fontSize.subtitle, fontWeight: "bold", color: "#007736" }}>
+                      <Typography 
+                        sx={{ 
+                          fontSize: fontSize.subtitle, 
+                          fontWeight: "bold", 
+                          color: "#007736",
+                          bgcolor: 'rgba(0, 119, 54, 0.1)',
+                          p: 1,
+                          borderRadius: 1,
+                          display: 'inline-block'
+                        }}
+                      >
                         {formatCurrency(finalTotal)}
                       </Typography>
                     </Grid>
@@ -453,14 +618,23 @@ const LocationPage = () => {
           >
             <Button
               variant="outlined"
-              color="error"
               onClick={() => navigate('service-detail/:id')}
               sx={{
                 fontSize: fontSize.button,
                 px: 4,
                 py: 1.5,
                 width: { xs: "100%", sm: "auto", md: "auto" },
-                minWidth: { sm: 150 }
+                minWidth: { sm: 150 },
+                borderRadius: 2,
+                borderColor: '#d32f2f',
+                color: '#d32f2f',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  borderColor: '#b71c1c',
+                  color: '#b71c1c',
+                  backgroundColor: 'rgba(211, 47, 47, 0.04)',
+                  transform: 'translateY(-2px)'
+                }
               }}
             >
               ຍົກເລີກ
@@ -472,15 +646,17 @@ const LocationPage = () => {
                 fontSize: fontSize.button,
                 px: 4,
                 py: 1.5,
-                bgcolor: "#611463",
+                borderRadius: 2,
+                background: 'linear-gradient(135deg, #611463 0%, #8a1c8d 100%)',
                 width: { xs: "100%", sm: "auto", md: "auto" },
                 minWidth: { sm: 150 },
+                boxShadow: '0 4px 12px rgba(97, 20, 99, 0.3)',
                 '&:hover': {
-                  bgcolor: "#7a1a7d",  // A slightly lighter shade for hover effect
-                  boxShadow: '0 4px 8px rgba(0,0,0,0.2)',  // Add shadow on hover
-                  transform: 'translateY(-2px)'  // Slight lift effect on hover
+                  background: 'linear-gradient(135deg, #6b1870 0%, #9a2c9d 100%)',
+                  boxShadow: '0 6px 15px rgba(97, 20, 99, 0.4)',
+                  transform: 'translateY(-3px)'
                 },
-                transition: 'all 0.3s ease'  // Smooth transition for hover effects
+                transition: 'all 0.3s ease'
               }}
             >
               ຢືນຢັນ
@@ -489,8 +665,26 @@ const LocationPage = () => {
         </Paper>
 
         {/* Snackbar Alert */}
-        <Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleAlertClose}>
-          <Alert onClose={handleAlertClose} severity={alertSeverity} sx={{ width: '100%' }}>
+        <Snackbar 
+          open={alertOpen} 
+          autoHideDuration={6000} 
+          onClose={handleAlertClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert 
+            onClose={handleAlertClose} 
+            severity={alertSeverity} 
+            sx={{ 
+              width: '100%',
+              borderRadius: 2,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              '& .MuiAlert-message': {
+                fontSize: fontSize.text
+              }
+            }}
+            elevation={6}
+            variant="filled"
+          >
             {alertMessage}
           </Alert>
         </Snackbar>
