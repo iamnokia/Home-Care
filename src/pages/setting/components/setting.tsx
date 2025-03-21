@@ -607,7 +607,7 @@ const SettingsPage = () => {
                                         }
                                     }}
                                 >
-                                    Support Center
+                                    Support The Center
                                 </Button>
                             </Box>
                         </Card>
