@@ -133,9 +133,9 @@ function ResponsiveAppBar() {
                 src={FreeIcon}
                 alt=""
                 style={{ 
-                  width: "110px", 
-                  height: "110px", 
-                  marginTop: -12,
+                  width: "100px", 
+                  height: "100px", 
+                  marginTop: -8,
                   filter: "drop-shadow(0 5px 10px rgba(0,0,0,0.3))",
                   transition: "all 0.5s ease",
                 }}

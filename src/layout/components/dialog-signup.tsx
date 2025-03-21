@@ -447,7 +447,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
               <Typography variant="body2">
                 I agree to the{" "}
                 <Link
-                  href="#"
+                  href="/Terms-privacy"
                   sx={{
                     color: "#f7931e",
                     textDecoration: "none",

@@ -543,7 +543,6 @@ const CommentPage = () => {
               </Box>
 
               {/* Download Button */}
-              // Fixed code:
               <Button
                 variant="outlined"
                 size="small"
@@ -1041,7 +1040,7 @@ const CommentPage = () => {
                   background: "linear-gradient(135deg, #4a0d4c 0%, #7b1fa2 100%)",
                 },
               }}
-              onClick={handleCommentSubmit}
+              onClick={() => window.location.href = "/"}
             >
               ສົ່ງຄຳເຫັນ
             </Button>
