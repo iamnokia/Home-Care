@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, ChangeEvent } from "react";
 import {
   Box,
   Container,
@@ -11,48 +11,74 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemIcon,
-  useTheme,
-  useMediaQuery,
-  Grid,
-  Card,
-  CardContent,
   FormControl,
   RadioGroup,
   FormControlLabel,
   Radio,
-  Avatar,
   Chip,
   Fade,
   Divider,
-  alpha
+  alpha,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  FormHelperText,
+  Checkbox,
+  Snackbar,
+  Alert,
+  AlertColor,
+  Grid,
+  Card,
+  CardContent,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import SearchIcon from "@mui/icons-material/Search";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import HomeIcon from "@mui/icons-material/Home";
 import BusinessIcon from "@mui/icons-material/Business";
-import ApartmentIcon from "@mui/icons-material/Apartment";
+import StoreIcon from "@mui/icons-material/Store";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-import AddIcon from "@mui/icons-material/Add";
+import previewImage from "@mui/icons-material/BookmarkBorder";
 import PhoneIcon from "@mui/icons-material/Phone";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import UploadIcon from "@mui/icons-material/Upload";
-import TitleIcon from "@mui/icons-material/Title";
-import DescriptionIcon from "@mui/icons-material/Description";
 import DeleteIcon from "@mui/icons-material/Delete";
-import WcIcon from "@mui/icons-material/Wc";
-import FmdGoodIcon from "@mui/icons-material/FmdGood";
-import StoreIcon from "@mui/icons-material/Store";
 import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
-import { LOCATION_PATH } from "../../../routes/path";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import LinkIcon from "@mui/icons-material/Link";
+import LaunchIcon from "@mui/icons-material/Launch";
+import ErrorIcon from "@mui/icons-material/Error";
 import { LocationCity } from "@mui/icons-material";
+import { LOCATION_PATH } from "../../../routes/path";
+
+// Define TypeScript interfaces
+interface LocationType {
+  id: number;
+  name: string;
+  description: string;
+  type: "home" | "work" | "other";
+}
+
+interface CountryCode {
+  code: string;
+  country: string;
+}
+
+interface ImageFile {
+  file: File;
+  preview: string;
+}
+
+interface ErrorState {
+  placeName?: string;
+  detailAddress?: string;
+  phoneNumber?: string;
+  mapLink?: string;
+}
 
 // Sample saved locations
-const initialSavedLocations = [
+const initialSavedLocations: LocationType[] = [
   {
     id: 1,
     name: "ບ້ານເລກທີ 123, ຖະໜົນ 23 ສິງຫາ",
@@ -73,49 +99,50 @@ const initialSavedLocations = [
   },
 ];
 
-// Sample recent locations
-const recentLocations = [
-  {
-    id: 1,
-    name: "ຮ້ານອາຫານ ພູຄຳ",
-    description: "ບ້ານເລກທີ 321, ຖະໜົນ ສາຍໄໝ",
-  },
-  {
-    id: 2,
-    name: "ຕະຫຼາດ ດົງປາລານ",
-    description: "ບ້ານເລກທີ 654, ຖະໜົນ ດົງປາລານ",
-  },
+// Country codes for phone numbers
+const countryCodes: CountryCode[] = [
+  { code: "+856", country: "Laos" },
+  { code: "+66", country: "Thailand" },
+  { code: "+84", country: "Vietnam" },
+  { code: "+855", country: "Cambodia" },
+  { code: "+95", country: "Myanmar" },
+  { code: "+60", country: "Malaysia" },
+  { code: "+65", country: "Singapore" },
 ];
 
-const LocationDetailPage = () => {
+const LocationDetailPage: React.FC = () => {
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  
-  const [savedLocations, setSavedLocations] = useState(initialSavedLocations);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [detailAddress, setDetailAddress] = useState("");
-  const [placeName, setPlaceName] = useState("");
-  const [placeDetails, setPlaceDetails] = useState("");
-  const [ownerGender, setOwnerGender] = useState("male");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // State hooks
+  const [savedLocations, setSavedLocations] = useState<LocationType[]>(initialSavedLocations);
+  const [selectedLocation, setSelectedLocation] = useState<LocationType | null>(null);
+  const [detailAddress, setDetailAddress] = useState<string>("");
+  const [placeName, setPlaceName] = useState<string>("");
+  const [placeDetails, setPlaceDetails] = useState<string>("");
+  const [countryCode, setCountryCode] = useState<string>("+856");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [hasWhatsapp, setHasWhatsapp] = useState<boolean>(false);
+  const [mapLink, setMapLink] = useState<string>("");
+  const [images, setImages] = useState<ImageFile[]>([]);
+  const [errors, setErrors] = useState<ErrorState>({});
+  const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string>("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<AlertColor>("success");
 
   // Handle location selection
-  const handleLocationSelect = (location) => {
+  const handleLocationSelect = (location: LocationType): void => {
     setSelectedLocation(location);
     setDetailAddress(location.description);
     setPlaceName(location.name);
   };
 
   // Handle delete location
-  const handleDeleteLocation = (id, event) => {
+  const handleDeleteLocation = (id: number, event: React.MouseEvent): void => {
     event.stopPropagation(); // Prevent triggering the onClick of parent ListItem
     const updatedLocations = savedLocations.filter(location => location.id !== id);
     setSavedLocations(updatedLocations);
-    
+
     // If the deleted location was selected, reset selection
     if (selectedLocation && selectedLocation.id === id) {
       setSelectedLocation(null);
@@ -125,28 +152,88 @@ const LocationDetailPage = () => {
   };
 
   // Handle confirm location
-  const handleConfirmLocation = () => {
+  const handleConfirmLocation = (): void => {
+    // Validation
+    const newErrors: ErrorState = {};
+    if (!placeName.trim()) newErrors.placeName = "ກະລຸນາໃສ່ຊື່ສະຖານທີ່";
+    if (!detailAddress.trim()) newErrors.detailAddress = "ກະລຸນາໃສ່ລາຍລະອຽດທີ່ຢູ່";
+    if (!phoneNumber.trim()) newErrors.phoneNumber = "ກະລຸນາໃສ່ເບີໂທລະສັບ";
+    if (!mapLink.trim()) newErrors.mapLink = "ກະລຸນາໃສ່ລິ້ງແຜນທີ່";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setSnackbarMessage("ກະລຸນາກວດສອບຂໍ້ມູນອີກຄັ້ງ");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      return;
+    }
+
     // Here you would typically save the selected location and navigate back
-    navigate("/"); // Navigate back to the main page
+    setSnackbarMessage("ບັນທຶກທີ່ຢູ່ສຳເລັດແລ້ວ");
+    setSnackbarSeverity("success");
+    setOpenSnackbar(true);
+
+    // Navigate after successful save
+    setTimeout(() => {
+      navigate(LOCATION_PATH);
+    }, 1500);
   };
 
-  // Handle image upload
-  const handleImageChange = (event) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      setSelectedImage(file);
-      
-      // Create a preview URL
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreviewImage(e.target.result);
-      };
-      reader.readAsDataURL(file);
+  // Open Google Maps with the provided link
+  const handleOpenGoogleMaps = (): void => {
+    if (mapLink) {
+      window.open(mapLink, '_blank');
+    } else {
+      window.open('https://www.google.com/maps', '_blank');
     }
   };
 
+  // Handle image upload
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    if (event.target.files) {
+      const newFiles = Array.from(event.target.files);
+
+      // Check if adding new files would exceed the limit of 3
+      if (images.length + newFiles.length > 3) {
+        setSnackbarMessage("ສາມາດອັບໂຫລດຮູບພາບໄດ້ສູງສຸດ 3 ຮູບເທົ່ານັ້ນ");
+        setSnackbarSeverity("warning");
+        setOpenSnackbar(true);
+        return;
+      }
+
+      const newImages: ImageFile[] = [...images];
+
+      newFiles.forEach(file => {
+        // Create a preview URL
+        const reader = new FileReader();
+        reader.onload = (e: ProgressEvent<FileReader>) => {
+          if (e.target?.result) {
+            newImages.push({
+              file: file,
+              preview: e.target.result as string
+            });
+            setImages([...newImages]);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  // Handle image removal
+  const handleRemoveImage = (index: number): void => {
+    const newImages = [...images];
+    newImages.splice(index, 1);
+    setImages(newImages);
+  };
+
+  // Handle country code change
+  const handleCountryCodeChange = (event: SelectChangeEvent): void => {
+    setCountryCode(event.target.value);
+  };
+
   // Get icon based on location type
-  const getLocationIcon = (type) => {
+  const getLocationIcon = (type: string): React.ReactElement => {
     switch (type) {
       case "home":
         return <HomeIcon />;
@@ -158,11 +245,19 @@ const LocationDetailPage = () => {
   };
 
   // Get color based on location type
-  const getLocationColor = (type) => {
+  const getLocationColor = (type: string): string => {
     switch (type) {
       default:
         return "#f7931e";
     }
+  };
+
+  // Handle snackbar close
+  const handleCloseSnackbar = (event?: React.SyntheticEvent | Event, reason?: string): void => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
   };
 
   return (
@@ -209,9 +304,9 @@ const LocationDetailPage = () => {
               mb: 3,
             }}
           >
-            <IconButton 
+            <IconButton
               onClick={() => navigate(LOCATION_PATH)}
-              sx={{ 
+              sx={{
                 mr: 2,
                 backgroundColor: alpha("#611463", 0.08),
                 "&:hover": {
@@ -239,20 +334,20 @@ const LocationDetailPage = () => {
             <Typography
               variant="subtitle1"
               color="#611463"
-              sx={{ 
-                fontSize: "1rem", 
-                mb: 1.5, 
+              sx={{
+                fontSize: "1rem",
+                mb: 1.5,
                 fontWeight: 600,
                 display: "flex",
-                alignItems: "center" 
+                alignItems: "center"
               }}
             >
               <BookmarkIcon sx={{ mr: 1, fontSize: "1.2rem" }} />
               ທີ່ຢູ່ທີ່ບັນທຶກໄວ້
             </Typography>
-            
-            <List 
-              sx={{ 
+
+            <List
+              sx={{
                 p: 0,
                 backgroundColor: alpha("#f5f5f5", 0.5),
                 borderRadius: 2,
@@ -269,10 +364,10 @@ const LocationDetailPage = () => {
                       px: 2,
                       py: 1.5,
                       borderRadius: 1,
-                      backgroundColor: selectedLocation?.id === location.id 
-                        ? alpha("#611463", 0.05) 
+                      backgroundColor: selectedLocation?.id === location.id
+                        ? alpha("#611463", 0.05)
                         : "transparent",
-                      "&:hover": { 
+                      "&:hover": {
                         backgroundColor: alpha("#611463", 0.08),
                         transform: "translateY(-2px)",
                         transition: "transform 0.2s ease-in-out",
@@ -304,7 +399,7 @@ const LocationDetailPage = () => {
                     >
                       {getLocationIcon(location.type)}
                     </Box>
-                    
+
                     <ListItemText
                       primary={
                         <Typography sx={{ fontSize: "0.95rem", fontWeight: 600, color: "#333" }}>
@@ -317,30 +412,30 @@ const LocationDetailPage = () => {
                         </Typography>
                       }
                     />
-                    
+
                     <Box sx={{ display: "flex", alignItems: "center", ml: 1 }}>
                       {selectedLocation?.id === location.id && (
-                        <Chip 
+                        <Chip
                           color="primary"
                           size="small"
                           icon={<BookmarkIcon sx={{ fontSize: "1rem" }} />}
-                          label="ເລືອກແລ້ວ" 
-                          sx={{ 
+                          label="ເລືອກແລ້ວ"
+                          sx={{
                             backgroundColor: getLocationColor(location.type),
                             mr: 1.5,
-                            fontSize: "0.75rem" 
-                          }} 
+                            fontSize: "0.75rem"
+                          }}
                         />
                       )}
-                      
-                      <IconButton 
-                        size="small" 
+
+                      <IconButton
+                        size="small"
                         onClick={(e) => handleDeleteLocation(location.id, e)}
-                        sx={{ 
+                        sx={{
                           color: "#d32f2f",
                           p: 1,
                           backgroundColor: alpha("#d32f2f", 0.05),
-                          "&:hover": { 
+                          "&:hover": {
                             backgroundColor: alpha("#d32f2f", 0.1),
                           },
                         }}
@@ -353,7 +448,7 @@ const LocationDetailPage = () => {
               ))}
             </List>
           </Box>
-          
+
           {/* Action buttons */}
           <Grid container spacing={2} sx={{ mt: 3 }}>
             <Grid item xs={12} sm={6}>
@@ -391,7 +486,7 @@ const LocationDetailPage = () => {
                   borderRadius: 2,
                   background: "linear-gradient(135deg, #611463 0%, #812e84 100%)",
                   transition: "all 0.2s",
-                  "&:hover": { 
+                  "&:hover": {
                     background: "linear-gradient(135deg, #7a1980 0%, #974099 100%)",
                     transform: "translateY(-2px)",
                     boxShadow: "0 4px 12px rgba(97, 20, 99, 0.2)",
@@ -403,7 +498,7 @@ const LocationDetailPage = () => {
             </Grid>
           </Grid>
         </Paper>
-        
+
         {/* Second Box */}
         <Paper
           elevation={6}
@@ -432,456 +527,422 @@ const LocationDetailPage = () => {
             <LocationCity sx={{ mr: 1, fontSize: "1.8rem" }} />
             ເພີ່ມທີ່ຢູ່ໃໝ່
           </Typography>
-       
-          {/* Map section */}
+
+          {/* Map link section */}
           <Box sx={{ mb: 4 }}>
             <Typography
               variant="subtitle1"
-              sx={{ 
-                fontSize: "1rem", 
-                mb: 1.5, 
+              sx={{
+                fontSize: "1rem",
+                mb: 1.5,
                 fontWeight: 600,
                 display: "flex",
-                alignItems: "center", 
+                alignItems: "center",
+              }}
+            >
+              <LinkIcon sx={{ mr: 1, color: "#611463" }} />
+              ລິ້ງ Google Maps *
+            </Typography>
+
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="ວາງລິ້ງແຜນທີ່ຈາກ Google Maps ທີ່ນີ້"
+              value={mapLink}
+              onChange={(e) => {
+                setMapLink(e.target.value);
+                if (e.target.value.trim()) {
+                  setErrors({ ...errors, mapLink: undefined });
+                }
+              }}
+              error={!!errors.mapLink}
+              helperText={errors.mapLink}
+              required
+              sx={{
+                mb: 2,
+                backgroundColor: "#fff",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  transition: "all 0.2s",
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: alpha("#611463", 0.5),
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#611463",
+                    borderWidth: 2,
+                  },
+                },
+              }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Button
+                      variant="contained"
+                      onClick={handleOpenGoogleMaps}
+                      startIcon={<LaunchIcon />}
+                      sx={{
+                        background: "#f79313",
+                        "&:hover": {
+                          background: "#611463",
+                        },
+                        borderRadius: 1.5,
+                        px: 2,
+                      }}
+                    >
+                      Google Maps
+                    </Button>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <FormHelperText sx={{ mb: 1, ml: 1 }}>
+              ແນະນຳ: ສາມາດຄົ້ນຫາສະຖານທີ່ໃນ Google Maps ແລ້ວວາງລິ້ງຈາກນັ້ນບ່ອນນີ້
+            </FormHelperText>
+          </Box>
+
+          <Divider sx={{ my: 3, opacity: 0.6 }} />
+
+          {/* Form for place name and details */}
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontSize: "1rem",
+                mb: 1.5,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <LocationOnIcon sx={{ mr: 1, color: "#611463" }} />
+              ຊື່ສະຖານທີ່ *
+            </Typography>
+
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="ຊື່ອາຄານ, ທີ່ຢູ່, ຫລືຊື່ຮ້ານ"
+              value={placeName}
+              onChange={(e) => {
+                setPlaceName(e.target.value);
+                if (e.target.value.trim()) {
+                  setErrors({ ...errors, placeName: undefined });
+                }
+              }}
+              error={!!errors.placeName}
+              helperText={errors.placeName}
+              required
+              sx={{
+                mb: 3,
+                backgroundColor: "#fff",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  transition: "all 0.2s",
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: alpha("#611463", 0.5),
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#611463",
+                    borderWidth: 2,
+                  },
+                },
+              }}
+              InputProps={{
+                sx: { fontSize: "0.95rem", py: 0.5 },
+                endAdornment: errors.placeName && (
+                  <InputAdornment position="end">
+                    <ErrorIcon color="error" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontSize: "1rem",
+                mb: 1.5,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
               }}
             >
               <MyLocationIcon sx={{ mr: 1, color: "#611463" }} />
-              ເລືອກຈາກແຜນທີ່
+              ລາຍລະອຽດສະຖານທີ່ *
             </Typography>
-            
-            <Card
+
+            <TextField
+              fullWidth
+              variant="outlined"
+              multiline
+              rows={3}
+              placeholder="ປ້ອນລາຍລະອຽດເພີ່ມເຕີມເຊັ່ນ: ໝາຍເລກອາຄານ, ຊັ້ນ, ຫ້ອງ"
+              value={detailAddress}
+              onChange={(e) => {
+                setDetailAddress(e.target.value);
+                if (e.target.value.trim()) {
+                  setErrors({ ...errors, detailAddress: undefined });
+                }
+              }}
+              error={!!errors.detailAddress}
+              helperText={errors.detailAddress}
+              required
               sx={{
-                borderRadius: 3,
-                height: 220,
-                boxShadow: "none",
-                border: "1px solid rgba(0,0,0,0.08)",
-                overflow: "hidden",
-                position: "relative",
-                "&:hover": {
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                  transform: "translateY(-2px)",
+                mb: 3,
+                backgroundColor: "#fff",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  transition: "all 0.2s",
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: alpha("#611463", 0.5),
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#611463",
+                    borderWidth: 2,
+                  },
                 },
-                transition: "all 0.3s ease",
+              }}
+              InputProps={{
+                sx: { fontSize: "0.95rem" },
+                endAdornment: errors.detailAddress && (
+                  <InputAdornment position="end">
+                    <ErrorIcon color="error" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+
+          {/* Phone number section */}
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontSize: "1rem",
+                mb: 1.5,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
               }}
             >
-              <CardContent sx={{ p: 0, height: "100%" }}>
-                <Box
-                  component="img"
-                  src="/api/placeholder/800/400"
-                  alt="Map"
+              <PhoneIcon sx={{ mr: 1, color: "#611463" }} />
+              ເບີໂທລະສັບ *
+            </Typography>
+
+            <Grid container spacing={2} sx={{ mb: 2 }}>
+              <Grid item xs={3}>
+                <FormControl fullWidth>
+                  <Select
+                    value={countryCode}
+                    onChange={handleCountryCodeChange}
+                    sx={{
+                      borderRadius: 2,
+                      backgroundColor: "#fff",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: alpha("#611463", 0.2),
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: alpha("#611463", 0.5),
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#611463",
+                      },
+                    }}
+                  >
+                    {countryCodes.map((option) => (
+                      <MenuItem key={option.code} value={option.code}>
+                        {option.code}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={9}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="XX XXXXXXXX"
+                  value={phoneNumber}
+                  onChange={(e) => {
+                    setPhoneNumber(e.target.value);
+                    if (e.target.value.trim()) {
+                      setErrors({ ...errors, phoneNumber: undefined });
+                    }
+                  }}
+                  error={!!errors.phoneNumber}
+                  helperText={errors.phoneNumber}
+                  required
                   sx={{
+                    backgroundColor: "#fff",
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      transition: "all 0.2s",
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: alpha("#611463", 0.5),
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#611463",
+                        borderWidth: 2,
+                      },
+                    },
+                  }}
+                  InputProps={{
+                    sx: { fontSize: "0.95rem", py: 0.5 },
+                    endAdornment: errors.phoneNumber && (
+                      <InputAdornment position="end">
+                        <ErrorIcon color="error" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+            </Grid>
+
+            {/* WhatsApp Option */}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={hasWhatsapp}
+                  onChange={(e) => setHasWhatsapp(e.target.checked)}
+                  sx={{
+                    color: "#25D366",
+                    '&.Mui-checked': {
+                      color: "#25D366",
+                    },
+                  }}
+                />
+              }
+              label={
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <WhatsAppIcon sx={{ color: "#25D366", mr: 1 }} />
+                  <Typography sx={{ fontSize: "0.95rem" }}>
+                    ໝາຍເລກນີ້ໃຊ້ WhatsApp ໄດ້
+                  </Typography>
+                </Box>
+              }
+              sx={{ mb: 3 }}
+            />
+          </Box>
+
+                 {/* Upload picture */}
+      <Typography
+        variant="subtitle1"
+        sx={{ 
+          fontSize: "1rem", 
+          mb: 1.5, 
+          fontWeight: 600,
+          display: "flex",
+          alignItems: "center", 
+          mt: 1,
+        }}
+      >
+        <CameraAltOutlinedIcon sx={{ mr: 1, color: "#611463" }} />
+        ຮູບພາບຂອງສະຖານທີ່
+      </Typography>
+      <Card
+        sx={{
+          mb: 4,
+          borderRadius: 3,
+          boxShadow: "none",
+          border: "1px dashed",
+          borderColor: alpha("#611463", 0.3),
+          overflow: "hidden",
+          transition: "all 0.2s",
+          "&:hover": {
+            borderColor: "#611463",
+            backgroundColor: alpha("#611463", 0.02),
+          },
+        }}
+      >
+        <CardContent sx={{ p: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              p: 3,
+              borderRadius: 2,
+            }}
+          >
+            {previewImage ? (
+              <Box
+                sx={{
+                  width: "100%",
+                  height: 220,
+                  mb: 2,
+                  display: "flex",
+                  justifyContent: "center",
+                  position: "relative",
+                  borderRadius: 2,
+                  overflow: "hidden",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                }}
+              >
+                <img
+                  src={previewImage}
+                  alt="Preview"
+                  style={{
                     width: "100%",
                     height: "100%",
                     objectFit: "cover",
                   }}
                 />
-                <Box
-                  sx={{
-                    position: "absolute",
-                    bottom: 16,
-                    right: 16,
-                    zIndex: 10,
-                  }}
-                >
-                  <IconButton
-                    sx={{
-                      backgroundColor: "#fff",
-                      color: "#611463",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                      "&:hover": {
-                        backgroundColor: "#f3f3f3",
-                      },
-                    }}
-                  >
-                    <MyLocationIcon />
-                  </IconButton>
-                </Box>
-              </CardContent>
-            </Card>
-          </Box>
-
-          <Divider sx={{ my: 3, opacity: 0.6 }} />
-
-          {/* Form grid for location details */}
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              {/* Name of place */}
-              <Typography
-                variant="subtitle1"
-                sx={{ 
-                  fontSize: "1rem", 
-                  mb: 1.5, 
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center", 
-                }}
-              >
-                <TitleIcon sx={{ mr: 1, color: "#611463" }} />
-                ຊື່ສະຖານທີ່
-              </Typography>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="ຊື່ສະຖານທີ່"
-                value={placeName}
-                onChange={(e) => setPlaceName(e.target.value)}
-                sx={{
-                  mb: 3,
-                  backgroundColor: "#fff",
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                    transition: "all 0.2s",
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: alpha("#611463", 0.5),
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#611463",
-                      borderWidth: 2,
-                    },
-                  },
-                }}
-                InputProps={{
-                  sx: { fontSize: "0.95rem", py: 0.5 },
-                }}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              {/* Detailed address */}
-              <Typography
-                variant="subtitle1"
-                sx={{ 
-                  fontSize: "1rem", 
-                  mb: 1.5, 
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center", 
-                }}
-              >
-                <LocationOnIcon sx={{ mr: 1, color: "#611463" }} />
-                ລາຍລະອຽດທີ່ຢູ່
-              </Typography>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="ອາຄານ, ຊັ້ນ, ຫ້ອງ"
-                value={detailAddress}
-                onChange={(e) => setDetailAddress(e.target.value)}
-                multiline
-                rows={2}
-                sx={{
-                  mb: 3,
-                  backgroundColor: "#fff",
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                    transition: "all 0.2s",
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: alpha("#611463", 0.5),
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#611463",
-                      borderWidth: 2,
-                    },
-                  },
-                }}
-                InputProps={{
-                  sx: { fontSize: "0.95rem" },
-                }}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              {/* Explanation of place */}
-              <Typography
-                variant="subtitle1"
-                sx={{ 
-                  fontSize: "1rem", 
-                  mb: 1.5, 
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center", 
-                }}
-              >
-                <DescriptionIcon sx={{ mr: 1, color: "#611463" }} />
-                ລາຍລະອຽດເພີ່ມເຕີມ
-              </Typography>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="ລາຍລະອຽດເພີ່ມເຕີມກ່ຽວກັບສະຖານທີ່..."
-                value={placeDetails}
-                onChange={(e) => setPlaceDetails(e.target.value)}
-                multiline
-                rows={3}
-                sx={{
-                  mb: 3,
-                  backgroundColor: "#fff",
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                    transition: "all 0.2s",
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: alpha("#611463", 0.5),
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#611463",
-                      borderWidth: 2,
-                    },
-                  },
-                }}
-                InputProps={{
-                  sx: { fontSize: "0.95rem" },
-                }}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-  {/* Gender of house owner */}
-  <Typography
-    variant="subtitle1"
-    sx={{ 
-      fontSize: "1rem", 
-      mb: 1.5, 
-      fontWeight: 600,
-      display: "flex",
-      alignItems: "center", 
-    }}
-  >
-    <WcIcon sx={{ mr: 1, color: "#611463" }} />
-    ເພດຂອງເຈົ້າຂອງເຮືອນ
-  </Typography>
-  <FormControl 
-    component="fieldset" 
-    sx={{ 
-      mb: 3, 
-      width: "100%",
-      p: 2,
-      border: "1px solid",
-      borderColor: alpha("#611463", 0.1),
-      borderRadius: 2,
-      backgroundColor: alpha("#f8f8f8", 0.5),
-      transition: "all 0.2s",
-      "&:hover": {
-        borderColor: alpha("#611463", 0.3),
-      }
-    }}
-  >
-    <RadioGroup
-      row
-      value={ownerGender}
-      onChange={(e) => setOwnerGender(e.target.value)}
-    >
-      <FormControlLabel
-        value="male"
-        control={
-          <Radio
-            sx={{
-              color: alpha("#611463", 0.7),
-              "&.Mui-checked": {
-                color: "#611463",
-              },
-            }}
-          />
-        }
-        label={
-          <Typography sx={{ fontSize: "0.95rem", fontWeight: 500 }}>ຊາຍ</Typography>
-        }
-      />
-      <FormControlLabel
-        value="female"
-        control={
-          <Radio
-            sx={{
-              color: alpha("#611463", 0.7),
-              "&.Mui-checked": {
-                color: "#611463",
-              },
-            }}
-          />
-        }
-        label={
-          <Typography sx={{ fontSize: "0.95rem", fontWeight: 500 }}>ຍິງ</Typography>
-        }
-      />
-      <FormControlLabel
-        value="other"
-        control={
-          <Radio
-            sx={{
-              color: alpha("#611463", 0.7),
-              "&.Mui-checked": {
-                color: "#611463",
-              },
-            }}
-          />
-        }
-        label={
-          <Typography sx={{ fontSize: "0.95rem", fontWeight: 500 }}>ອື່ນໆ</Typography>
-        }
-      />
-    </RadioGroup>
-  </FormControl>
-
-  {/* Phone number */}
-  <Typography
-    variant="subtitle1"
-    sx={{ 
-      fontSize: "1rem", 
-      mb: 1.5, 
-      fontWeight: 600,
-      display: "flex",
-      alignItems: "center", 
-    }}
-  >
-    <PhoneIcon sx={{ mr: 1, color: "#611463" }} />
-    ເບີໂທລະສັບ
-  </Typography>
-  <TextField
-    fullWidth
-    variant="outlined"
-    placeholder="020 XXXXXXXX"
-    value={phoneNumber}
-    onChange={(e) => setPhoneNumber(e.target.value)}
-    sx={{
-      mb: 3,
-      backgroundColor: "#fff",
-      "& .MuiOutlinedInput-root": {
-        borderRadius: 2,
-        transition: "all 0.2s",
-        "&:hover .MuiOutlinedInput-notchedOutline": {
-          borderColor: alpha("#611463", 0.5),
-        },
-        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-          borderColor: "#611463",
-          borderWidth: 2,
-        },
-      },
-    }}
-    InputProps={{
-      sx: { fontSize: "0.95rem", py: 0.5 },
-    }}
-  />
-</Grid>
-          </Grid>
-
-          {/* Upload picture */}
-          <Typography
-            variant="subtitle1"
-            sx={{ 
-              fontSize: "1rem", 
-              mb: 1.5, 
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center", 
-              mt: 1,
-            }}
-          >
-            <CameraAltOutlinedIcon sx={{ mr: 1, color: "#611463" }} />
-            ຮູບພາບຂອງສະຖານທີ່
-          </Typography>
-          <Card
-            sx={{
-              mb: 4,
-              borderRadius: 3,
-              boxShadow: "none",
-              border: "1px dashed",
-              borderColor: alpha("#611463", 0.3),
-              overflow: "hidden",
-              transition: "all 0.2s",
-              "&:hover": {
-                borderColor: "#611463",
-                backgroundColor: alpha("#611463", 0.02),
-              },
-            }}
-          >
-            <CardContent sx={{ p: 2 }}>
+              </Box>
+            ) : (
               <Box
                 sx={{
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  p: 3,
-                  borderRadius: 2,
+                  py: 5,
                 }}
               >
-                {previewImage ? (
-                  <Box
-                    sx={{
-                      width: "100%",
-                      height: 220,
-                      mb: 2,
-                      display: "flex",
-                      justifyContent: "center",
-                      position: "relative",
-                      borderRadius: 2,
-                      overflow: "hidden",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    <Box
-                      component="img"
-                      src={previewImage}
-                      alt="Preview"
-                      sx={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  </Box>
-                ) : (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      py: 5,
-                    }}
-                  >
-                    <PhotoCameraIcon
-                      sx={{ fontSize: 60, color: alpha("#611463", 0.7), mb: 2 }}
-                    />
-                    <Typography sx={{ color: "#666", mb: 2, textAlign: "center" }}>
-                      ອັບໂຫລດຮູບພາບເພື່ອໃຫ້ຜູ້ໃຫ້ບໍລິການເຫັນສະຖານທີ່ຂອງທ່ານໄດ້ງ່າຍຂຶ້ນ
-                    </Typography>
-                  </Box>
-                )}
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  id="upload-image"
-                  onChange={handleImageChange}
-                  style={{ display: "none" }}
+                <PhotoCameraIcon
+                  sx={{ fontSize: 60, color: alpha("#611463", 0.7), mb: 2 }}
                 />
-                <label htmlFor="upload-image">
-                  <Button
-                    variant="contained"
-                    component="span"
-                    startIcon={<UploadIcon />}
-                    sx={{
-                      background: "linear-gradient(135deg, #611463 0%, #812e84 100%)",
-                      borderRadius: 2,
-                      boxShadow: "0 4px 12px rgba(97, 20, 99, 0.15)",
-                      px: 3,
-                      py: 1.2,
-                      transition: "all 0.2s",
-                      "&:hover": { 
-                        background: "linear-gradient(135deg, #7a1980 0%, #974099 100%)",
-                        transform: "translateY(-2px)",
-                        boxShadow: "0 6px 16px rgba(97, 20, 99, 0.25)",
-                      },
-                      fontSize: "0.95rem",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {previewImage ? "ປ່ຽນຮູບພາບ" : "ອັບໂຫລດຮູບພາບ"}
-                  </Button>
-                </label>
+                <Typography sx={{ color: "#666", mb: 2, textAlign: "center" }}>
+                  ອັບໂຫລດຮູບພາບເພື່ອໃຫ້ຜູ້ໃຫ້ບໍລິການເຫັນສະຖານທີ່ຂອງທ່ານໄດ້ງ່າຍຂຶ້ນ
+                </Typography>
               </Box>
-            </CardContent>
-          </Card>
+            )}
+
+            <input
+              type="file"
+              accept="image/*"
+              id="upload-image"
+              onChange={handleImageChange}
+              style={{ display: "none" }}
+            />
+            <label htmlFor="upload-image">
+              <Button
+                variant="contained"
+                component="span"
+                startIcon={<UploadIcon />}
+                sx={{
+                  background: "linear-gradient(135deg, #611463 0%, #812e84 100%)",
+                  borderRadius: 2,
+                  boxShadow: "0 4px 12px rgba(97, 20, 99, 0.15)",
+                  px: 3,
+                  py: 1.2,
+                  transition: "all 0.2s",
+                  "&:hover": { 
+                    background: "linear-gradient(135deg, #7a1980 0%, #974099 100%)",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 6px 16px rgba(97, 20, 99, 0.25)",
+                  },
+                  fontSize: "0.95rem",
+                  fontWeight: 600,
+                }}
+              >
+                {previewImage ? "ປ່ຽນຮູບພາບ" : "ອັບໂຫລດຮູບພາບ"}
+              </Button>
+            </label>
+          </Box>
+        </CardContent>
+      </Card>
+
 
           {/* Action buttons */}
           <Grid container spacing={2} sx={{ mt: 2 }}>

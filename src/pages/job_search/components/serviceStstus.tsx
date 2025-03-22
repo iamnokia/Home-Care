@@ -54,7 +54,7 @@ const ServiceStatus = () => {
     {
       id: 2,
       title: 'ກຳລັງດຳເນີນການ',
-      description: 'ພະນັກງານກຳລັງຢູ່ເສັ້ນທາງ, ພະນັກງານກຳລັງດັງເນີນການ, ເມື່ອວຽກແລ້ວໆກະລຸນາກົດສຳເລັດດ້ວຍ.',
+      description: 'ພະນັກງານກຳລັງດັງເນີນການ, ເມື່ອວຽກແລ້ວໆກະລຸນາກົດສຳເລັດດ້ວຍ.',
       icon: <TaskAltIcon sx={{ fontSize: 28 }} />,
       color: '#00BFA6',
     },
@@ -247,6 +247,50 @@ const ServiceStatus = () => {
           mt: 2,
           px: { xs: 0, sm: 2, md: 3 },
         }}>
+               {/* Suggestion Text Before Start Button */}
+               {showStartButton && (
+            <Grow in={animate} timeout={500}>
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 3,
+                  mb: 3,
+                  mx: { xs: 0, sm: 2, md: 3 },
+                  borderRadius: 4,
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(0, 191, 166, 0.2)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: 4,
+                    height: '100%',
+                    background: 'linear-gradient(to bottom, #00BFA6, #38B2AC)',
+                    borderRadius: '4px 0 0 4px',
+                  }
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <AccessTimeIcon sx={{ color: '#00BFA6', fontSize: 28 }} />
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontWeight: 500,
+                      color: '#611463',
+                      fontSize: { xs: '0.95rem', sm: '1rem', md: '1.05rem' },
+                      lineHeight: 1.6
+                    }}
+                  >
+                    ກະລຸນາລໍຖ້າພະນັກງານກຳລັງເດີນທາງ, ເມື່ອພະນັກງານມາຮອດແລ້ວ, ກະລຸນາກົດເລີ່ມຕົ້ນດ້ວຍ.
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grow>
+          )}
           {/* Start Button */}
           {showStartButton && (
             <Grow in={animate} timeout={600}>
