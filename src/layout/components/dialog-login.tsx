@@ -7,8 +7,6 @@ import {
   Button,
   IconButton,
   Box,
-  Checkbox,
-  FormControlLabel,
   Link,
   InputAdornment,
   Paper,
@@ -21,8 +19,8 @@ import {
   Visibility, 
   VisibilityOff, 
   PersonOutline, 
-  LockOutlined,
-  SendIcon
+  LockOutlined,  
+  Email, 
 } from "@mui/icons-material";
 import RegisterDialog from "./dialog-signup";
 
@@ -37,9 +35,9 @@ interface LoginDialogProps {
 
 const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+
   const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
   
   const theme = useTheme();
@@ -60,7 +58,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
 
   const handleLogin = () => {
     // Handle login logic here
-    console.log("Logging in with:", fullName, password);
+    console.log("Logging in with:", email, password);
     // After successful login, close dialog
     onClose();
   };
@@ -138,14 +136,15 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
           }}>
             <TextField
               fullWidth
-              label="Full Name"
+              label="Email Address"
               variant="outlined"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PersonOutline color="action" />
+                    <Email color="action" />
                   </InputAdornment>
                 ),
                 sx: {
@@ -190,40 +189,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
               }}
             />
 
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    size="small"
-                    sx={{
-                      color: "#611463",
-                      '&.Mui-checked': {
-                        color: "#611463",
-                      },
-                    }}
-                  />
-                }
-                label={<Typography variant="body2">Keep me logged in</Typography>}
-              />
-              
-              <Link
-                component="button"
-                variant="body2"
-                onClick={() => {}}
-                sx={{
-                  color: "#611463",
-                  textDecoration: "none",
-                  fontWeight: 500,
-                  '&:hover': {
-                    color: "#f7931e",
-                  },
-                }}
-              >
-                Forgot Password?
-              </Link>
-            </Box>
+
 
             <Button
               variant="contained"
