@@ -9,7 +9,6 @@ import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import BadgeIcon from '@mui/icons-material/Badge';
 import { useNavigate } from "react-router-dom";
 
-
 const ServiceProviderCard = ({ 
   id, 
   name, 
@@ -17,12 +16,12 @@ const ServiceProviderCard = ({
   location, 
   price, 
   imageUrl, 
-  rating, 
+  rating = 5, 
   category, 
   gender, 
   age, 
-  village, 
-  city, 
+  village = 'N/A', 
+  city = 'N/A', 
   categoryType,
   // Car details - new props for moving and bathroom categories
   carId,
@@ -38,13 +37,17 @@ const ServiceProviderCard = ({
 
   // Format price to have commas
   const formatPrice = (price) => {
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "KIP";
+    if (!price && price !== 0) return "N/A";
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " KIP";
   };
 
   // Handle click to navigate to service detail page
   const handleCardClick = () => {
     navigate(`/service-detail/${id}`);
   };
+
+  // Ensure rating is a valid number between 0-5
+  const safeRating = Number.isInteger(rating) && rating >= 0 && rating <= 5 ? rating : 5;
 
   return (
     <Box
@@ -67,39 +70,40 @@ const ServiceProviderCard = ({
       <Box sx={{ height: 200, overflow: 'hidden' }}>
         {/* Show car image for moving/bathroom services, otherwise show employee image */}
         <img 
-          src={isCarService ? (carImageUrl || '/api/placeholder/400/300') : imageUrl} 
-          alt={isCarService ? `${carBrand} ${carModel}` : name} 
+          src={isCarService ? (carImageUrl || '/api/placeholder/400/300') : (imageUrl || '/api/placeholder/400/300')} 
+          alt={isCarService ? `${carBrand || 'Car'} ${carModel || ''}` : (name || 'Service Provider')} 
           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          onError={(e) => {
+            e.target.src = '/api/placeholder/400/300';
+          }}
         />
       </Box>
       <Box sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{name} {surname}</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{name || 'N/A'} {surname || ''}</Typography>
           <Box sx={{ display: 'flex' }}>
-            {[...Array(rating)].map((_, i) => (
+            {[...Array(safeRating)].map((_, i) => (
               <StarIcon key={i} sx={{ fontSize: 16, color: '#FFD700' }} />
             ))}
           </Box>
         </Box>
 
-
-
         {/* Category and gender/age info */}
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, flexWrap: 'wrap' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 2, mb: 0.5 }}>
             <CategoryIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-            <Typography variant="body2" color="text.secondary">{category}</Typography>
+            <Typography variant="body2" color="text.secondary">{category || 'N/A'}</Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <PersonIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
             <Typography variant="body2" color="text.secondary">
-              {gender}, {age} ປີ
+              {gender || 'N/A'}, {age || 'N/A'} ປີ
             </Typography>
           </Box>
         </Box>
 
         {/* Car details for moving/bathroom services */}
-        {isCarService && carBrand && (
+        {isCarService && (
           <Box 
             sx={{
               mb: 2,
@@ -115,19 +119,21 @@ const ServiceProviderCard = ({
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
               <DirectionsCarIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                {carBrand} {carModel}
+                {carBrand || 'Toyota'} {carModel || 'Hilux'}
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
               <BadgeIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
               <Typography variant="body2" color="text.secondary">
-                {licensePlate}
+                {licensePlate || 'N/A'}
               </Typography>
-              <Chip 
-                size="small" 
-                label={`ລະຫັດລົດ: ${carId}`} 
-                sx={{ ml: 1, height: 20, fontSize: '0.7rem' }} 
-              />
+              {carId && (
+                <Chip 
+                  size="small" 
+                  label={`ລະຫັດລົດ: ${carId}`} 
+                  sx={{ ml: 1, height: 20, fontSize: '0.7rem' }} 
+                />
+              )}
             </Box>
           </Box>
         )}

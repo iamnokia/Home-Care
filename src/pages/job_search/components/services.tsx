@@ -8,173 +8,135 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import WcIcon from '@mui/icons-material/Wc';
 import PestControlIcon from '@mui/icons-material/PestControl';
 import { useNavigate } from "react-router-dom";
-import ads from "../../../assets/icons/HomeCareAds.png";
 
 // Import the separated components
 import ServiceProviderCard from "./ServiceProviderCard";
 import ServiceCategoryChip from "./ServiceCategoryChip";
 import { styles } from "./ServiceStyles";
+import useMainController from "../controllers";
 
 const Services = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState(null);
   const [filteredProviders, setFilteredProviders] = useState([]);
+  
+  // Get data from controller
+  const { loading, data } = useMainController();
 
-  // Service categories data with categoryType for filtering
+  // Define service categories
   const serviceCategories = [
-    { id: 1, title: 'ທຳຄວາມສະອາດ', icon: <CleaningServicesIcon />, categoryType: 'cleaning' },
-    { id: 2, title: 'ສ້ອມແປງໄຟຟ້າ', icon: <ElectricalServicesIcon />, categoryType: 'electrical' },
-    { id: 3, title: 'ສ້ອມແປງແອ', icon: <AcUnitIcon />, categoryType: 'ac' },
-    { id: 4, title: 'ສ້ອມແປງນ້ຳປະປາ', icon: <PlumbingIcon />, categoryType: 'plumbing' },
-    { id: 5, title: 'ແກ່ເຄື່ອງ', icon: <LocalShippingIcon />, categoryType: 'moving' },
-    { id: 6, title: 'ດູດສ້ວມ', icon: <WcIcon />, categoryType: 'bathroom' },
-    { id: 7, title: 'ກຳຈັດປວກ', icon: <PestControlIcon />, categoryType: 'pest' },
+    {
+      id: 'all',
+      title: 'ທັງຫມົດ',
+      icon: <CleaningServicesIcon />,
+      categoryType: 'all'
+    },
+    {
+      id: 'cleaning',
+      title: 'ທຳຄວາມສະອາດ',
+      icon: <CleaningServicesIcon />,
+      categoryType: 'cleaning'
+    },
+    {
+      id: 'electrical',
+      title: 'ໄຟຟ້າ',
+      icon: <ElectricalServicesIcon />,
+      categoryType: 'electrical'
+    },
+    {
+      id: 'aircon',
+      title: 'ແອປັບອາກາດ',
+      icon: <AcUnitIcon />,
+      categoryType: 'aircon'
+    },
+    {
+      id: 'plumbing',
+      title: 'ປະປາ',
+      icon: <PlumbingIcon />,
+      categoryType: 'plumbing'
+    },
+    {
+      id: 'moving',
+      title: 'ຂົນສົ່ງເຄື່ອງ',
+      icon: <LocalShippingIcon />,
+      categoryType: 'moving'
+    },
+    {
+      id: 'bathroom',
+      title: 'ຫ້ອງນ້ຳເຄື່ອນທີ່',
+      icon: <WcIcon />,
+      categoryType: 'bathroom'
+    },
+    {
+      id: 'pest',
+      title: 'ກຳຈັດແມງໄມ້',
+      icon: <PestControlIcon />,
+      categoryType: 'pest'
+    },
   ];
 
-  // Enhanced mock service providers data with car information for moving and bathroom services
-  const serviceProviders = [
-    {
-      id: 1,
-      name: 'ອຳມະລິນ',
-      surname: 'ອຸນາລົມ',
-      location: 'ເມືອງປາກເຊ, ແຂວງຈຳປາສັກ',
-      price: 250000,
-      imageUrl: {ads},
-      rating: 5,
-      categoryType: 'cleaning',
-      category: 'ແມ່ບ້ານ',
-      gender: 'ຍິງ',
-      age: 21,
-      village: 'ບ້ານ ໂນນສະຫວ່າງ',
-      city: 'ວຽງຈັນ',
-    },
-    {
-      id: 2,
-      name: 'ສົມພອນ',
-      surname: 'ພົມມະວົງ',
-      location: 'ເມືອງປາກເຊ, ແຂວງຈຳປາສັກ',
-      price: 100000,
-      imageUrl: '/api/placeholder/400/300',
-      rating: 5,
-      categoryType: 'electrical',
-      category: 'ຊ່າງໄຟຟ້າ',
-      gender: 'ຊາຍ',
-      age: 35,
-      village: 'ບ້ານ ຊຽງຢືນ',
-      city: 'ວຽງຈັນ',
-    },
-    {
-      id: 3,
-      name: 'ວິໄລ',
-      surname: 'ແກ້ວມະນີ',
-      location: 'ເມືອງວັງວຽງກາງ, ຊີສັດຕະນາກ',
-      price: 150000,
-      imageUrl: '/api/placeholder/400/300',
-      rating: 5,
-      categoryType: 'ac',
-      category: 'ຊ່າງແອ',
-      gender: 'ຊາຍ',
-      age: 28,
-      village: 'ບ້ານ ທົ່ງສາງ',
-      city: 'ຊີສັດຕະນາກ',
-    },
-    {
-      id: 4,
-      name: 'ບຸນມີ',
-      surname: 'ສິນທະວົງ',
-      location: 'ເມືອງວັງວຽງກາງ, ຊີສັດຕະນາກ',
-      price: 200000,
-      imageUrl: '/api/placeholder/400/300',
-      rating: 4,
-      categoryType: 'plumbing',
-      category: 'ຊ່າງປະປາ',
-      gender: 'ຊາຍ',
-      age: 40,
-      village: 'ບ້ານ ຫ້ວຍຮັງ',
-      city: 'ຊີສັດຕະນາກ',
-    },
-    {
-      id: 5,
-      name: 'ນາງ ວັນນະສອນ',
-      surname: 'ພູທອງ',
-      location: 'ເມືອງຫຼວງ, ໂຮງໝໍ',
-      price: 300000,
-      imageUrl: '/api/placeholder/400/300',
-      rating: 5,
-      categoryType: 'moving',
-      category: 'ຂົນສົ່ງ',
-      gender: 'ຍິງ',
-      age: 32,
-      village: 'ບ້ານ ນາດີ',
-      city: 'ເມືອງຫຼວງ',
-      // Car information for moving service
-      carId: 'M001',
-      carBrand: 'Toyota',
-      carModel: 'Hiace',
-      licensePlate: 'ກຂ 1234',
-      carImageUrl: '/api/placeholder/400/300'
-    },
-    {
-      id: 6,
-      name: 'ສົມຈິດ',
-      surname: 'ແກ້ວສະຫວັນ',
-      location: 'ເມືອງປາກເຊ, ແຂວງຈຳປາສັກ',
-      price: 200000,
-      imageUrl: '/api/placeholder/400/300',
-      rating: 3,
-      categoryType: 'bathroom',
-      category: 'ຊ່າງຫ້ອງນ້ຳ',
-      gender: 'ຊາຍ',
-      age: 45,
-      village: 'ບ້ານ ຂອນແກ່ນ',
-      city: 'ປາກເຊ',
-      // Car information for bathroom service
-      carId: 'B002',
-      carBrand: 'Isuzu',
-      carModel: 'D-Max',
-      licensePlate: 'ຄງ 5678',
-      carImageUrl: '/api/placeholder/400/300'
-    },
-    {
-      id: 7,
-      name: 'ພອນສະຫວັນ',
-      surname: 'ແກ້ວມະນີ',
-      location: 'ເມືອງປາກເຊ, ແຂວງຈຳປາສັກ',
-      price: 100000,
-      imageUrl: '/api/placeholder/400/300',
-      rating: 5,
-      categoryType: 'pest',
-      category: 'ກຳຈັດສັດຕູພືດ',
-      gender: 'ຊາຍ',
-      age: 38,
-      village: 'ບ້ານ ຈອມແກ້ວ',
-      city: 'ປາກເຊ',
-    },
-    {
-      id: 8,
-      name: 'ນາງ ສຸລິຍາ',
-      surname: 'ພົມມະຈັນ',
-      location: 'ເມືອງວັງວຽງກາງ, ຊີສັດຕະນາກ',
-      price: 150000,
-      imageUrl: '/api/placeholder/400/300',
-      rating: 4,
-      categoryType: 'cleaning',
-      category: 'ທຳຄວາມສະອາດ',
-      gender: 'ຍິງ',
-      age: 25,
-      village: 'ບ້ານ ຫນອງໄຮ',
-      city: 'ວັງວຽງ',
-    }
-  ];
+  // Map the API data to format expected by ServiceProviderCard
+  const mapEmployeeToServiceProvider = (employee) => {
+    // Parse the category type from the cat_id
+    const categoryMap = {
+      '1': 'cleaning',
+      '2': 'electrical',
+      '3': 'aircon',
+      '4': 'plumbing',
+      '5': 'moving',
+      '6': 'bathroom',
+      '7': 'pest'
+      // Add more mappings as needed
+    };
+
+    // Get category name from category type
+    const getCategoryName = (catId) => {
+      const categoryType = categoryMap[catId] || 'other';
+      const category = serviceCategories.find(cat => cat.categoryType === categoryType);
+      return category ? category.title : 'Other';
+    };
+
+    // Parse address to extract village and city
+    // Assuming address format is "Village, City"
+    const addressParts = (employee.address || '').split(',');
+    const village = addressParts[0]?.trim() || 'N/A';
+    const city = addressParts[1]?.trim() || 'N/A';
+
+    // Determine if this is a car-based service (moving or bathroom)
+    const categoryType = categoryMap[employee.cat_id] || 'other';
+    const isCarService = categoryType === 'moving' || categoryType === 'bathroom';
+
+    return {
+      id: employee.id,
+      name: employee.first_name,
+      surname: employee.last_name,
+      location: employee.address,
+      price: parseFloat(employee.price || 0),
+      imageUrl: employee.avatar || '/api/placeholder/400/300',
+      rating: 5, // Default rating or could be added to your employee model
+      category: getCategoryName(employee.cat_id),
+      gender: employee.gender,
+      age: 30, // This is missing from your model, you might want to add it
+      village: village,
+      city: city,
+      categoryType: categoryType,
+      // Car details for moving and bathroom categories
+      // These fields would need to be added to your data model
+      carId: isCarService ? `C${employee.id}` : undefined,
+      carBrand: isCarService ? 'Toyota' : undefined, // Default or from your data
+      carModel: isCarService ? 'Hilux' : undefined, // Default or from your data
+      licensePlate: isCarService ? 'ກຂ-' + employee.id : undefined,
+      carImageUrl: isCarService ? '/api/placeholder/400/300' : undefined
+    };
+  };
 
   useEffect(() => {
-    // Simulate loading data
-    setTimeout(() => {
-      setLoading(false);
-      setFilteredProviders(serviceProviders); // Initially show all providers
-    }, 1000);
-  }, []);
+    if (!loading && data && data.length > 0) {
+      // Map the API data to the format expected by your UI
+      const mappedProviders = data.map(mapEmployeeToServiceProvider);
+      setFilteredProviders(mappedProviders);
+    }
+  }, [loading, data]);
 
   const handleCategoryClick = (categoryId) => {
     const selectedCategory = serviceCategories.find(cat => cat.id === categoryId);
@@ -182,18 +144,38 @@ const Services = () => {
     if (activeCategory === categoryId) {
       // If clicking the same category, clear filter
       setActiveCategory(null);
-      setFilteredProviders(serviceProviders);
+      setFilteredProviders(data.map(mapEmployeeToServiceProvider));
     } else {
       // Set active category and filter
       setActiveCategory(categoryId);
 
       if (selectedCategory.categoryType === 'all') {
-        setFilteredProviders(serviceProviders); // Show all
+        setFilteredProviders(data.map(mapEmployeeToServiceProvider)); // Show all
       } else {
         // Filter by category type
-        const filtered = serviceProviders.filter(
-          provider => provider.categoryType === selectedCategory.categoryType
+        const categoryType = selectedCategory.categoryType;
+        const categoryId = Object.keys(serviceCategories).find(
+          key => serviceCategories[key]?.categoryType === categoryType
         );
+        
+        // Filter employees by cat_id
+        const filtered = data
+          .filter(employee => {
+            // Map category types back to cat_id for comparison
+            const categoryMap = {
+              'cleaning': '1',
+              'electrical': '2',
+              'aircon': '3',
+              'plumbing': '4',
+              'moving': '5',
+              'bathroom': '6',
+              'pest': '7'
+              // Add more mappings as needed
+            };
+            return employee.cat_id === categoryMap[categoryType];
+          })
+          .map(mapEmployeeToServiceProvider);
+          
         setFilteredProviders(filtered);
       }
     }
@@ -269,7 +251,7 @@ const Services = () => {
               size="medium"
               onClick={() => {
                 setActiveCategory(null);
-                setFilteredProviders(serviceProviders);
+                setFilteredProviders(data.map(mapEmployeeToServiceProvider));
               }}
               sx={styles.showAllButton}
               startIcon={<span style={{ fontSize: '0.8rem' }}>×</span>}
@@ -314,7 +296,7 @@ const Services = () => {
                   variant="contained"
                   onClick={() => {
                     setActiveCategory(null);
-                    setFilteredProviders(serviceProviders);
+                    setFilteredProviders(data.map(mapEmployeeToServiceProvider));
                   }}
                   sx={{
                     mt: 2,
