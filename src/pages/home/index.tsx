@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
-import RecommendJob from "./components/TakeMore";
 import HeaderPage from "./components/header";
+import JobSearchPage from "../job_search";
 
 const HomePage = () => {
   return (
@@ -12,7 +12,7 @@ const HomePage = () => {
 
         <HeaderPage />
 
-        <RecommendJob />
+        <JobSearchPage />
       </Box>
 
       <Box sx={{ width: "100%" }}>

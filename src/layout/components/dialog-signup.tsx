@@ -156,7 +156,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
               textShadow: "1px 1px 3px rgba(0,0,0,0.2)"
             }}
           >
-            Create Account
+            ສ້າງບັນຊີຂອງທ່ານ
           </Typography>
           <Typography 
             variant="body1" 
@@ -166,7 +166,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
               mt: 1
             }}
           >
-            Join HomeCare to get premium home services
+            ເຂົ້າຮ່ວມ HomeCare ເພື່ອນຳໃຊ້ການບໍລິການດູແລບ້ານເຕັມຮູບແບບ
           </Typography>
         </Box>
 
@@ -174,7 +174,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
         <Box sx={{ flex: 1, p: 4, display: "flex", flexDirection: "column", gap: 2 }}>
           <TextField
             fullWidth
-            label="Username"
+            label="ຊື່ຜູ້ໃຊ້"
             variant="outlined"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -196,7 +196,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
           <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
               fullWidth
-              label="First Name"
+              label="ຊື່ຂອງທ່ານ"
               variant="outlined"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
@@ -217,7 +217,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
             
             <TextField
               fullWidth
-              label="Last Name"
+              label="ນາມສະກຸນ"
               variant="outlined"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
@@ -239,7 +239,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
 
           <TextField
             fullWidth
-            label="Phone Number"
+            label="ເບີໂທລະສັບ"
             variant="outlined"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
@@ -277,7 +277,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
                   mb: 1
                 }}
               >
-                Gender
+                ເພດ
               </FormLabel>
               <RadioGroup
                 row
@@ -344,7 +344,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
 
           <TextField
             fullWidth
-            label="Email Address"
+            label="ທີ່ຢູ່ອີເມລ"
             type="email"
             variant="outlined"
             value={email}
@@ -366,7 +366,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
 
           <TextField
             fullWidth
-            label="Password"
+            label="ລະຫັດຜ່ານ"
             type={showPassword ? "text" : "password"}
             variant="outlined"
             value={password}
@@ -399,7 +399,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
 
           <TextField
             fullWidth
-            label="Confirm Password"
+            label="ຢືນຢັນລະຫັດຜ່ານ"
             type={showConfirmPassword ? "text" : "password"}
             variant="outlined"
             value={confirmPassword}
@@ -445,7 +445,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
             }
             label={
               <Typography variant="body2">
-                I agree to the{" "}
+                ຂ້ອຍຍອມຮັບ ແລະ ເຫັນດີກັບ{" "}
                 <Link
                   href="/Terms-privacy"
                   sx={{
@@ -457,7 +457,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
                     },
                   }}
                 >
-                  Terms and Conditions
+                  ເງື່ອນໄຂ ແລະ ຂໍ້ກຳນົດ
                 </Link>
               </Typography>
             }
@@ -484,18 +484,18 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
               }
             }}
           >
-            Create Account
+            ສ້າງບັນຊີ
           </Button>
           
           <Divider sx={{ my: 2 }}>
             <Typography variant="body2" color="text.secondary">
-              OR
+              ຫຼື
             </Typography>
           </Divider>
 
           <Box sx={{ display: "flex", justifyContent: "center" }}>
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              Already have an account?&nbsp;
+              ທ່ານມີບັນຊີຢູ່ແລ້ວແມ່ນບໍ່?&nbsp;
               <Link
                 onClick={handleOpenLogin}
                 sx={{
@@ -509,7 +509,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
                   },
                 }}
               >
-                Log in now
+                ເຂົ້າສູ່ລະບົບທັນທີ
               </Link>
             </Typography>
           </Box>

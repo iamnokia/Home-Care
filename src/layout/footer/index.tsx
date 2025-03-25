@@ -30,11 +30,11 @@ const FOOTER_ORANGE = "#f7931e";
 
 // Define navigation links with placeholder routes
 const QUICK_LINKS = [
-  { label: "Home", path: '/' },
-  { label: "Services", path: SERVICE_PATH },
-  { label: "About Us", path: CONTACT_US_PATH },
-  { label: "Contact Us", path: CONTACT_US_PATH },
-  { label: "Privacy Policy", path: TERMS_PRIVACY_PATH },
+  { label: "ໜ້າຫຼັກ", path: '/' },
+  { label: "ການບໍລິການ", path: SERVICE_PATH },
+  { label: "ກ່ຽວກັບພວກເຮົາ", path: CONTACT_US_PATH },
+  { label: "ຕິດຕໍ່ພວກເຮົາ", path: CONTACT_US_PATH },
+  { label: "ນນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ", path: TERMS_PRIVACY_PATH },
 ];
 
 // Define social media links with placeholder URLs
@@ -48,8 +48,8 @@ const SOCIAL_LINKS = [
 
 // Define footer links for copyright section
 const FOOTER_LINKS = [
-  { label: "Terms of Use", path: TERMS_PRIVACY_PATH },
-  { label: "Privacy Policy", path: TERMS_PRIVACY_PATH },
+  { label: "ເງື່ອນໄຂການນຳໃຊ້", path: TERMS_PRIVACY_PATH },
+  { label: "ນະໂຍບາຍຄວາມເປັນສ່ວນໂຕ", path: TERMS_PRIVACY_PATH },
 ];
 
 const Footer = () => {
@@ -157,7 +157,7 @@ const Footer = () => {
                   lineHeight: 1.4, // Medium line height
                 }}
               >
-                HomeCare provides comprehensive home maintenance services with skilled professionals.
+                ຄົບທຸກບໍລິການ ດູແລບ້ານທ່ານເຖິງທີ່
               </Typography>
 
               <Box
@@ -176,7 +176,7 @@ const Footer = () => {
                     letterSpacing: 0.5,
                   }}
                 >
-                  Connect with us
+                  ເຊື່ອມຕໍ່ກັບພວກເຮົາ
                 </Typography>
 
                 <Stack
@@ -236,7 +236,7 @@ const Footer = () => {
                   }
                 }}
               >
-                QUICK LINKS
+                ກ່ຽວກັບພວກເຮົາ
               </Typography>
 
               <Stack
@@ -306,7 +306,7 @@ const Footer = () => {
                   }
                 }}
               >
-                GET IN TOUCH
+                ຕິດຕໍ່ພວກເຮົາ
               </Typography>
 
               <Stack
@@ -332,7 +332,7 @@ const Footer = () => {
                   </Box>
                   <Box>
                     <Typography variant="body2" sx={{ opacity: 0.7, mb: 0.25 }}>
-                      Phone
+                      ໂທ
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
                       +856-20-5482-1624
@@ -357,7 +357,7 @@ const Footer = () => {
                   </Box>
                   <Box>
                     <Typography variant="body2" sx={{ opacity: 0.7, mb: 0.25 }}>
-                      Email
+                      ອີເມລ
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
                       homecaredolaebn@gmail.com
@@ -382,10 +382,10 @@ const Footer = () => {
                   </Box>
                   <Box>
                     <Typography variant="body2" sx={{ opacity: 0.7, mb: 0.25 }}>
-                      Location
+                      ສະຖານທີ່
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      Vientiane, Laos
+                      ຖະໜົນທ່າເດື່ອ, ບ້ານຫາຍໂສກ, ເມືອງສີສັດຕະນາກ, ນະຄອນຫຼວງວຽງຈັນ
                     </Typography>
                   </Box>
                 </Box>

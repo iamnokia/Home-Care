@@ -48,9 +48,9 @@ const HeaderPage = () => {
 
   // Feature items
   const features = [
-    { icon: <VerifiedIcon fontSize="small" sx={{ color: "#611463" }} />, text: "Professional" },
-    { icon: <HandymanIcon fontSize="small" sx={{ color: "#611463" }} />, text: "Quality" },
-    { icon: <CleaningServicesIcon fontSize="small" sx={{ color: "#611463" }} />, text: "Affordable" }
+    { icon: <VerifiedIcon fontSize="small" sx={{ color: "#611463" }} />, text: "ປອດໄພ" },
+    { icon: <HandymanIcon fontSize="small" sx={{ color: "#611463" }} />, text: "ຄົບທຸກບໍລິການ" },
+    { icon: <CleaningServicesIcon fontSize="small" sx={{ color: "#611463" }} />, text: "ສະດວກສະບາຍ" }
   ];
 
   return (
@@ -233,7 +233,7 @@ const HeaderPage = () => {
                         }
                       }}
                     >
-                      Explore Services
+                      ເບິ່ງການບໍລິການ
                     </Button>
                     
                     <Button
@@ -258,7 +258,7 @@ const HeaderPage = () => {
                         }
                       }}
                     >
-                      Contact Us
+                      ຕິດຕໍ່ພວກເຮົາ
                     </Button>
                   </Stack>
                 </Box>

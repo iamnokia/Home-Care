@@ -27,6 +27,10 @@ import HomeIcon from "@mui/icons-material/Home";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import StarIcon from "@mui/icons-material/Star";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import BadgeIcon from "@mui/icons-material/Badge";
+import SpeedIcon from "@mui/icons-material/Speed";
+import TimeToLeaveIcon from "@mui/icons-material/TimeToLeave";
 import { LOCATION_PATH } from "../../../routes/path";
 
 // Font size constants with responsive adjustments
@@ -48,15 +52,18 @@ const ServiceDetailsPage = () => {
   // Apply font sizes based on screen size
   const fontSize = getFontSize(isSmallScreen);
 
-  const [serviceData, setServiceData] = useState({
-    id: 1,
+  // Mock data for different service types
+  const serviceData = {
+    // Basic service data
+    id: parseInt(id) || 1,
     name: "ດູດຝຸ່ນ, ທຳຄວາມສະອາດ",
     firstName: "ອຳມະລິນ",
     surname: "ອຸນາລົມ",
     price: 250000,
     priceFormatted: "250,000 KIP",
-    image: "/api/placeholder/40/40",
+    image: "/api/placeholder/400/300",
     category: "ທຳຄວາມສະອາດ",
+    categoryType: "cleaning", // Added categoryType for conditional rendering
     gender: "ຍິງ",
     age: 21,
     village: "ບ້ານ ໂນນສະຫວ່າງ",
@@ -68,7 +75,79 @@ const ServiceDetailsPage = () => {
       { id: 2, rating: 4, comment: "ດີຫຼາຍ", user: "ທ້າວ ສົມສະໄໝ", date: "10 ມີນາ 2025" },
       { id: 3, rating: 4, comment: "ດີຫຼາຍ", user: "ນາງ ວັນນິດາ", date: "28 ກຸມພາ 2025" },
     ],
-  });
+  };
+
+  // Mock data for different services based on ID parameter
+  const movingService = {
+    ...serviceData,
+    id: 5,
+    name: "ຂົນສົ່ງ ແລະ ຍ້າຍເຄື່ອງ",
+    firstName: "ວັນນະສອນ",
+    surname: "ພູທອງ",
+    price: 300000,
+    priceFormatted: "300,000 KIP",
+    category: "ຂົນສົ່ງ",
+    categoryType: "moving",
+    gender: "ຍິງ",
+    age: 32,
+    village: "ບ້ານ ນາດີ",
+    city: "ເມືອງຫຼວງ",
+    skills: "ຂ້ອຍມີປະສົບການ 5 ປີໃນການບໍລິການຂົນສົ່ງເຄື່ອງ. ສາມາດຂົນສົ່ງໄດ້ທຸກປະເພດແລະຮັບຜິດຊອບເຄື່ອງດ້ວຍຄວາມປອດໄພສູງສຸດ. ລົດວ່ອງໄວ, ສະອາດສະອ້ານ. ມີລົດຂະຫນາດປານກາງທີ່ສາມາດຂົນສົ່ງສິນຄ້າໄດ້ຫຼາຍ.",
+    
+    // Car details
+    carId: "M001",
+    carBrand: "Toyota",
+    carModel: "Hiace",
+    licensePlate: "ກຂ 1234",
+    carYear: "2020",
+    carImage: "/api/placeholder/400/300",
+    carFeatures: ["ບັນທຸກໄດ້ 1,000 ກິໂລ", "ຫ້ອງເຢັນ", "ມີຄົນຊ່ວຍຍົກ 2 ຄົນ"],
+    carDescription: "ລົດບັນທຸກໃໝ່ປີ 2020, ບຳລຸງຮັກສາຢ່າງດີ, ສະອາດ ແລະ ພ້ອມໃຫ້ບໍລິການຂົນສົ່ງ. ມີປະກັນໄພຄຸ້ມຄອງ 100% ຕໍ່ຄວາມເສຍຫາຍ.",
+  };
+
+  const bathroomService = {
+    ...serviceData,
+    id: 6,
+    name: "ຊ່າງຫ້ອງນ້ຳ",
+    firstName: "ສົມຈິດ",
+    surname: "ແກ້ວສະຫວັນ",
+    price: 200000,
+    priceFormatted: "200,000 KIP",
+    category: "ຊ່າງຫ້ອງນ້ຳ",
+    categoryType: "bathroom",
+    gender: "ຊາຍ",
+    age: 45,
+    village: "ບ້ານ ຂອນແກ່ນ",
+    city: "ປາກເຊ",
+    skills: "ຊ່າງມືອາຊີບທີ່ມີປະສົບການ 15 ປີໃນການສ້ອມແປງ ແລະ ຕິດຕັ້ງອຸປະກອນຫ້ອງນ້ຳທຸກຊະນິດ. ແກ້ໄຂບັນຫາທໍ່ຮົ່ວ, ອ່າງລ້າງ ແລະ ສຸຂະພັນທຸກຢ່າງ.",
+    
+    // Car details
+    carId: "B002",
+    carBrand: "Isuzu",
+    carModel: "D-Max",
+    licensePlate: "ຄງ 5678",
+    carYear: "2019",
+    carImage: "/api/placeholder/400/300",
+    carFeatures: ["ອຸປະກອນຄົບຊຸດ", "ແກ້ໄຂໄດ້ທຸກບັນຫາ", "ບໍລິການ 24/7"],
+    carDescription: "ລົດບັນທຸກເຄື່ອງມືຄົບຊຸດ, ພ້ອມຊ່ວຍເຫຼືອທຸກບັນຫາກ່ຽວກັບຫ້ອງນ້ຳ ແລະ ລະບົບທໍ່ຂອງທ່ານ. ໃຫ້ບໍລິການທັງກາງເວັນ ແລະ ກາງຄືນ.",
+  };
+
+  // Set the current service data based on ID
+  const [currentService, setCurrentService] = useState(serviceData);
+
+  useEffect(() => {
+    // Check id and update the service data accordingly
+    if (id === "5") {
+      setCurrentService(movingService);
+    } else if (id === "6") {
+      setCurrentService(bathroomService);
+    } else {
+      setCurrentService(serviceData);
+    }
+  }, [id]);
+
+  // Determine if this is a car-based service (moving or bathroom)
+  const isCarService = currentService.categoryType === 'moving' || currentService.categoryType === 'bathroom';
 
   // Calculate container width based on screen size
   const getContainerWidth = () => {
@@ -141,9 +220,11 @@ const ServiceDetailsPage = () => {
                 letterSpacing: "0.5px"
               }}
             >
-              ລາຍລະອຽດການບໍລິການ
+              {isCarService ? 'ລາຍລະອຽດການບໍລິການ ແລະ ລົດ' : 'ລາຍລະອຽດການບໍລິການ'}
             </Typography>
           </Box>
+
+        
 
           {/* Profile info with improved styling */}
           <Box sx={{ 
@@ -155,7 +236,7 @@ const ServiceDetailsPage = () => {
             p: 2
           }}>
             <Avatar
-              src={serviceData.image}
+              src="/api/placeholder/40/40"
               sx={{
                 width: { xs: 80, sm: 100 },
                 height: { xs: 80, sm: 100 },
@@ -171,20 +252,20 @@ const ServiceDetailsPage = () => {
                 mb: 0.5,
                 letterSpacing: "0.5px"
               }}>
-                {serviceData.firstName} {serviceData.surname}
+                {currentService.firstName} {currentService.surname}
               </Typography>
               
               <Stack direction="row" spacing={2} sx={{ mb: 1.5 }}>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <CalendarTodayIcon sx={{ fontSize: "1rem", mr: 0.5, opacity: 0.8 }} />
                   <Typography sx={{ fontSize: fontSize.text }}>
-                    {serviceData.age} ປີ
+                    {currentService.age} ປີ
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <PersonIcon sx={{ fontSize: "1rem", mr: 0.5, opacity: 0.8 }} />
                   <Typography sx={{ fontSize: fontSize.text }}>
-                    {serviceData.gender}
+                    {currentService.gender}
                   </Typography>
                 </Box>
               </Stack>
@@ -192,14 +273,14 @@ const ServiceDetailsPage = () => {
               <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                 <LocationOnIcon sx={{ fontSize: "1.1rem", mr: 0.7, opacity: 0.8 }} />
                 <Typography sx={{ fontSize: fontSize.text }}>
-                  {serviceData.village}, {serviceData.city}
+                  {currentService.village}, {currentService.city}
                 </Typography>
               </Box>
               
               {/* Rating display */}
               <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                 <Rating
-                  value={serviceData.rating}
+                  value={currentService.rating}
                   readOnly
                   precision={0.5}
                   size="small"
@@ -211,14 +292,14 @@ const ServiceDetailsPage = () => {
                   }}
                 />
                 <Typography sx={{ fontSize: fontSize.text, fontWeight: "medium" }}>
-                  {serviceData.rating}
+                  {currentService.rating}
                 </Typography>
               </Box>
               
               {/* Category in stylish chip */}
               <Chip
                 icon={<CategoryIcon style={{ color: "#611463" }} />}
-                label={serviceData.category}
+                label={currentService.category}
                 sx={{
                   borderRadius: "16px",
                   backgroundColor: "white",
@@ -256,25 +337,86 @@ const ServiceDetailsPage = () => {
                 fontWeight: "bold",
                 color: "white"
               }}>
-                {serviceData.priceFormatted}
+                {currentService.priceFormatted}
               </Typography>
             </Box>
           </Box>
         </Box>
 
-        {/* Service details section */}
-        <Box sx={{ px: { xs: 2, sm: 3 }, width: "100%" }}>
-          {/* Skills section with improved card design */}
+       {/* Service details section */}
+<Box sx={{ px: { xs: 2, sm: 3 }, width: "100%" }}>
+  {/* Car details section - Only shown for moving and bathroom categories */}
+  {isCarService && (
+    
+    <>
+      <Box sx={{ 
+        display: "flex", 
+        flexDirection: { xs: "column", md: "row" },
+        alignItems: { xs: "flex-start", md: "flex-start" },
+        gap: 3,
+        mb: 4
+      }}>
+         <DirectionsCarIcon sx={{ color: "#611463" }} />
+            ຮູບພາຫະນະ
+        
+        {/* Left side: Car image with gradient overlay */}
+        <Box sx={{
+          width: { xs: "100%", md: "40%" },
+          height: { xs: 200, md: 250 },
+          borderRadius: 4,
+          overflow: "hidden",
+          position: "relative",
+          boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
+          border: "3px solid rgba(255,255,255,0.2)",
+          flexShrink: 0,
+          mt:5,
+          ml:-18,
+        }}>
+          <img
+            src={currentService.carImage}
+            alt={`${currentService.carBrand} ${currentService.carModel}`}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+          {/* Overlay gradient for better text visibility */}
+          <Box sx={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "40%",
+            background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)",
+            display: "flex",
+            alignItems: "flex-end",
+            p: 2,
+          }}>
+            <Typography
+              sx={{
+                color: "white",
+                fontWeight: "bold",
+                fontSize: { xs: "1.3rem", sm: "1.5rem" },
+                textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+              }}
+            >
+              {currentService.carBrand} {currentService.carModel} • {currentService.carYear}
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Right side: Vehicle information */}
+        <Box sx={{ flex: 1 }}>
           <Typography sx={{ 
             fontSize: fontSize.subtitle, 
             fontWeight: "600", 
             mb: 2,
-            ml: 1,
             display: "flex",
             alignItems: "center",
           }}>
-            <WorkIcon sx={{ mr: 1.5, color: "#611463" }} />
-            ການບໍລິການ ແລະ ທັກສະ
+            <DirectionsCarIcon sx={{ mr: 1.5, color: "#611463" }} />
+            ຂໍ້ມູນພາຫະນະ
           </Typography>
 
           <Card
@@ -282,22 +424,116 @@ const ServiceDetailsPage = () => {
             sx={{
               p: { xs: 0, sm: 0 },
               borderRadius: 4,
-              mb: 4,
               boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
               overflow: "hidden",
               border: "1px solid rgba(0,0,0,0.05)",
+              position: "relative",
+              height: { md: "calc(100% - 42px)" }, // Adjust height to match the image (minus the heading)
             }}
           >
             <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
-              <Typography sx={{ 
-                fontSize: fontSize.text, 
-                lineHeight: 1.8,
-                color: "#424242"
-              }}>
-                {serviceData.skills}
+              {/* Car details grid */}
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                    <TimeToLeaveIcon sx={{ fontSize: "1.1rem", mr: 1, color: "#611463" }} />
+                    <Typography sx={{ fontSize: fontSize.text, fontWeight: "medium", color: "#611463" }}>
+                      ຍີ່ຫໍ້ & ລຸ້ນ
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: fontSize.text, ml: 4, color: "#424242" }}>
+                    {currentService.carBrand} {currentService.carModel}
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={6}>
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                    <CalendarTodayIcon sx={{ fontSize: "1.1rem", mr: 1, color: "#611463" }} />
+                    <Typography sx={{ fontSize: fontSize.text, fontWeight: "medium", color: "#611463" }}>
+                      ປີຜະລິດ
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: fontSize.text, ml: 4, color: "#424242" }}>
+                    {currentService.carYear}
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={6}>
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                    <BadgeIcon sx={{ fontSize: "1.1rem", mr: 1, color: "#611463" }} />
+                    <Typography sx={{ fontSize: fontSize.text, fontWeight: "medium", color: "#611463" }}>
+                      ປ້າຍທະບຽນ
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: fontSize.text, ml: 4, color: "#424242" }}>
+                    {currentService.licensePlate}
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={6}>
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                    <SpeedIcon sx={{ fontSize: "1.1rem", mr: 1, color: "#611463" }} />
+                    <Typography sx={{ fontSize: fontSize.text, fontWeight: "medium", color: "#611463" }}>
+                      ລະຫັດລົດ
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: fontSize.text, ml: 4, color: "#424242" }}>
+                    {currentService.carId}
+                  </Typography>
+                </Grid>
+              </Grid>
+
+              <Divider sx={{ my: 2 }} />
+
+              {/* Car features */}
+              <Typography sx={{ fontSize: fontSize.text, fontWeight: "medium", mb: 1, color: "#611463" }}>
+                ຄຸນສົມບັດພິເສດ:
+              </Typography>
+              {/* Car description */}
+              <Typography sx={{ fontSize: fontSize.text, lineHeight: 1.8, color: "#424242" }}>
+                {currentService.carDescription}
               </Typography>
             </CardContent>
           </Card>
+        </Box>
+      </Box>
+    </>
+  )}
+
+  {/* Skills section with improved card design */}
+  <Typography sx={{ 
+    fontSize: fontSize.subtitle, 
+    fontWeight: "600", 
+    mb: 2,
+    ml: 1,
+    display: "flex",
+    alignItems: "center",
+  }}>
+    <WorkIcon sx={{ mr: 1.5, color: "#611463" }} />
+    ການບໍລິການ ແລະ ທັກສະ
+  </Typography>
+
+  <Card
+    elevation={2}
+    sx={{
+      p: { xs: 0, sm: 0 },
+      borderRadius: 4,
+      mb: 4,
+      boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
+      overflow: "hidden",
+      border: "1px solid rgba(0,0,0,0.05)",
+    }}
+  >
+    <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
+      <Typography sx={{ 
+        fontSize: fontSize.text, 
+        lineHeight: 1.8,
+        color: "#424242"
+      }}>
+        {currentService.skills}
+      </Typography>
+    </CardContent>
+  </Card>
 
           {/* Reviews section with enhanced cards */}
           <Typography sx={{ 
@@ -313,7 +549,7 @@ const ServiceDetailsPage = () => {
           </Typography>
 
           <Stack spacing={2} sx={{ mb: 4 }}>
-            {serviceData.reviews.map((review) => (
+            {currentService.reviews.map((review) => (
               <Card
                 key={review.id}
                 sx={{

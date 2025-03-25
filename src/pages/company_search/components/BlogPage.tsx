@@ -33,6 +33,10 @@ import CategoryIcon from '@mui/icons-material/Category';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import HistoryIcon from '@mui/icons-material/History';
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import BadgeIcon from '@mui/icons-material/Badge';
+import TimeToLeaveIcon from '@mui/icons-material/TimeToLeave';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import Icon from '../../../assets/icons/HomeCareLogo.png';
 
 const ServiceListing = () => {
@@ -78,7 +82,13 @@ const ServiceListing = () => {
     }
   };
   
-  // Enhanced sample data
+  // Check if a service is a vehicle-based service
+  const isVehicleService = (service) => {
+    return service.occupation.toLowerCase() === 'transportation' || 
+           service.occupation.toLowerCase() === 'bathroom specialist';
+  };
+  
+  // Enhanced sample data with vehicle information for certain services
   const [services, setServices] = useState([
     {
       id: 1,
@@ -160,10 +170,41 @@ const ServiceListing = () => {
       category: "ຂົນສົ່ງ",
       price: 300000,
       avatar: "/api/placeholder/40/40",
+      carImage: "/api/placeholder/400/300",
       rating: 5,
       service: "ຂົນສົ່ງເຄື່ອງຫຍ້າຍບ້ານ",
       date: "2025-03-15",
-      status: "Completed"
+      status: "Completed",
+      // Car details for transportation service
+      carId: "M001",
+      carBrand: "Toyota",
+      carModel: "Hiace",
+      licensePlate: "ກຂ 1234",
+      carYear: "2020"
+    },
+    {
+      id: 6,
+      name: "ສົມຈິດ",
+      surname: "ແກ້ວສະຫວັນ",
+      age: 45,
+      gender: "ຊາຍ",
+      village: "ບ້ານ ຂອນແກ່ນ",
+      city: "ປາກເຊ",
+      occupation: "Bathroom Specialist",
+      category: "ຊ່າງຫ້ອງນ້ຳ",
+      price: 250000,
+      avatar: "/api/placeholder/40/40",
+      carImage: "/api/placeholder/400/300",
+      rating: 4,
+      service: "ຕິດຕັ້ງສຸຂະພັນຫ້ອງນ້ຳ",
+      date: "2025-03-20",
+      status: "Completed",
+      // Car details for bathroom specialist
+      carId: "B002",
+      carBrand: "Isuzu",
+      carModel: "D-Max",
+      licensePlate: "ຄງ 5678",
+      carYear: "2019"
     }
   ]);
 
@@ -298,332 +339,395 @@ const ServiceListing = () => {
           maxWidth: "1200px"
         }}
       >
-        {services.map((service) => (
-          <Card
-            key={service.id}
-            sx={{
-              mb: 3,
-              borderRadius: "16px",
-              p: 0,
-              overflow: "hidden",
-              position: "relative",
-              boxShadow: "0 5px 15px rgba(0,0,0,0.05)",
-              width: "100%",
-              transition: "transform 0.3s ease, box-shadow 0.3s ease",
-              "&:hover": {
-                transform: "translateY(-5px)",
-                boxShadow: "0 12px 20px rgba(97, 20, 99, 0.1)"
-              }
-            }}
-          >
-            {/* Top bar with Contract ID, Date, and Delete Button */}
-            <Box sx={{ 
-              display: "flex", 
-              justifyContent: "space-between", 
-              alignItems: "center",
-              bgcolor: "#f9f9f9",
-              borderBottom: "1px solid #eee",
-              py: 1,
-              px: 3,
-            }}>
-              {/* Contract ID */}
+        {services.map((service) => {
+          // Check if this is a vehicle service
+          const vehicleService = isVehicleService(service);
+          
+          return (
+            <Card
+              key={service.id}
+              sx={{
+                mb: 3,
+                borderRadius: "16px",
+                p: 0,
+                overflow: "hidden",
+                position: "relative",
+                boxShadow: "0 5px 15px rgba(0,0,0,0.05)",
+                width: "100%",
+                transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                "&:hover": {
+                  transform: "translateY(-5px)",
+                  boxShadow: "0 12px 20px rgba(97, 20, 99, 0.1)"
+                }
+              }}
+            >
+              {/* Top bar with Contract ID, Date, and Delete Button */}
               <Box sx={{ 
                 display: "flex", 
-                alignItems: "center" 
-              }}>
-                <ReceiptIcon sx={{ 
-                  fontSize: "0.9rem", 
-                  color: "#611463", 
-                  mr: 1 
-                }} />
-                <Typography 
-                  sx={{ 
-                    fontSize: { xs: "0.75rem", sm: "0.8rem" },
-                    color: "#611463",
-                    fontWeight: "600"
-                  }}
-                >
-                  ເລກທີສັນຍາ: #10{service.id}M
-                </Typography>
-              </Box>
-              
-              {/* Middle spacer */}
-              <Box flexGrow={1} />
-              
-              {/* Date */}
-              <Box sx={{ 
-                display: "flex", 
+                justifyContent: "space-between", 
                 alignItems: "center",
-                mr: 2
+                bgcolor: "#f9f9f9",
+                borderBottom: "1px solid #eee",
+                py: 1,
+                px: 3,
               }}>
-                <DateRangeIcon sx={{ 
-                  fontSize: "0.9rem", 
-                  color: "#611463", 
-                  mr: 1 
-                }} />
-                <Typography 
-                  sx={{ 
-                    fontSize: { xs: "0.75rem", sm: "0.8rem" },
-                    color: "#611463",
-                  }}
-                >
-                  {formatDate(service.date)}
-                </Typography>
-              </Box>
-              
-              {/* Delete Button */}
-              <Tooltip title="ລຶບຂໍ້ມູນ" arrow>
-                <IconButton 
-                  aria-label="delete"
-                  size="small" 
-                  onClick={() => handleDelete(service.id)}
-                  sx={{ 
-                    color: "#f44336",
-                    bgcolor: "rgba(244, 67, 54, 0.1)",
-                    padding: "4px",
-                    "&:hover": {
-                      bgcolor: "rgba(244, 67, 54, 0.2)"
-                    }
-                  }}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
-
-            {/* Main Card Content */}
-            <Box sx={{ 
-              p: 3,
-              display: "flex", 
-              flexDirection: isMobile ? "column" : "row",
-              gap: isMobile ? 3 : 2,
-              position: "relative"
-            }}>
-              {/* Left Section: Provider Info */}
-              <Box sx={{ 
-                display: "flex",
-                alignItems: "flex-start",
-                width: isMobile ? "100%" : "60%"
-              }}>
-                {/* Provider Avatar with Badge */}
-                <Badge
-                  overlap="circular"
-                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                  badgeContent={
-                    <Box sx={{ 
-                      display: "flex", 
-                      bgcolor: "#fff", 
-                      borderRadius: "50%", 
-                      p: 0.3,
-                      border: "2px solid #fff",
-                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-                    }}>
-                      {getServiceIcon(service.occupation)}
-                    </Box>
-                  }
-                >
-                  <Avatar 
-                    src={service.avatar} 
-                    alt={service.name}
-                    sx={{ 
-                      width: { xs: 70, sm: 80 }, 
-                      height: { xs: 70, sm: 80 }, 
-                      border: "3px solid #f7931e",
-                      boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-                      mr: 2
-                    }}
-                  />
-                </Badge>
-                
-                {/* Provider Details */}
-                <Box sx={{ ml: 1 }}>
-                  <Typography 
-                    sx={{ 
-                      color: "#611463", 
-                      fontWeight: "bold",
-                      fontSize: { xs: "1.1rem", sm: "1.25rem" },
-                      mb: 0.5,
-                    }}
-                  >
-                    {service.name} {service.surname}
-                  </Typography>
-                  
-                  {/* Rating Stars */}
-                  <Box sx={{ display: "flex", mb: 1.5 }}>
-                    {[...Array(5)].map((_, i) => (
-                      <StarIcon 
-                        key={i} 
-                        sx={{ 
-                          fontSize: 16, 
-                          color: i < service.rating ? '#FFD700' : '#e0e0e0',
-                          mr: 0.3
-                        }} 
-                      />
-                    ))}
-                  </Box>
-                  
-                  {/* Gender and Age */}
-                  <Box sx={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    mb: 1,
-                    p: 1,
-                    borderRadius: "8px",
-                    bgcolor: alpha('#611463', 0.05),
-                    width: "fit-content"
-                  }}>
-                    <PersonIcon sx={{ fontSize: "0.9rem", color: "#611463", mr: 0.5 }} />
-                    <Typography sx={{ fontSize: { xs: "0.8rem", sm: "0.85rem" }, color: "#611463" }}>
-                      {service.gender}, {service.age} ປີ
-                    </Typography>
-                  </Box>
-                  
-                  {/* Location with icons */}
-                  <Grid container spacing={1} sx={{ mt: 1 }}>
-                    <Grid item xs={12} sm={6}>
-                      <Box sx={{ 
-                        display: "flex", 
-                        alignItems: "center",
-                        p: 1,
-                        borderRadius: "8px",
-                        bgcolor: alpha('#f7931e', 0.05),
-                      }}>
-                        <HomeIcon sx={{ fontSize: "0.9rem", color: "#f7931e", mr: 0.5 }} />
-                        <Typography sx={{ fontSize: { xs: "0.8rem", sm: "0.85rem" }, color: "#666" }}>
-                          {service.village}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Box sx={{ 
-                        display: "flex", 
-                        alignItems: "center",
-                        p: 1,
-                        borderRadius: "8px",
-                        bgcolor: alpha('#f7931e', 0.05),
-                      }}>
-                        <LocationCityIcon sx={{ fontSize: "0.9rem", color: "#f7931e", mr: 0.5 }} />
-                        <Typography sx={{ fontSize: { xs: "0.8rem", sm: "0.85rem" }, color: "#666" }}>
-                          {service.city}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Box>
-              
-              {/* Right Section: Service Info */}
-              <Box 
-                sx={{ 
-                  width: isMobile ? "100%" : "40%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: isMobile ? "flex-start" : "flex-end",
-                  justifyContent: "space-between",
-                  position: "relative",
-                }}
-              >
-                {/* Status Chip */}
+                {/* Contract ID */}
                 <Box sx={{ 
                   display: "flex", 
-                  justifyContent: isMobile ? "flex-start" : "flex-end",
-                  width: "100%",
-                  mb: 2
+                  alignItems: "center" 
                 }}>
-                  <Chip 
-                    label={service.status} 
-                    sx={{
-                      bgcolor: getStatusColor(service.status).bg,
-                      color: getStatusColor(service.status).color,
-                      fontWeight: "600",
-                      fontSize: "0.75rem",
-                      height: 28,
-                      px: 1,
-                      borderRadius: "8px"
+                  <ReceiptIcon sx={{ 
+                    fontSize: "0.9rem", 
+                    color: "#611463", 
+                    mr: 1 
+                  }} />
+                  <Typography 
+                    sx={{ 
+                      fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                      color: "#611463",
+                      fontWeight: "600"
                     }}
-                  />
+                  >
+                    ເລກທີສັນຍາ: #10{service.id}M
+                  </Typography>
                 </Box>
                 
-                {/* Service Card */}
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 2,
-                    borderRadius: "12px",
-                    bgcolor: "#fafafa",
-                    border: "1px solid #eee",
-                    width: "100%",
-                    mb: 2
-                  }}
-                >
-                  {/* Service Category */}
-                  <Box sx={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    mb: 1,
-                    justifyContent: isMobile ? "flex-start" : "flex-start"
-                  }}>
-                    {getServiceIcon(service.occupation)}
+                {/* Middle spacer */}
+                <Box flexGrow={1} />
+                
+                {/* Date */}
+                <Box sx={{ 
+                  display: "flex", 
+                  alignItems: "center",
+                  mr: 2
+                }}>
+                  <DateRangeIcon sx={{ 
+                    fontSize: "0.9rem", 
+                    color: "#611463", 
+                    mr: 1 
+                  }} />
+                  <Typography 
+                    sx={{ 
+                      fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                      color: "#611463",
+                    }}
+                  >
+                    {formatDate(service.date)}
+                  </Typography>
+                </Box>
+                
+                {/* Delete Button */}
+                <Tooltip title="ລຶບຂໍ້ມູນ" arrow>
+                  <IconButton 
+                    aria-label="delete"
+                    size="small" 
+                    onClick={() => handleDelete(service.id)}
+                    sx={{ 
+                      color: "#f44336",
+                      bgcolor: "rgba(244, 67, 54, 0.1)",
+                      padding: "4px",
+                      "&:hover": {
+                        bgcolor: "rgba(244, 67, 54, 0.2)"
+                      }
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+
+              {/* Main Card Content */}
+              <Box sx={{ 
+                p: 3,
+                display: "flex", 
+                flexDirection: isMobile ? "column" : "row",
+                gap: isMobile ? 3 : 2,
+                position: "relative"
+              }}>
+                {/* Left Section: Provider Info */}
+                <Box sx={{ 
+                  display: "flex",
+                  alignItems: "flex-start",
+                  width: isMobile ? "100%" : "60%"
+                }}>
+                  {/* Provider Avatar with Badge */}
+                  <Badge
+                    overlap="circular"
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    badgeContent={
+                      <Box sx={{ 
+                        display: "flex", 
+                        bgcolor: "#fff", 
+                        borderRadius: "50%", 
+                        p: 0.3,
+                        border: "2px solid #fff",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+                      }}>
+                        {getServiceIcon(service.occupation)}
+                      </Box>
+                    }
+                  >
+                    <Avatar 
+                      src={vehicleService ? service.carImage : service.avatar} 
+                      alt={vehicleService ? `${service.carBrand} ${service.carModel}` : service.name}
+                      sx={{ 
+                        width: { xs: 70, sm: 80 }, 
+                        height: { xs: 70, sm: 80 }, 
+                        border: "3px solid #f7931e",
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                        mr: 2
+                      }}
+                    />
+                  </Badge>
+                  
+                  {/* Provider Details */}
+                  <Box sx={{ ml: 1 }}>
                     <Typography 
                       sx={{ 
                         color: "#611463", 
-                        fontWeight: "600",
-                        fontSize: "0.95rem",
-                        ml: 1
+                        fontWeight: "bold",
+                        fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                        mb: 0.5,
                       }}
                     >
-                      {service.category}
+                      {service.name} {service.surname}
                     </Typography>
-                  </Box>
-                  
-                  {/* Service Description */}
-                  <Typography 
-                    sx={{ 
-                      fontSize: "0.85rem",
-                      color: "#555",
+                    
+                    {/* Rating Stars */}
+                    <Box sx={{ display: "flex", mb: 1.5 }}>
+                      {[...Array(5)].map((_, i) => (
+                        <StarIcon 
+                          key={i} 
+                          sx={{ 
+                            fontSize: 16, 
+                            color: i < service.rating ? '#FFD700' : '#e0e0e0',
+                            mr: 0.3
+                          }} 
+                        />
+                      ))}
+                    </Box>
+                    
+                    {/* Gender and Age */}
+                    <Box sx={{ 
+                      display: "flex", 
+                      alignItems: "center", 
                       mb: 1,
-                      lineHeight: 1.4
-                    }}
-                  >
-                    {service.service}
-                  </Typography>
-                </Paper>
+                      p: 1,
+                      borderRadius: "8px",
+                      bgcolor: alpha('#611463', 0.05),
+                      width: "fit-content"
+                    }}>
+                      <PersonIcon sx={{ fontSize: "0.9rem", color: "#611463", mr: 0.5 }} />
+                      <Typography sx={{ fontSize: { xs: "0.8rem", sm: "0.85rem" }, color: "#611463" }}>
+                        {service.gender}, {service.age} ປີ
+                      </Typography>
+                    </Box>
+                    
+                    {/* Location with icons */}
+                    <Grid container spacing={1} sx={{ mt: 1 }}>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          display: "flex", 
+                          alignItems: "center",
+                          p: 1,
+                          borderRadius: "8px",
+                          bgcolor: alpha('#f7931e', 0.05),
+                        }}>
+                          <HomeIcon sx={{ fontSize: "0.9rem", color: "#f7931e", mr: 0.5 }} />
+                          <Typography sx={{ fontSize: { xs: "0.8rem", sm: "0.85rem" }, color: "#666" }}>
+                            {service.village}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          display: "flex", 
+                          alignItems: "center",
+                          p: 1,
+                          borderRadius: "8px",
+                          bgcolor: alpha('#f7931e', 0.05),
+                        }}>
+                          <LocationCityIcon sx={{ fontSize: "0.9rem", color: "#f7931e", mr: 0.5 }} />
+                          <Typography sx={{ fontSize: { xs: "0.8rem", sm: "0.85rem" }, color: "#666" }}>
+                            {service.city}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                    
+                    {/* Vehicle Information - Only for vehicle-based services */}
+                    {vehicleService && (
+                      <Box sx={{
+                        mt: 2,
+                        p: 1.5,
+                        backgroundColor: "rgba(97, 20, 99, 0.05)",
+                        borderRadius: "8px",
+                        border: "1px dashed rgba(97, 20, 99, 0.2)",
+                        width: "100%"
+                      }}>
+                        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                          <DirectionsCarIcon sx={{ fontSize: '1rem', color: '#8a1c8d', mr: 0.7 }} />
+                          <Typography variant="body2" sx={{ fontSize: '0.9rem', color: '#611463', fontWeight: "600" }}>
+                            ຂໍ້ມູນພາຫະນະ
+                          </Typography>
+                        </Box>
+                        
+                        <Grid container spacing={1} sx={{ mt: 0.5 }}>
+                          <Grid item xs={6}>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <TimeToLeaveIcon sx={{ fontSize: '0.8rem', color: '#8a1c8d', mr: 0.5 }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#666' }}>
+                                {service.carBrand} {service.carModel}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <CalendarTodayIcon sx={{ fontSize: '0.8rem', color: '#8a1c8d', mr: 0.5 }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#666' }}>
+                                ປີ {service.carYear}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <BadgeIcon sx={{ fontSize: '0.8rem', color: '#8a1c8d', mr: 0.5 }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#666' }}>
+                                {service.licensePlate}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Chip 
+                              size="small"
+                              label={`ລະຫັດລົດ: ${service.carId}`}
+                              sx={{ 
+                                height: 22, 
+                                fontSize: '0.7rem',
+                                backgroundColor: 'rgba(97, 20, 99, 0.1)',
+                                color: '#611463',
+                              }} 
+                            />
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
                 
-                {/* Price Section */}
+                {/* Right Section: Service Info */}
                 <Box 
                   sx={{ 
-                    display: "flex", 
+                    width: isMobile ? "100%" : "40%",
+                    display: "flex",
                     flexDirection: "column",
                     alignItems: isMobile ? "flex-start" : "flex-end",
-                    width: "100%"
+                    justifyContent: "space-between",
+                    position: "relative",
                   }}
                 >
-                  <Typography 
-                    variant="body2" 
-                    sx={{ 
-                      color: "#666",
-                      mb: 0.5,
-                      fontSize: "0.75rem"
+                  {/* Status Chip */}
+                  <Box sx={{ 
+                    display: "flex", 
+                    justifyContent: isMobile ? "flex-start" : "flex-end",
+                    width: "100%",
+                    mb: 2
+                  }}>
+                    <Chip 
+                      label={service.status} 
+                      sx={{
+                        bgcolor: getStatusColor(service.status).bg,
+                        color: getStatusColor(service.status).color,
+                        fontWeight: "600",
+                        fontSize: "0.75rem",
+                        height: 28,
+                        px: 1,
+                        borderRadius: "8px"
+                      }}
+                    />
+                  </Box>
+                  
+                  {/* Service Card */}
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: "12px",
+                      bgcolor: "#fafafa",
+                      border: "1px solid #eee",
+                      width: "100%",
+                      mb: 2
                     }}
                   >
-                    ລາຄາທັງໝົດ
-                  </Typography>
-                  <Typography 
+                    {/* Service Category */}
+                    <Box sx={{ 
+                      display: "flex", 
+                      alignItems: "center", 
+                      mb: 1,
+                      justifyContent: isMobile ? "flex-start" : "flex-start"
+                    }}>
+                      {getServiceIcon(service.occupation)}
+                      <Typography 
+                        sx={{ 
+                          color: "#611463", 
+                          fontWeight: "600",
+                          fontSize: "0.95rem",
+                          ml: 1
+                        }}
+                      >
+                        {service.category}
+                      </Typography>
+                    </Box>
+                    
+                    {/* Service Description */}
+                    <Typography 
+                      sx={{ 
+                        fontSize: "0.85rem",
+                        color: "#555",
+                        mb: 1,
+                        lineHeight: 1.4
+                      }}
+                    >
+                      {service.service}
+                    </Typography>
+                  </Paper>
+                  
+                  {/* Price Section */}
+                  <Box 
                     sx={{ 
-                      color: "#f7931e", 
-                      fontWeight: "bold",
-                      fontSize: { xs: "1.2rem", sm: "1.3rem" },
-                      display: "flex",
-                      alignItems: "center"
+                      display: "flex", 
+                      flexDirection: "column",
+                      alignItems: isMobile ? "flex-start" : "flex-end",
+                      width: "100%"
                     }}
                   >
-                    {formatPrice(service.price)}
-                  </Typography>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        color: "#666",
+                        mb: 0.5,
+                        fontSize: "0.75rem"
+                      }}
+                    >
+                      ລາຄາທັງໝົດ
+                    </Typography>
+                    <Typography 
+                      sx={{ 
+                        color: "#f7931e", 
+                        fontWeight: "bold",
+                        fontSize: { xs: "1.2rem", sm: "1.3rem" },
+                        display: "flex",
+                        alignItems: "center"
+                      }}
+                    >
+                      {formatPrice(service.price)}
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
-            </Box>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </Container>
       
       {/* Load More Button */}

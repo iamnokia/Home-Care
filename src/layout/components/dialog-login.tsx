@@ -113,7 +113,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
                 textShadow: "1px 1px 3px rgba(0,0,0,0.2)"
               }}
             >
-              Welcome Back
+              ຍິນດີຕ້ອນຮັບອີກຄັ້ງ
             </Typography>
             <Typography 
               variant="body1" 
@@ -123,7 +123,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
                 mt: 1
               }}
             >
-              Log in to access your HomeCare account
+              ເຂົ້າສູ່ລະບົບເພື່ອເຂົ້າເຖິງບັນຊີ HomeCare ຂອງທ່ານ
             </Typography>
           </Box>
 
@@ -136,7 +136,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
           }}>
             <TextField
               fullWidth
-              label="Email Address"
+              label="ທີ່ຢູ່ອີເມລ"
               variant="outlined"
               type="email"
               value={email}
@@ -158,7 +158,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
 
             <TextField
               fullWidth
-              label="Password"
+              label="ລະຫັດຜ່ານ"
               type={showPassword ? "text" : "password"}
               variant="outlined"
               value={password}
@@ -212,18 +212,18 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
                 }
               }}
             >
-              Log In
+              ເຂົ້າສູ່ລະບົບ
             </Button>
 
             <Divider sx={{ my: 2 }}>
               <Typography variant="body2" color="text.secondary">
-                OR
+                ຫຼື
               </Typography>
             </Divider>
 
             <Box sx={{ display: "flex", justifyContent: "center" }}>
               <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                Don't have an account?&nbsp;
+                ທ່ານຍັງບໍ່ທັນມີບັນຊີເທື່ອແມ່ນບໍ່?&nbsp;
                 <Link
                   onClick={handleOpenRegister}
                   sx={{
@@ -237,7 +237,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
                     },
                   }}
                 >
-                  Sign up now
+                  ລົງທະບຽນຕອນນີ້
                 </Link>
               </Typography>
             </Box>

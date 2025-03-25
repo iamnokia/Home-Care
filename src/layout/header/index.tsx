@@ -32,15 +32,15 @@ import LoginDialog from "../components/dialog-login";
 
 // Modified pages array - removed LOGIN_PATH
 const pages = [
-  { to: HOME_PATH, label: "Home" },
-  { to: SERVICE_PATH, label: "Service" },
-  { to: HISTORY_PATH, label: "History" },
-  { to: CONTACT_US_PATH, label: "Contact Us" },
+  { to: HOME_PATH, label: "ໜ້າຫຼັກ" },
+  { to: SERVICE_PATH, label: "ການບໍລິການ" },
+  { to: HISTORY_PATH, label: "ປະຫວັດການບໍລິການ" },
+  { to: CONTACT_US_PATH, label: "ຕີດຕໍ່ພວກເຮົາ" },
 ];
 const settings = [
-  { to: SETTING_PATH, label: "Profile"}, // Fixed: Changed Label to label for consistency
-  { to: SETTING_PATH, label: "Setting"},
-  { to: "/", label: "Logout"}
+  { to: SETTING_PATH, label: "ຂໍ້ມູນບັນຊີ"}, // Fixed: Changed Label to label for consistency
+  { to: SETTING_PATH, label: "ຕັ້ງຄ່າ"},
+  { to: "/", label: "ອອກຈາກລະບົບ"}
 ];
 
 function ResponsiveAppBar() {
@@ -245,7 +245,7 @@ function ResponsiveAppBar() {
                     color="white"
                     fontSize="16px"
                   >
-                    Log in
+                    ເຂົ້າສູ່ລະບົບ
                   </Typography>
                 </MenuItem>
               </Menu>
@@ -378,7 +378,7 @@ function ResponsiveAppBar() {
                   },
                 }}
               >
-                Log in
+                ເຂົ້າສູ່ລະບົບ
               </Button>
               <Tooltip title="Open settings">
                 <IconButton 
@@ -479,7 +479,7 @@ function ResponsiveAppBar() {
             position: "relative"
           }}>
             <TextField
-              placeholder="Search..."
+              placeholder="ຄົ້ນຫາ"
               variant="standard"
               sx={{
                 bgcolor: "rgba(255, 255, 255, 0.97)",

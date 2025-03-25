@@ -97,7 +97,7 @@ const SettingsPage = () => {
                 return (
                     <Box>
                         <Typography variant="h6" fontWeight={600} color="#611463" sx={{ mb: 3 }}>
-                            Profile Information
+                            ຂໍ້ມູນບັນຊີ
                         </Typography>
                         <Grid container spacing={3}>
                             <Grid item xs={12} display="flex" justifyContent="center" mb={2}>
@@ -138,7 +138,7 @@ const SettingsPage = () => {
                             <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
-                                    label="First Name"
+                                    label="ຊື່ຂອງທ່ານ"
                                     variant="outlined"
                                     InputProps={{
                                         sx: { borderRadius: 2 }
@@ -148,7 +148,7 @@ const SettingsPage = () => {
                             <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
-                                    label="Last Name"
+                                    label="ນາມສະກຸນ"
                                     variant="outlined"
                                     InputProps={{
                                         sx: { borderRadius: 2 }
@@ -158,7 +158,7 @@ const SettingsPage = () => {
                             <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
-                                    label="Display Name"
+                                    label="ຊື່ບັນຊີ"
                                     variant="outlined"
                                     InputProps={{
                                         sx: { borderRadius: 2 }
@@ -168,7 +168,7 @@ const SettingsPage = () => {
                             <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
-                                    label="Phone Number"
+                                    label="ເບີໂທລະສັບ"
                                     variant="outlined"
                                     InputProps={{
                                         sx: { borderRadius: 2 },
@@ -183,7 +183,7 @@ const SettingsPage = () => {
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
-                                    label="Email Address"
+                                    label="ທີ່ຢູ່ອີເມລ"
                                     variant="outlined"
                                     InputProps={{
                                         sx: { borderRadius: 2 }
@@ -192,7 +192,7 @@ const SettingsPage = () => {
                             </Grid>
                             <Grid item xs={12}>
                                 <FormControl component="fieldset">
-                                    <Typography variant="subtitle1" sx={{ mb: 1 }}>Gender</Typography>
+                                    <Typography variant="subtitle1" sx={{ mb: 1 }}>ເພດ</Typography>
                                     <RadioGroup
                                         row
                                         value={settings.gender}
@@ -207,7 +207,7 @@ const SettingsPage = () => {
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
-                                    label="Address"
+                                    label="ທີ່ຢູ່"
                                     variant="outlined"
                                     InputProps={{
                                         sx: { borderRadius: 2 }
@@ -235,7 +235,7 @@ const SettingsPage = () => {
                                             }
                                         }}
                                     >
-                                        Save Changes
+                                        ບັນທຶກ
                                     </Button>
                                 </Box>
                             </Grid>
@@ -246,13 +246,13 @@ const SettingsPage = () => {
                 return (
                     <Box>
                         <Typography variant="h6" fontWeight={600} color="#611463" sx={{ mb: 3 }}>
-                            Security Settings
+                            ການຕັ້ງຄ່າຄວາມປອດໄພ
                         </Typography>
                         <Grid container spacing={3}>
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
-                                    label="Current Password"
+                                    label="ລະຫັດຜ່ານປັດຈຸບັນ"
                                     type={showPassword ? "text" : "password"}
                                     variant="outlined"
                                     InputProps={{
@@ -273,7 +273,7 @@ const SettingsPage = () => {
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
-                                    label="New Password"
+                                    label="ລະຫັດຜ່ານໃໝ່"
                                     type={showPassword ? "text" : "password"}
                                     variant="outlined"
                                     InputProps={{
@@ -294,7 +294,7 @@ const SettingsPage = () => {
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
-                                    label="Confirm New Password"
+                                    label="ຢືນຢັນລະຫັດຜ່ານໃໝ່"
                                     type={showPassword ? "text" : "password"}
                                     variant="outlined"
                                     InputProps={{
@@ -315,7 +315,7 @@ const SettingsPage = () => {
 
                             <Grid item xs={12}>
                                 <Typography variant="subtitle1" fontWeight={500} sx={{ mt: 1, mb: 2 }}>
-                                    Session Management
+                                    ການນຳໃຊ້
                                 </Typography>
                                 <Button
                                     variant="outlined"
@@ -326,7 +326,7 @@ const SettingsPage = () => {
                                         mr: 2
                                     }}
                                 >
-                                    Log Out All Devices
+                                    ອອກຈາກລະບົບ
                                 </Button>
                             </Grid>
                             <Grid item xs={12}>
@@ -349,7 +349,7 @@ const SettingsPage = () => {
                                             }
                                         }}
                                     >
-                                        Save Changes
+                                        ບັນທຶກ
                                     </Button>
                                 </Box>
                             </Grid>
@@ -360,14 +360,14 @@ const SettingsPage = () => {
                 return (
                     <Box>
                         <Typography variant="h6" fontWeight={600} color="#611463" sx={{ mb: 3 }}>
-                            Application Preferences
+                            ການປັບແຕ່ງສ່ວນໂຕ
                         </Typography>
                         <Grid container spacing={3}>
                             <Grid item xs={12}>
                                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                     <Box sx={{ display: "flex", alignItems: "center" }}>
                                         <DarkModeIcon sx={{ color: "#611463", mr: 2 }} />
-                                        <Typography variant="subtitle1">Dark Mode</Typography>
+                                        <Typography variant="subtitle1">ໂໝດກາງຄືນ</Typography>
                                     </Box>
                                     <Switch
                                         checked={settings.darkMode}
@@ -389,7 +389,7 @@ const SettingsPage = () => {
                             <Grid item xs={12}>
                                 <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                                     <LanguageIcon sx={{ color: "#611463", mr: 2 }} />
-                                    <Typography variant="subtitle1">Language</Typography>
+                                    <Typography variant="subtitle1">ພາສາ</Typography>
                                 </Box>
                                 <Select
                                     fullWidth
@@ -398,9 +398,9 @@ const SettingsPage = () => {
                                     sx={{ borderRadius: 2 }}
                                 >
                                     <MenuItem value="english">English</MenuItem>
-                                    <MenuItem value="thai">Thai</MenuItem>
-                                    <MenuItem value="lao">Lao</MenuItem>
-                                    <MenuItem value="chinese">Chinese</MenuItem>
+                                    <MenuItem value="thai">ไทย</MenuItem>
+                                    <MenuItem value="ລາວ">Lao</MenuItem>
+                                    <MenuItem value="chinese">漢語</MenuItem>
                                 </Select>
                             </Grid>
 
@@ -425,7 +425,7 @@ const SettingsPage = () => {
                                             }
                                         }}
                                     >
-                                        Save Changes
+                                        ບັນທຶກ
                                     </Button>
                                 </Box>
                             </Grid>
@@ -530,7 +530,7 @@ const SettingsPage = () => {
                                     }}
                                 />
                                 <Typography variant="h6" fontWeight={600}>
-                                    Settings Menu
+                                    ເມນູການຕັ້ງຄ່າ
                                 </Typography>
                             </Box>
 
@@ -567,19 +567,19 @@ const SettingsPage = () => {
                                     <Tab
                                         icon={<AccountCircleIcon />}
                                         iconPosition="start"
-                                        label="Profile"
+                                        label="ຂໍ້ມູນບັນຊີ"
                                         sx={{ borderLeft: tabValue === 0 ? "3px solid #f7931e" : "none" }}
                                     />
                                     <Tab
                                         icon={<SecurityIcon />}
                                         iconPosition="start"
-                                        label="Security"
+                                        label="ຄວາມປອດໄພ"
                                         sx={{ borderLeft: tabValue === 1 ? "3px solid #f7931e" : "none" }}
                                     />
                                     <Tab
                                         icon={<ColorLensIcon />}
                                         iconPosition="start"
-                                        label="Preferences"
+                                        label="ປັບແຕ່ງ"
                                         sx={{ borderLeft: tabValue === 2 ? "3px solid #f7931e" : "none" }}
                                     />
 
@@ -590,7 +590,7 @@ const SettingsPage = () => {
 
                             <Box sx={{ p: 3 }}>
                                 <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                    Need help with settings?
+                                    ສອບຖາມຂໍ້ມູນເພີ່ມເຕີມ
                                 </Typography>
                                 <Button
                                     variant="outlined"
@@ -607,7 +607,7 @@ const SettingsPage = () => {
                                         }
                                     }}
                                 >
-                                    Support The Center
+                                    ຕິດຕໍ່ພວກເຮົາ
                                 </Button>
                             </Box>
                         </Card>
