@@ -384,7 +384,6 @@ const ServiceDetailsPage = () => {
           </Box>
         </Box>
 
-        Service details section
         <Box sx={{ px: { xs: 2, sm: 3 }, width: "100%" }}>
           {/* Car details section - Only shown for moving and bathroom categories */}
           {isCarService && (

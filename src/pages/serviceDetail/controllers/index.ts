@@ -17,7 +17,7 @@ const useMainController = () => {
     try {
       setLoading(true);
       // Using the id parameter in the URL
-      const res = await axios.get(`https://homecare-pro.onrender.com/employees/employees/${id}`, {
+      const res = await axios.get(`https://homecare-pro.onrender.com/employees/${id}`, {
         headers: {
           'Content-Type': 'application/json'
         }
