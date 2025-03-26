@@ -1,5 +1,6 @@
 import React, { useState, useRef, ChangeEvent } from "react";
 import {
+  Autocomplete, 
   Box,
   Container,
   Typography,
@@ -49,8 +50,26 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import LinkIcon from "@mui/icons-material/Link";
 import LaunchIcon from "@mui/icons-material/Launch";
 import ErrorIcon from "@mui/icons-material/Error";
+import HouseOutlinedIcon from '@mui/icons-material/HouseOutlined';
+import LocationCityOutlinedIcon from '@mui/icons-material/LocationCityOutlined';
 import { LocationCity } from "@mui/icons-material";
 import { LOCATION_PATH } from "../../../routes/path";
+
+
+const districts: string[] = [
+  'ຈັນທະບູລີ',
+  'ສີສັດຕະນາກ',
+  'ໄຊເສດຖາ',
+  'ຫາດຊາຍຟອງ',
+  'ນາຊາຍທອງ',
+  'ສີໂຄດຕະບອງ',
+  'ໄຊທານີ'
+];
+// Define types for errors
+interface ErrorState {
+  placeName?: string;
+  [key: string]: string | undefined;
+}
 
 // Define TypeScript interfaces
 interface LocationType {
@@ -711,7 +730,123 @@ const LocationDetailPage: React.FC = () => {
                 ),
               }}
             />
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontSize: "1rem",
+                mb: 1.5,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <HouseOutlinedIcon sx={{ mr: 1, color: "#611463" }} />
+              ບ້ານ *
+            </Typography>
+
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="ປ້ອນຊື່ບ້ານເຊັ່ນ: ດົງໂດກ, ໜອງພະຍາ,..."
+              value={placeName}
+              onChange={(e) => {
+                setPlaceName(e.target.value);
+                if (e.target.value.trim()) {
+                  setErrors({ ...errors, placeName: undefined });
+                }
+              }}
+              error={!!errors.placeName}
+              helperText={errors.placeName}
+              required
+              sx={{
+                mb: 3,
+                backgroundColor: "#fff",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  transition: "all 0.2s",
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: alpha("#611463", 0.5),
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#611463",
+                    borderWidth: 2,
+                  },
+                },
+              }}
+              InputProps={{
+                sx: { fontSize: "0.95rem", py: 0.5 },
+                endAdornment: errors.placeName && (
+                  <InputAdornment position="end">
+                    <ErrorIcon color="error" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontSize: "1rem",
+                mb: 1.5,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <LocationCityOutlinedIcon sx={{ mr: 1, color: "#611463" }} /> ເມືອງ *
+      </Typography>
+      
+      <Autocomplete
+        fullWidth
+        options={districts}
+        value={placeName}
+        onChange={(event: React.SyntheticEvent, newValue: string | null) => {
+          setPlaceName(newValue);
+          if (newValue) {
+            setErrors({ ...errors, placeName: undefined });
+          }
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            variant="outlined"
+            placeholder="ເລືອກເມືອງ"
+            error={!!errors.placeName}
+            helperText={errors.placeName}
+            required
+            sx={{
+              mb: 3,
+              backgroundColor: "#fff",
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+                transition: "all 0.2s",
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: alpha("#611463", 0.5),
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#611463",
+                  borderWidth: 2,
+                },
+              },
+            }}
+            InputProps={{
+              ...params.InputProps,
+              sx: { fontSize: "0.95rem", py: 0.5 },
+              endAdornment: (
+                <>
+                  {errors.placeName && (
+                    <InputAdornment position="end">
+                      <ErrorIcon color="error" />
+                    </InputAdornment>
+                  )}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            }}
+          />
+        )}
+      />
           </Box>
+          
 
           {/* Phone number section */}
           <Box sx={{ mb: 4 }}>

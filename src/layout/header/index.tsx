@@ -1,4 +1,3 @@
-import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -29,64 +28,86 @@ import {
   Fade,
 } from "@mui/material";
 import LoginDialog from "../components/dialog-login";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../../store";
+import { logout } from "../../store/authenticationSlice";
+
+// Page interface
+interface PageItem {
+  to: string;
+  label: string;
+}
+
+// Setting item interface
+interface SettingItem {
+  to: string;
+  label: string;
+  onClick?: () => void;
+}
 
 // Modified pages array - removed LOGIN_PATH
-const pages = [
+const pages: PageItem[] = [
   { to: HOME_PATH, label: "ໜ້າຫຼັກ" },
   { to: SERVICE_PATH, label: "ການບໍລິການ" },
   { to: HISTORY_PATH, label: "ປະຫວັດການບໍລິການ" },
   { to: CONTACT_US_PATH, label: "ຕີດຕໍ່ພວກເຮົາ" },
 ];
-const settings = [
-  { to: SETTING_PATH, label: "ຂໍ້ມູນບັນຊີ"}, // Fixed: Changed Label to label for consistency
-  { to: SETTING_PATH, label: "ຕັ້ງຄ່າ"},
-  { to: "/", label: "ອອກຈາກລະບົບ"}
-];
 
 function ResponsiveAppBar() {
-  const [currentPath, setCurrentPath] = useState<string>(location.pathname);
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
-    null
-  );
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
-    null
-  );
-  // New state for login dialog
-  const [loginDialogOpen, setLoginDialogOpen] = React.useState(false);
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
+  // Redux state and dispatch
+  const dispatch = useDispatch();
+  const { loggedIn } = useSelector((state: RootState) => state.auth);
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+  const [currentPath, setCurrentPath] = useState<string>(location.pathname);
+  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+  // State for login dialog
+  const [loginDialogOpen, setLoginDialogOpen] = useState<boolean>(false);
+
+  // Function for opening login dialog - defined before use
+  const handleOpenLoginDialog = (): void => {
+    setLoginDialogOpen(true);
+  };
+
+  const handleLogout = (): void => {
+    handleCloseUserMenu();
+    dispatch(logout());
+  };
+
+
+  const settings: SettingItem[] = loggedIn
+  ? [
+      { to: SETTING_PATH, label: "ຂໍ້ມູນບັນຊີ" },
+      { to: SETTING_PATH, label: "ຕັ້ງຄ່າ" },
+      { 
+        to: "#", 
+        label: "ອອກຈາກລະບົບ",
+        onClick: handleLogout
+      }
+    ]
+  : [
+      { to: "#", label: "ເຂົ້າສູ່ລະບົບ", onClick: handleOpenLoginDialog }
+    ];
+
+  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorElNav(event.currentTarget);
   };
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+  
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorElUser(event.currentTarget);
   };
 
-  const handleCloseNavMenu = () => {
+  const handleCloseNavMenu = (): void => {
     setAnchorElNav(null);
   };
 
-  const handleCloseUserMenu = () => {
+  const handleCloseUserMenu = (): void => {
     setAnchorElUser(null);
   };
 
   // Login dialog handlers
-  const handleOpenLoginDialog = () => {
-    setLoginDialogOpen(true);
-  };
-
-  const handleCloseLoginDialog = () => {
+  const handleCloseLoginDialog = (): void => {
     setLoginDialogOpen(false);
-    setEmail("");
-    setPassword("");
-  };
-
-  const handleLogin = () => {
-    // Handle login logic here
-    console.log("Logging in with:", email, password);
-    // After successful login, close dialog
-    handleCloseLoginDialog();
   };
 
   useEffect(() => {
@@ -196,7 +217,7 @@ function ResponsiveAppBar() {
                   }
                 }}
               >
-                {pages.map((page, index) => (
+                {pages.map((page) => (
                   <MenuItem 
                     key={page.to} 
                     onClick={handleCloseNavMenu}
@@ -223,31 +244,33 @@ function ResponsiveAppBar() {
                     </Typography>
                   </MenuItem>
                 ))}
-                <MenuItem
-                  onClick={() => {
-                    handleCloseNavMenu();
-                    handleOpenLoginDialog();
-                  }}
-                  sx={{
-                    py: 2,
-                    my: 1,
-                    mx: 2,
-                    backgroundColor: 'rgba(247, 147, 30, 0.9)',
-                    borderRadius: '8px',
-                    '&:hover': {
-                      backgroundColor: 'rgba(247, 147, 30, 1)',
-                    }
-                  }}
-                >
-                  <Typography 
-                    textAlign="center" 
-                    fontWeight="bold" 
-                    color="white"
-                    fontSize="16px"
+                {!loggedIn && (
+                  <MenuItem
+                    onClick={() => {
+                      handleCloseNavMenu();
+                      handleOpenLoginDialog();
+                    }}
+                    sx={{
+                      py: 2,
+                      my: 1,
+                      mx: 2,
+                      backgroundColor: 'rgba(247, 147, 30, 0.9)',
+                      borderRadius: '8px',
+                      '&:hover': {
+                        backgroundColor: 'rgba(247, 147, 30, 1)',
+                      }
+                    }}
                   >
-                    ເຂົ້າສູ່ລະບົບ
-                  </Typography>
-                </MenuItem>
+                    <Typography 
+                      textAlign="center" 
+                      fontWeight="bold" 
+                      color="white"
+                      fontSize="16px"
+                    >
+                      ເຂົ້າສູ່ລະບົບ
+                    </Typography>
+                  </MenuItem>
+                )}
               </Menu>
             </Box>
             <Typography
@@ -342,44 +365,47 @@ function ResponsiveAppBar() {
             </Box>
 
             <Box sx={{ flexGrow: 0, display: 'flex', gap: 3, alignItems: 'center' }}>
-              <Button
-                onClick={handleOpenLoginDialog}
-                variant="contained"
-                sx={{
-                  background: 'linear-gradient(45deg, #f7931e 0%, #ffb347 100%)',
-                  color: "white",
-                  "&:hover": {
-                    background: 'linear-gradient(45deg, #f7931e 30%, #ffb347 90%)',
-                    transform: "translateY(-3px)",
-                    boxShadow: '0 8px 16px rgba(247, 147, 30, 0.4)'
-                  },
-                  textTransform: "none",
-                  borderRadius: "30px",
-                  padding: "10px 28px",
-                  fontSize: "17px",
-                  fontWeight: "bold",
-                  letterSpacing: "0.5px",
-                  transition: "all 0.4s ease",
-                  boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
-                  position: "relative",
-                  overflow: "hidden",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: "-100%",
-                    width: "100%",
-                    height: "100%",
-                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
+              {/* Conditional rendering based on login status */}
+              {!loggedIn ? (
+                <Button
+                  onClick={handleOpenLoginDialog}
+                  variant="contained"
+                  sx={{
+                    background: 'linear-gradient(45deg, #f7931e 0%, #ffb347 100%)',
+                    color: "white",
+                    "&:hover": {
+                      background: 'linear-gradient(45deg, #f7931e 30%, #ffb347 90%)',
+                      transform: "translateY(-3px)",
+                      boxShadow: '0 8px 16px rgba(247, 147, 30, 0.4)'
+                    },
+                    textTransform: "none",
+                    borderRadius: "30px",
+                    padding: "10px 28px",
+                    fontSize: "17px",
+                    fontWeight: "bold",
+                    letterSpacing: "0.5px",
                     transition: "all 0.4s ease",
-                  },
-                  "&:hover::before": {
-                    left: "100%",
-                  },
-                }}
-              >
-                ເຂົ້າສູ່ລະບົບ
-              </Button>
+                    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
+                    position: "relative",
+                    overflow: "hidden",
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      top: 0,
+                      left: "-100%",
+                      width: "100%",
+                      height: "100%",
+                      background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
+                      transition: "all 0.4s ease",
+                    },
+                    "&:hover::before": {
+                      left: "100%",
+                    },
+                  }}
+                >
+                  ເຂົ້າສູ່ລະບົບ
+                </Button>
+              ) : null}
               <Tooltip title="Open settings">
                 <IconButton 
                   onClick={handleOpenUserMenu} 

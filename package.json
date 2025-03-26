@@ -24,8 +24,10 @@
     "react-dom": "^18.3.1",
     "react-redux": "^9.2.0",
     "react-router-dom": "^6.30.0",
-    "sweetalert2": "^11.14.0",
-    "swiper": "^11.2.5"
+    "redux": "^5.0.1",
+    "sweetalert2": "^11.17.2",
+    "swiper": "^11.2.5",
+    "toolkit": "^1.5.4"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

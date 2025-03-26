@@ -2,8 +2,8 @@ import { Box } from "@mui/material";
 import "./App.css";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { clearUserData, loginSuccess } from "./store/slices/userSlice";import LocationDetailPage from "./pages/loDetail/components/lomore";
 import RoutesComponent from "./routes";
+import { loginSuccess } from "./store/authenticationSlice";
 
 
 function App() {
@@ -33,7 +33,7 @@ function App() {
         await handleTokenRefresh();
       } else {
         console.error("Login failed:", err);
-        dispatch(clearUserData());
+        // dispatch(clearUserData());
       }
     }
   };
@@ -68,7 +68,7 @@ function App() {
       dispatch(loginSuccess(resGetData.data));
     } catch (err) {
       console.error("Token refresh failed:", err);
-      dispatch(clearUserData());
+      // dispatch(clearUserData());
     }
   };
 

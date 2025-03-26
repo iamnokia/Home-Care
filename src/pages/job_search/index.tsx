@@ -16,7 +16,7 @@ const JobSearchPage = () => {
         <Services/>
       </Box>
       <Box sx={{ maxWidth: 1300, width: "100%" }}></Box>
-    a</Box>
+    </Box>
   );
 };
 

@@ -100,7 +100,7 @@ const Services = () => {
     // Parse address to extract village and city
     // Assuming address format is "Village, City"
     const addressParts = (employee.address || '').split(',');
-    const village = addressParts[0]?.trim() || 'N/A';
+    const address = addressParts[0]?.trim() || 'N/A';
     const city = addressParts[1]?.trim() || 'N/A';
 
     // Determine if this is a car-based service (moving or bathroom)
@@ -117,7 +117,7 @@ const Services = () => {
       category: employee.cat_name, // Use cat_name directly
       gender: employee.gender,
       age: 30, // This is missing from your model, you might want to add it
-      village: village,
+      address: address,
       city: city,
       categoryType: categoryType,
       // Car details for moving and bathroom categories

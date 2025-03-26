@@ -1,3 +1,6 @@
+import { Gender } from "../enums/gender";
+import { Status } from "../enums/status";
+
 export interface EmployeeModel {
     id: string,
     first_name: string ,
@@ -6,13 +9,14 @@ export interface EmployeeModel {
     tel: string,
     password: string,
     address: string,
-    gender: string,
+    city: string,
+    gender: Gender,
     cv: string, 
     avatar: string,
     cat_id: string,
     cat_name: string;
     price: string,
-    status: string,
+    status: Status,
     created_at: string,
     updated_at: string 
 }

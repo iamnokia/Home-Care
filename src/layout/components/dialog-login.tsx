@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,8 +9,6 @@ import {
   Box,
   Link,
   InputAdornment,
-  Paper,
-  Avatar,
   Divider,
   useTheme,
   useMediaQuery,
@@ -18,15 +16,18 @@ import {
 import { 
   Visibility, 
   VisibilityOff, 
-  PersonOutline, 
   LockOutlined,  
   Email, 
 } from "@mui/icons-material";
 import RegisterDialog from "./dialog-signup";
+import axios from "axios";
+import Swal from "sweetalert2";
+import { useDispatch } from "react-redux";
 
 // Assuming you have this logo image in your assets folder
 // If not, replace with your actual logo path
 import LOGO_HOMECARE from "../../assets/icons/HomeCareLogo.png";
+import { loginFailed, loginSuccess } from "../../store/authenticationSlice";
 
 interface LoginDialogProps {
   open: boolean;
@@ -34,14 +35,18 @@ interface LoginDialogProps {
 }
 
 const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  
+  // Use refs instead of state for form inputs
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
 
   const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const dispatch = useDispatch();
 
   const handleOpenRegister = () => {
     onClose();
@@ -56,11 +61,78 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
     setShowPassword(!showPassword);
   };
 
-  const handleLogin = () => {
-    // Handle login logic here
-    console.log("Logging in with:", email, password);
-    // After successful login, close dialog
+  const handleLogin = async () => {
+
     onClose();
+    // Get values from refs
+    const email = emailRef.current?.value || "";
+    const password = passwordRef.current?.value || "";
+    
+    // Validate inputs
+    if (!email || !password) {
+      Swal.fire({
+        title: "ກະລຸນາກວດສອບຂໍ້ມູນ",
+        text: "ກະລຸນາປ້ອນອີເມວ ແລະ ລະຫັດຜ່ານ",
+        icon: "warning",
+        confirmButtonText: "ຕົກລົງ",
+        confirmButtonColor: "#611463"
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // Make API call to login endpoint
+      const response = await axios.post("https://homecare-pro.onrender.com/users/sign_in", {
+        email,
+        password
+      });
+      
+      // Check if login was successful
+      if (response.data) {
+        console.log("Login response:", response.data);
+        
+        // Dispatch login success action with user data
+        // We're assuming the API returns the user data directly
+        dispatch(loginSuccess(response.data));
+        
+        // Show success message
+        Swal.fire({
+          title: "ສຳເລັດ!",
+          text: "ເຂົ້າສູ່ລະບົບສຳເລັດແລ້ວ",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false
+        });
+        
+      } else {
+        throw new Error("Invalid response from server");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      
+      // Dispatch login failed action
+      dispatch(loginFailed());
+      
+      // Show error message
+      Swal.fire({
+        title: "ເຂົ້າສູ່ລະບົບບໍ່ສຳເລັດ",
+        text: "ອີເມວ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ",
+        icon: "error",
+        confirmButtonText: "ລອງໃໝ່",
+        confirmButtonColor: "#611463"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle Enter key press for login
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      handleLogin();
+    }
   };
 
   return (
@@ -139,8 +211,8 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
               label="ທີ່ຢູ່ອີເມລ"
               variant="outlined"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              inputRef={emailRef}
+              onKeyPress={handleKeyPress}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -161,8 +233,8 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
               label="ລະຫັດຜ່ານ"
               type={showPassword ? "text" : "password"}
               variant="outlined"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              inputRef={passwordRef}
+              onKeyPress={handleKeyPress}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -189,12 +261,11 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
               }}
             />
 
-
-
             <Button
               variant="contained"
               fullWidth
               onClick={handleLogin}
+              disabled={isLoading}
               sx={{
                 mt: 1,
                 py: 1.5,
@@ -212,7 +283,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
                 }
               }}
             >
-              ເຂົ້າສູ່ລະບົບ
+              {isLoading ? "ກຳລັງດຳເນີນການ..." : "ເຂົ້າສູ່ລະບົບ"}
             </Button>
 
             <Divider sx={{ my: 2 }}>

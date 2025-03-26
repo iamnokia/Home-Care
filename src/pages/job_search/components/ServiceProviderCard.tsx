@@ -9,18 +9,39 @@ import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import BadgeIcon from '@mui/icons-material/Badge';
 import { useNavigate } from "react-router-dom";
 
-const ServiceProviderCard = ({ 
+interface ServiceProviderCardProps {
+  id: string | number;
+  name?: string;
+  surname?: string;
+  location?: string;
+  price?: number;
+  imageUrl?: string;
+  rating?: number;
+  category?: string;
+  gender?: string;
+  age?: number;
+  address?: string;
+  city?: string;
+  categoryType?: string;
+  // Car details - for moving and bathroom categories
+  carId?: string;
+  carBrand?: string;
+  carModel?: string;
+  licensePlate?: string;
+  carImageUrl?: string;
+}
+
+const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({ 
   id, 
   name, 
   surname, 
-  location, 
   price, 
   imageUrl, 
   rating = 5, 
   category, 
   gender, 
   age, 
-  village = 'N/A', 
+  address, 
   city = 'N/A', 
   categoryType,
   // Car details - new props for moving and bathroom categories
@@ -36,18 +57,18 @@ const ServiceProviderCard = ({
   const isCarService = categoryType === 'moving' || categoryType === 'bathroom';
 
   // Format price to have commas
-  const formatPrice = (price) => {
-    if (!price && price !== 0) return "N/A";
+  const formatPrice = (price?: number): string => {
+    if (price === undefined || price === null) return "N/A";
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " KIP";
   };
 
   // Handle click to navigate to service detail page
-  const handleCardClick = () => {
+  const handleCardClick = (): void => {
     navigate(`/service-detail/${id}`);
   };
 
   // Ensure rating is a valid number between 0-5
-  const safeRating = Number.isInteger(rating) && rating >= 0 && rating <= 5 ? rating : 5;
+  const safeRating: number = (Number.isInteger(rating) && rating >= 0 && rating <= 5) ? rating : 5;
 
   return (
     <Box
@@ -73,8 +94,8 @@ const ServiceProviderCard = ({
           src={isCarService ? (carImageUrl || '/api/placeholder/400/300') : (imageUrl || '/api/placeholder/400/300')} 
           alt={isCarService ? `${carBrand || 'Car'} ${carModel || ''}` : (name || 'Service Provider')} 
           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-          onError={(e) => {
-            e.target.src = '/api/placeholder/400/300';
+          onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+            e.currentTarget.src = '/api/placeholder/400/300';
           }}
         />
       </Box>
@@ -150,7 +171,7 @@ const ServiceProviderCard = ({
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 2, mb: { xs: 0.5, sm: 0 }, minWidth: '45%' }}>
             <HomeIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-            <Typography variant="body2" color="text.secondary">{village}</Typography>
+            <Typography variant="body2" color="text.secondary">{address}</Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <LocationCityIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
@@ -163,7 +184,7 @@ const ServiceProviderCard = ({
         <Typography variant="h6" color="warning.main" sx={{ mb: 2 }}>{formatPrice(price)}</Typography>
         <Button
           variant="contained"
-          onClick={(e) => {
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             navigate(`/service-detail/${id}`);
           }}
