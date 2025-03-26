@@ -23,7 +23,7 @@ interface ServiceProviderCardProps {
   address?: string;
   city?: string;
   categoryType?: string;
-  // Car details - for moving and bathroom categories
+  // Car details - for moving category only
   carId?: string;
   carBrand?: string;
   carModel?: string;
@@ -42,19 +42,18 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
   gender, 
   age, 
   address, 
-  city = 'N/A', 
+  city, 
   categoryType,
-  // Car details - new props for moving and bathroom categories
+  // Car details - now only for moving category
   carId,
   carBrand,
   carModel,
   licensePlate,
-  carImageUrl
 }) => {
   const navigate = useNavigate();
 
-  // Determine if this is a car-based service (moving or bathroom)
-  const isCarService = categoryType === 'moving' || categoryType === 'bathroom';
+  // Only show car details for moving services (category 5)
+  const isMovingService = categoryType === 'moving';
 
   // Format price to have commas
   const formatPrice = (price?: number): string => {
@@ -62,12 +61,10 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " KIP";
   };
 
-  // Handle click to navigate to service detail page
   const handleCardClick = (): void => {
     navigate(`/service-detail/${id}`);
   };
 
-  // Ensure rating is a valid number between 0-5
   const safeRating: number = (Number.isInteger(rating) && rating >= 0 && rating <= 5) ? rating : 5;
 
   return (
@@ -89,14 +86,10 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
       onClick={handleCardClick}
     >
       <Box sx={{ height: 200, overflow: 'hidden' }}>
-        {/* Show car image for moving/bathroom services, otherwise show employee image */}
         <img 
-          src={isCarService ? (carImageUrl || '/api/placeholder/400/300') : (imageUrl || '/api/placeholder/400/300')} 
-          alt={isCarService ? `${carBrand || 'Car'} ${carModel || ''}` : (name || 'Service Provider')} 
+          src={imageUrl || '/api/placeholder/400/300'} 
+          alt={name || 'Service Provider'} 
           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-          onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-            e.currentTarget.src = '/api/placeholder/400/300';
-          }}
         />
       </Box>
       <Box sx={{ p: 2 }}>
@@ -123,8 +116,8 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
           </Box>
         </Box>
 
-        {/* Car details for moving/bathroom services */}
-        {isCarService && (
+        {/* Car details - ONLY for moving services */}
+        {isMovingService && (
           <Box 
             sx={{
               mb: 2,
@@ -171,11 +164,11 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 2, mb: { xs: 0.5, sm: 0 }, minWidth: '45%' }}>
             <HomeIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-            <Typography variant="body2" color="text.secondary">{address}</Typography>
+            <Typography variant="body2" color="text.secondary">{address || 'N/A'}</Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <LocationCityIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-            <Typography variant="body2" color="text.secondary">{city}</Typography>
+            <Typography variant="body2" color="text.secondary">{city || 'N/A'}</Typography>
           </Box>
         </Box>
 

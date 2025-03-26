@@ -54,8 +54,6 @@ const carData = {
     licensePlate: "ກຂ 1234",
     carYear: "2020",
     carImage: "/api/placeholder/400/300",
-    carFeatures: ["ບັນທຸກໄດ້ 1,000 ກິໂລ", "ຫ້ອງເຢັນ", "ມີຄົນຊ່ວຍຍົກ 2 ຄົນ"],
-    carDescription: "ລົດບັນທຸກໃໝ່ປີ 2020, ບຳລຸງຮັກສາຢ່າງດີ, ສະອາດ ແລະ ພ້ອມໃຫ້ບໍລິການຂົນສົ່ງ. ມີປະກັນໄພຄຸ້ມຄອງ 100% ຕໍ່ຄວາມເສຍຫາຍ.",
   },
   bathroom: {
     carId: "B002",
@@ -64,8 +62,6 @@ const carData = {
     licensePlate: "ຄງ 5678",
     carYear: "2019",
     carImage: "/api/placeholder/400/300",
-    carFeatures: ["ອຸປະກອນຄົບຊຸດ", "ແກ້ໄຂໄດ້ທຸກບັນຫາ", "ບໍລິການ 24/7"],
-    carDescription: "ລົດບັນທຸກເຄື່ອງມືຄົບຊຸດ, ພ້ອມຊ່ວຍເຫຼືອທຸກບັນຫາກ່ຽວກັບຫ້ອງນ້ຳ ແລະ ລະບົບທໍ່ຂອງທ່ານ. ໃຫ້ບໍລິການທັງກາງເວັນ ແລະ ກາງຄືນ.",
   }
 };
 
@@ -77,6 +73,7 @@ const mockReviews = [
 ];
 
 const ServiceDetailsPage = () => {
+  const {id} = useParams();
   const { data, loading, handleNaVigate } = useMainController();
   const employee = data[0]; // Get the first employee from the data array
   const theme = useTheme();
@@ -181,7 +178,7 @@ const ServiceDetailsPage = () => {
   }, [employee]);
 
   // Determine if this is a car-based service
-  const isCarService = serviceData.categoryType === 'moving' || serviceData.categoryType === 'bathroom';
+  const isCarService = serviceData.categoryType === 'moving';
 
   // Calculate container width based on screen size
   const getContainerWidth = () => {
@@ -518,15 +515,6 @@ const ServiceDetailsPage = () => {
                       </Grid>
 
                       <Divider sx={{ my: 2 }} />
-
-                      {/* Car features */}
-                      <Typography sx={{ fontSize: fontSize.text, fontWeight: "medium", mb: 1, color: "#611463" }}>
-                        ຄຸນສົມບັດພິເສດ:
-                      </Typography>
-                      {/* Car description */}
-                      <Typography sx={{ fontSize: fontSize.text, lineHeight: 1.8, color: "#424242" }}>
-                        {serviceData.carDescription}
-                      </Typography>
                     </CardContent>
                   </Card>
                 </Box>
@@ -706,7 +694,7 @@ const ServiceDetailsPage = () => {
                 },
                 transition: "all 0.3s ease",
               }}
-              onClick={() => navigate(LOCATION_PATH)}
+              onClick={() => navigate(`/Location/${id}`)}
             >
               ເລືອກບໍລິການ
             </Button>

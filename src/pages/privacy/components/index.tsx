@@ -32,7 +32,7 @@ const TermsAndPrivacyPage = () => {
   };
 
   // Last updated date
-  const lastUpdated = "March 15, 2025";
+  const lastUpdated = "15 ມີນາ 2025";
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -48,7 +48,7 @@ const TermsAndPrivacyPage = () => {
           mb: 4
         }}
       >
-        Legal Information
+        ຂໍ້ມູນການກວດກາ
       </Typography>
 
       <Typography 
@@ -60,7 +60,7 @@ const TermsAndPrivacyPage = () => {
           mx: 'auto'
         }}
       >
-        Please read these terms carefully. They contain important information about your rights and obligations.
+        ກະລຸນາອ່ານຂໍ້ກຳນົດເຫຼົ່ານີ້ຢ່າງລະມັດລະວັງ. ມັນມີຂໍ້ມູນສຳຄັນກ່ຽວກັບສິດ ແລະ ພັນທະຂອງທ່ານ.
       </Typography>
 
       {/* Tab Navigation */}
@@ -98,14 +98,14 @@ const TermsAndPrivacyPage = () => {
           <Tab 
             icon={<GavelIcon />} 
             iconPosition="start"
-            label="Terms of Use" 
+            label="ເງື່ອນໄຂການນຳໃຊ້" 
             id="tab-0" 
             aria-controls="tabpanel-0" 
           />
           <Tab 
             icon={<SecurityIcon />} 
             iconPosition="start"
-            label="Privacy Policy" 
+            label="ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ" 
             id="tab-1" 
             aria-controls="tabpanel-1" 
           />
@@ -120,117 +120,117 @@ const TermsAndPrivacyPage = () => {
           sx={{ p: { xs: 3, md: 5 } }}
         >
           <Typography variant="h5" component="h2" gutterBottom sx={{ color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            Terms of Use
+            ເງື່ອນໄຂການນຳໃຊ້
           </Typography>
           
           <Typography variant="body2" color="text.secondary" paragraph sx={{ mb: 3 }}>
-            Last Updated: {lastUpdated}
+            ອັບເດດລ່າສຸດ: {lastUpdated}
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            1. Acceptance of Terms
+            1. ການຍອມຮັບເງື່ອນໄຂ
           </Typography>
           <Typography variant="body1" paragraph>
-            By accessing and using HomeCare's services ("Services"), you agree to be bound by these Terms of Use ("Terms"). If you do not agree to these Terms, please do not use our Services.
+            ໂດຍການເຂົ້າເຖິງ ແລະ ນຳໃຊ້ບໍລິການຂອງ HomeCare ("ບໍລິການ"), ທ່ານຕົກລົງທີ່ຈະຖືກຜູກມັດດ້ວຍເງື່ອນໄຂການນຳໃຊ້ເຫຼົ່ານີ້ ("ເງື່ອນໄຂ"). ຖ້າທ່ານບໍ່ເຫັນດີຕາມເງື່ອນໄຂເຫຼົ່ານີ້, ກະລຸນາຢ່າໃຊ້ບໍລິການຂອງພວກເຮົາ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            2. Description of Services
+            2. ຄຳອະທິບາຍບໍລິການ
           </Typography>
           <Typography variant="body1" paragraph>
-            HomeCare provides home maintenance services including but not limited to plumbing, electrical work, cleaning, gardening, and general repairs. Our services are available through our website, mobile applications, and direct customer service.
+            HomeCare ສະໜອງບໍລິການດູແລບ້ານລວມທັງແຕ່ບໍ່ຈຳກັດເຖິງການປະຕິບັດງານທຳຄວາມສະອາດ, ສ້ອມແປງໄຟຟ້າ, ສ້ອມແປງນ້ຳປະປາ, ສ້ອມແປງແອ, ແກ່ເຄື່ອງ, ດູດສ້ວມ, ແລະ ກຳຈັດປວກ. ບໍລິການຂອງພວກເຮົາມີຢູ່ໃນເວັບໄຊທ໌, ແອັບຯໂທລະສັບມືຖື, ແລະ ບໍລິການລູກຄ້າໂດຍກົງ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            3. User Accounts
+            3. ບັນຊີຜູ້ໃຊ້
           </Typography>
           <Typography variant="body1" paragraph>
-            3.1. Account Creation: To use certain features of our Services, you may need to create an account. You agree to provide accurate, current, and complete information during the registration process.
+            3.1. ການສ້າງບັນຊີ: ເພື່ອໃຊ້ບາງຄຸນສົມບັດຂອງບໍລິການຂອງພວກເຮົາ, ທ່ານອາດຈຳເປັນຕ້ອງສ້າງບັນຊີ. ທ່ານຕົກລົງທີ່ຈະໃຫ້ຂໍ້ມູນທີ່ຖືກຕ້ອງ, ປະຈຸບັນ, ແລະ ຄົບຖ້ວນໃນລະຫວ່າງການລົງທະບຽນ.
           </Typography>
           <Typography variant="body1" paragraph>
-            3.2. Account Security: You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. Please notify HomeCare immediately of any unauthorized use of your account.
+            3.2. ຄວາມປອດໄພຂອງບັນຊີ: ທ່ານມີຄວາມຮັບຜິດຊອບໃນການຮັກສາຄວາມລັບຂອງຂໍ້ມູນບັນຊີຂອງທ່ານ ແລະ ກິດຈະກຳທັງໝົດທີ່ເກີດຂຶ້ນພາຍໃຕ້ບັນຊີຂອງທ່ານ. ກະລຸນາແຈ້ງໃຫ້ HomeCare ຮູ້ທັນທີຖ້າມີການນຳໃຊ້ບັນຊີຂອງທ່ານໂດຍບໍ່ໄດ້ຮັບອະນຸຍາດ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            4. Service Booking and Cancellation
+            4. ການຈອງ ແລະ ຍົກເລີກບໍລິການ
           </Typography>
           <Typography variant="body1" paragraph>
-            4.1. Booking: When you book a service, you agree to provide accurate information about your service needs and location.
+            4.1. ການຈອງ: ເມື່ອທ່ານຈອງບໍລິການ, ທ່ານຕົກລົງທີ່ຈະໃຫ້ຂໍ້ມູນທີ່ຖືກຕ້ອງກ່ຽວກັບຄວາມຕ້ອງການບໍລິການ ແລະ ສະຖານທີ່ຂອງທ່ານ.
           </Typography>
           <Typography variant="body1" paragraph>
-            4.2. Cancellation: Cancellation policies vary by service. Please refer to the specific service details or contact our customer service for information.
+            4.2. ການຍົກເລີກ: ນະໂຍບາຍການຍົກເລີກແຕກຕ່າງກັນໄປຕາມບໍລິການ. ກະລຸນາອ້າງອີງເຖິງລາຍລະອຽດບໍລິການສະເພາະ ຫຼື ຕິດຕໍ່ບໍລິການລູກຄ້າຂອງພວກເຮົາເພື່ອຂໍ້ມູນ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            5. Payment Terms
+            5. ເງື່ອນໄຂການຈ່າຍເງິນ
           </Typography>
           <Typography variant="body1" paragraph>
-            5.1. Fees: Service fees will be clearly displayed before confirmation. Additional charges may apply for services outside the standard scope.
+            5.1. ຄ່າບໍລິການ: ຄ່າບໍລິການຈະຖືກສະແດງຢ່າງຊັດເຈນກ່ອນການຢືນຢັນ. ອາດຈະມີຄ່າບໍລິການເພີ່ມເຕີມສຳລັບບໍລິການນອກເວທີມາດຕະຖານ.
           </Typography>
           <Typography variant="body1" paragraph>
-            5.2. Payment Methods: We accept various payment methods as indicated on our platform.
+            5.2. ວິທີການຈ່າຍເງິນ: ພວກເຮົາຍອມຮັບວິທີການຈ່າຍເງິນຕ່າງໆດັ່ງທີ່ລະບຸໄວ້ໃນເວທີຂອງພວກເຮົາ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            6. User Conduct
+            6. ພຶດຕິກຳຂອງຜູ້ໃຊ້
           </Typography>
           <Typography variant="body1" paragraph>
-            You agree not to use our Services to:
+            ທ່ານຕົກລົງທີ່ຈະບໍ່ໃຊ້ບໍລິການຂອງພວກເຮົາເພື່ອ:
           </Typography>
           <Typography variant="body1" component="ul" sx={{ pl: 2 }}>
-            <li>Violate any applicable laws or regulations</li>
-            <li>Impersonate any person or entity</li>
-            <li>Harass, threaten, or harm our staff or other users</li>
-            <li>Interfere with the proper functioning of our Services</li>
+            <li>ລະເມີດກົດໝາຍ ຫຼື ລະບຽບການທີ່ນຳໃຊ້ໄດ້</li>
+            <li>ປອມແປງບຸກຄົນ ຫຼື ການຈັດຕັ້ງໃດໆ</li>
+            <li>ລົບກວນ, ຂົ່ມຂູ່, ຫຼື ເຮັດອັນຕະລາຍພະນັກງານ ຫຼື ຜູ້ໃຊ້ອື່ນໆຂອງພວກເຮົາ</li>
+            <li>ລົບກວນການເຮັດວຽກປົກກະຕິຂອງບໍລິການຂອງພວກເຮົາ</li>
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            7. Intellectual Property
+            7. ຊັບສິນທາງປັນຍາ
           </Typography>
           <Typography variant="body1" paragraph>
-            All content, features, and functionality of our Services, including but not limited to text, graphics, logos, and software, are owned by HomeCare and are protected by copyright, trademark, and other intellectual property laws.
+            ເນື້ອຫາ, ຄຸນສົມບັດ, ແລະ ການເຮັດວຽກຂອງບໍລິການຂອງພວກເຮົາທັງໝົດ, ລວມແຕ່ບໍ່ຈຳກັດເຖິງຂໍ້ຄວາມ, ຮູບພາບ, ໂລໂກ້, ແລະ ຊອບແວ, ເປັນຊັບສິນຂອງ HomeCare ແລະ ໄດ້ຮັບການປົກປ້ອງໂດຍກົດໝາຍລິຂະສິດ, ເຄື່ອງໝາຍການຄ້າ, ແລະ ກົດໝາຍຊັບສິນທາງປັນຍາອື່ນໆ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            8. Disclaimer of Warranties
+            8. ການປະຕິເສດການຮັບປະກັນ
           </Typography>
           <Typography variant="body1" paragraph>
-            Our Services are provided "as is" without any warranties, expressed or implied. HomeCare does not warrant that our Services will be error-free or uninterrupted.
+            ບໍລິການຂອງພວກເຮົາໄດ້ຖືກສະໜອງ "ດັ່ງທີ່ເປັນຢູ່" ໂດຍບໍ່ມີການຮັບປະກັນໃດໆ, ທີ່ໄດ້ລະບຸ ຫຼື ເປັນນິດ. HomeCare ບໍ່ໄດ້ຮັບປະກັນວ່າບໍລິການຂອງພວກເຮົາຈະບໍ່ມີຂໍ້ຜິດພາດ ຫຼື ບໍ່ມີການຂັດຂວາງ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            9. Limitation of Liability
+            9. ຂໍ້ຈຳກັດຄວາມຮັບຜິດຊອບ
           </Typography>
           <Typography variant="body1" paragraph>
-            HomeCare shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use our Services.
+            HomeCare ຈະບໍ່ຮັບຜິດຊອບຕໍ່ຄວາມເສຍຫາຍໃດໆທີ່ເກີດຈາກທາງອ້ອມ, ບັງເອີນ, ສະເພາະ, ເສຍຫາຍຕາມລຳດັບ, ຫຼື ຄວາມເສຍຫາຍທີ່ເປັນການລົງໂທດທີ່ເກີດຈາກການນຳໃຊ້ ຫຼື ຄວາມບໍ່ສາມາດໃນການນຳໃຊ້ບໍລິການຂອງພວກເຮົາ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            10. Indemnification
+            10. ການຊົດໃຊ້
           </Typography>
           <Typography variant="body1" paragraph>
-            You agree to indemnify and hold HomeCare harmless from any claims, damages, liabilities, and expenses arising from your use of our Services or violation of these Terms.
+            ທ່ານຕົກລົງທີ່ຈະຊົດໃຊ້ ແລະ ປົກປ້ອງ HomeCare ຈາກຄຳຮ້ອງທຸກ, ຄວາມເສຍຫາຍ, ຄວາມຮັບຜິດຊອບ, ແລະ ຄ່າໃຊ້ຈ່າຍທີ່ເກີດຈາກການນຳໃຊ້ບໍລິການຂອງພວກເຮົາ ຫຼື ການລະເມີດເງື່ອນໄຂເຫຼົ່ານີ້.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            11. Modification of Terms
+            11. ການປັບປຸງເງື່ອນໄຂ
           </Typography>
           <Typography variant="body1" paragraph>
-            HomeCare reserves the right to modify these Terms at any time. We will provide notice of significant changes. Your continued use of our Services after such modifications constitutes your acceptance of the updated Terms.
+            HomeCare ສະຫງວນສິດໃນການແກ້ໄຂເງື່ອນໄຂເຫຼົ່ານີ້ໄດ້ທຸກເວລາ. ພວກເຮົາຈະໃຫ້ການແຈ້ງເຕືອນກ່ຽວກັບການປ່ຽນແປງທີ່ສຳຄັນ. ການນຳໃຊ້ບໍລິການຂອງທ່ານຕໍ່ໄປຫຼັງຈາກການແກ້ໄຂດັ່ງກ່າວຈະເປັນການຍອມຮັບເງື່ອນໄຂທີ່ປັບປຸງແລ້ວ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            12. Governing Law
+            12. ກົດໝາຍທີ່ນຳໃຊ້
           </Typography>
           <Typography variant="body1" paragraph>
-            These Terms shall be governed by and construed in accordance with the laws of Laos, without regard to its conflict of law principles.
+            ເງື່ອນໄຂເຫຼົ່ານີ້ຈະຖືກຄຸ້ມຄອງ ແລະ ຕີຄວາມໝາຍຕາມກົດໝາຍຂອງ ສປປ ລາວ, ໂດຍບໍ່ພິຈາລະນາຫຼັກການຂອງກົດໝາຍຂໍ້ຂັດແຍ່ງ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            13. Contact Information
+            13. ຂໍ້ມູນຕິດຕໍ່
           </Typography>
           <Typography variant="body1" paragraph>
-            If you have any questions about these Terms, please contact us at homecaredolaebn@gmail.com or +856-20-5482-1624.
+            ຖ້າທ່ານມີຄຳຖາມກ່ຽວກັບເງື່ອນໄຂເຫຼົ່ານີ້, ກະລຸນາຕິດຕໍ່ພວກເຮົາທີ່ homecaredolaebn@gmail.com ຫຼື +856-20-5482-1624.
           </Typography>
         </Box>
 
@@ -243,128 +243,128 @@ const TermsAndPrivacyPage = () => {
           sx={{ p: { xs: 3, md: 5 } }}
         >
           <Typography variant="h5" component="h2" gutterBottom sx={{ color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            Privacy Policy
+            ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ
           </Typography>
           
           <Typography variant="body2" color="text.secondary" paragraph sx={{ mb: 3 }}>
-            Last Updated: {lastUpdated}
+            ອັບເດດລ່າສຸດ: {lastUpdated}
           </Typography>
 
           <Typography variant="body1" paragraph>
-            At HomeCare, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our services.
+            ທີ່ HomeCare, ພວກເຮົາເອົາໃຈໃສ່ເຖິງຄວາມເປັນສ່ວນຕົວຂອງທ່ານ. ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວນີ້ອະທິບາຍວິທີທີ່ພວກເຮົາເກັບກຳ, ນຳໃຊ້, ເປີດເຜີຍ, ແລະ ປົກປ້ອງຂໍ້ມູນຂອງທ່ານໃນເວລາທີ່ທ່ານໃຊ້ບໍລິການຂອງພວກເຮົາ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            1. Information We Collect
+            1. ຂໍ້ມູນທີ່ພວກເຮົາເກັບກຳ
           </Typography>
           <Typography variant="body1" paragraph>
-            1.1. Personal Information: We may collect personal information such as:
+            1.1. ຂໍ້ມູນສ່ວນຕົວ: ພວກເຮົາອາດຈະເກັບກຳຂໍ້ມູນສ່ວນຕົວເຊັ່ນ:
           </Typography>
           <Typography variant="body1" component="ul" sx={{ pl: 2 }}>
-            <li>Name, email address, phone number, and home address</li>
-            <li>Payment information</li>
-            <li>Service preferences and history</li>
-            <li>Communication with our customer service</li>
+            <li>ຊື່, ທີ່ຢູ່ອີເມວ, ເບີໂທລະສັບ, ແລະ ທີ່ຢູ່ບ້ານ</li>
+            <li>ຂໍ້ມູນການຈ່າຍເງິນ</li>
+            <li>ຄວາມມັກ ແລະ ປະຫວັດການໃຊ້ບໍລິການ</li>
+            <li>ການສື່ສານກັບບໍລິການລູກຄ້າຂອງພວກເຮົາ</li>
           </Typography>
           <Typography variant="body1" paragraph>
-            1.2. Automatically Collected Information: When you use our Services, we may automatically collect:
+            1.2. ຂໍ້ມູນທີ່ເກັບກຳໂດຍອັດຕະໂນມັດ: ເມື່ອທ່ານໃຊ້ບໍລິການຂອງພວກເຮົາ, ພວກເຮົາອາດຈະເກັບກຳຂໍ້ມູນໂດຍອັດຕະໂນມັດ:
           </Typography>
           <Typography variant="body1" component="ul" sx={{ pl: 2 }}>
-            <li>Device information (e.g., IP address, browser type)</li>
-            <li>Usage data (e.g., pages visited, time spent)</li>
-            <li>Location data (with your consent)</li>
+            <li>ຂໍ້ມູນອຸປະກອນ (ເຊັ່ນ: ທີ່ຢູ່ IP, ປະເພດບຣາວເຊີ)</li>
+            <li>ຂໍ້ມູນການໃຊ້ງານ (ເຊັ່ນ: ໜ້າທີ່ໄດ້ເຂົ້າເບິ່ງ, ເວລາທີ່ໃຊ້)</li>
+            <li>ຂໍ້ມູນສະຖານທີ່ (ດ້ວຍຄວາມຍິນຍອມຂອງທ່ານ)</li>
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            2. How We Use Your Information
+            2. ວິທີທີ່ພວກເຮົາໃຊ້ຂໍ້ມູນຂອງທ່ານ
           </Typography>
           <Typography variant="body1" paragraph>
-            We use your information for purposes including:
+            ພວກເຮົາໃຊ້ຂໍ້ມູນຂອງທ່ານເພື່ອຈຸດປະສົງດັ່ງຕໍ່ໄປນີ້:
           </Typography>
           <Typography variant="body1" component="ul" sx={{ pl: 2 }}>
-            <li>Providing and improving our Services</li>
-            <li>Processing payments and transactions</li>
-            <li>Communicating with you about services, promotions, and updates</li>
-            <li>Analyzing usage patterns to enhance user experience</li>
-            <li>Complying with legal obligations</li>
+            <li>ການສະໜອງ ແລະ ປັບປຸງບໍລິການຂອງພວກເຮົາ</li>
+            <li>ການຈັດການການຈ່າຍເງິນ ແລະ ທຸລະກຳ</li>
+            <li>ການສື່ສານກັບທ່ານກ່ຽວກັບບໍລິການ, ການສົ່ງເສີມ, ແລະ ການອັບເດດ</li>
+            <li>ການວິເຄາະຮູບແບບການໃຊ້ງານເພື່ອປັບປຸງປະສົບການຂອງຜູ້ໃຊ້</li>
+            <li>ການປະຕິບັດຕາມພັນທະທາງກົດໝາຍ</li>
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            3. Information Sharing and Disclosure
+            3. ການແບ່ງປັນ ແລະ ເປີດເຜີຍຂໍ້ມູນ
           </Typography>
           <Typography variant="body1" paragraph>
-            3.1. Service Providers: We may share your information with third-party service providers who help us deliver our Services.
+            3.1. ຜູ້ສະໜອງບໍລິການ: ພວກເຮົາອາດຈະແບ່ງປັນຂໍ້ມູນຂອງທ່ານກັບຜູ້ສະໜອງບໍລິການພາກສ່ວນທີສາມທີ່ຊ່ວຍພວກເຮົາຈັດສົ່ງບໍລິການຂອງພວກເຮົາ.
           </Typography>
           <Typography variant="body1" paragraph>
-            3.2. Legal Requirements: We may disclose your information if required by law or in response to valid requests by public authorities.
+            3.2. ຄວາມຕ້ອງການທາງກົດໝາຍ: ພວກເຮົາອາດຈະເປີດເຜີຍຂໍ້ມູນຂອງທ່ານຖ້າຕ້ອງການໂດຍກົດໝາຍ ຫຼື ໃນການຕອບສະໜອງຄຳຮ້ອງຂໍທີ່ຖືກຕ້ອງຈາກອຳນາດການປົກຄອງ.
           </Typography>
           <Typography variant="body1" paragraph>
-            3.3. Business Transfers: In the event of a merger, acquisition, or sale of assets, your information may be transferred as a business asset.
+            3.3. ການໂອນທຸລະກິດ: ໃນກໍລະນີທີ່ມີການລວມທຸລະກິດ, ການຊື້, ຫຼື ການຂາຍຊັບສິນ, ຂໍ້ມູນຂອງທ່ານອາດຈະຖືກໂອນເປັນຊັບສິນທຸລະກິດ.
           </Typography>
           <Typography variant="body1" paragraph>
-            3.4. With Your Consent: We may share your information in other ways with your explicit consent.
+            3.4. ດ້ວຍຄວາມຍິນຍອມຂອງທ່ານ: ພວກເຮົາອາດຈະແບ່ງປັນຂໍ້ມູນຂອງທ່ານໃນວິທີອື່ນໆດ້ວຍຄວາມຍິນຍອມຢ່າງຊັດເຈນຈາກທ່ານ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            4. Data Security
+            4. ຄວາມປອດໄພຂອງຂໍ້ມູນ
           </Typography>
           <Typography variant="body1" paragraph>
-            We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.
+            ພວກເຮົາຈັດຕັ້ງມາດຕະການທາງດ້ານເຕັກນິກ ແລະ ການຈັດຕັ້ງທີ່ເໝາະສົມເພື່ອປົກປ້ອງຂໍ້ມູນສ່ວນຕົວຂອງທ່ານຈາກການເຂົ້າເຖິງ, ການປ່ຽນແປງ, ການເປີດເຜີຍ, ຫຼື ການທຳລາຍທີ່ບໍ່ໄດ້ຮັບອະນຸຍາດ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            5. Your Rights and Choices
+            5. ສິດ ແລະ ທາງເລືອກຂອງທ່ານ
           </Typography>
           <Typography variant="body1" paragraph>
-            Depending on your location, you may have the right to:
+            ຂຶ້ນກັບສະຖານທີ່ຂອງທ່ານ, ທ່ານອາດຈະມີສິດທີ່ຈະ:
           </Typography>
           <Typography variant="body1" component="ul" sx={{ pl: 2 }}>
-            <li>Access and receive a copy of your personal information</li>
-            <li>Rectify inaccurate or incomplete information</li>
-            <li>Request deletion of your personal information</li>
-            <li>Restrict or object to certain processing of your information</li>
-            <li>Data portability</li>
-            <li>Withdraw consent at any time (where processing is based on consent)</li>
+            <li>ເຂົ້າເຖິງ ແລະ ໄດ້ຮັບສຳເນົາຂໍ້ມູນສ່ວນຕົວຂອງທ່ານ</li>
+            <li>ແກ້ໄຂຂໍ້ມູນທີ່ບໍ່ຖືກຕ້ອງ ຫຼື ບໍ່ຄົບຖ້ວນ</li>
+            <li>ຮ້ອງຂໍລົບລ້າງຂໍ້ມູນສ່ວນຕົວຂອງທ່ານ</li>
+            <li>ຈຳກັດ ຫຼື ຄັດຄ້ານການຈັດການຂໍ້ມູນບາງຢ່າງຂອງທ່ານ</li>
+            <li>ການໂອນຂໍ້ມູນ</li>
+            <li>ຖອນຄວາມຍິນຍອມໄດ້ທຸກເວລາ (ໃນກໍລະນີທີ່ການຈັດການແມ່ນອີງໃສ່ຄວາມຍິນຍອມ)</li>
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            6. Cookies and Similar Technologies
+            6. ຄຸກກີ ແລະ ເຕັກໂນໂລຢີທີ່ຄ້າຍຄືກັນ
           </Typography>
           <Typography variant="body1" paragraph>
-            We use cookies and similar technologies to enhance your experience, analyze usage, and collect information about visitors to our websites. You can control cookies through your browser settings.
+            ພວກເຮົາໃຊ້ຄຸກກີ ແລະ ເຕັກໂນໂລຢີທີ່ຄ້າຍຄືກັນເພື່ອປັບປຸງປະສົບການຂອງທ່ານ, ວິເຄາະການນຳໃຊ້, ແລະ ເກັບກຳຂໍ້ມູນກ່ຽວກັບຜູ້ເຂົ້າເບິ່ງເວັບໄຊທ໌ຂອງພວກເຮົາ. ທ່ານສາມາດຄວບຄຸມຄຸກກີໂດຍຜ່ານການຕັ້ງຄ່າບຣາວເຊີຂອງທ່ານ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            7. Children's Privacy
+            7. ຄວາມເປັນສ່ວນຕົວຂອງເດັກນ້ອຍ
           </Typography>
           <Typography variant="body1" paragraph>
-            Our Services are not intended for individuals under the age of 18. We do not knowingly collect personal information from children under 18.
+            ບໍລິການຂອງພວກເຮົາບໍ່ໄດ້ມີເຈດຈຳນົງສຳລັບບຸກຄົນທີ່ມີອາຍຸຕໍ່າກວ່າ 18 ປີ. ພວກເຮົາບໍ່ໄດ້ເກັບກຳຂໍ້ມູນສ່ວນຕົວຈາກເດັກນ້ອຍທີ່ມີອາຍຸຕໍ່າກວ່າ 18 ປີ.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            8. International Data Transfers
+            8. ການໂອນຂໍ້ມູນຂ້າມປະເທດ
           </Typography>
           <Typography variant="body1" paragraph>
-            Your information may be transferred to, and processed in, countries other than the country in which you reside. These countries may have different data protection laws than your country of residence.
+            ຂໍ້ມູນຂອງທ່ານອາດຈະຖືກໂອນໄປ ແລະ ດຳເນີນການໃນປະເທດອື່ນນອກຈາກປະເທດທີ່ທ່ານອາໄສຢູ່. ປະເທດເຫຼົ່ານີ້ອາດຈະມີກົດໝາຍການປົກປ້ອງຂໍ້ມູນທີ່ແຕກຕ່າງຈາກປະເທດທີ່ທ່ານອາໄສຢູ່.
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            9. Changes to This Privacy Policy
+            9. ການປ່ຽນແປງນະໂຍບາຍຄວາມເປັນສ່ວນຕົວນີ້
           </Typography>
           <Typography variant="body1" paragraph>
-            We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date.
+            ພວກເຮົາອາດຈະປັບປຸງນະໂຍບາຍຄວາມເປັນສ່ວນຕົວຂອງພວກເຮົາເປັນຄັ້ງຄາວ. ພວກເຮົາຈະແຈ້ງໃຫ້ທ່ານຮູ້ກ່ຽວກັບການປ່ຽນແປງໂດຍການລົງນະໂຍບາຍຄວາມເປັນສ່ວນຕົວໃໝ່ໃນໜ້ານີ້ ແລະ ອັບເດດວັນທີ "ອັບເດດລ່າສຸດ".
           </Typography>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 4, color: PRIMARY_PURPLE, fontWeight: 600 }}>
-            10. Contact Us
+            10. ຕິດຕໍ່ພວກເຮົາ
           </Typography>
           <Typography variant="body1" paragraph>
-            If you have any questions about this Privacy Policy, please contact us at:
+            ຖ້າທ່ານມີຄຳຖາມກ່ຽວກັບນະໂຍບາຍຄວາມເປັນສ່ວນຕົວນີ້, ກະລຸນາຕິດຕໍ່ພວກເຮົາທີ່:
           </Typography>
           <Typography variant="body1" paragraph>
-            Email: homecaredolaebn@gmail.com<br />
-            Phone: +856-20-5482-1624<br />
-            Address: Vientiane, Laos
+            ອີເມວ: homecaredolaebn@gmail.com<br />
+            ໂທລະສັບ: +856-20-5482-1624<br />
+            ທີ່ຢູ່: ນະຄອນຫຼວງວຽງຈັນ, ລາວ
           </Typography>
         </Box>
       </Paper>
@@ -380,10 +380,10 @@ const TermsAndPrivacyPage = () => {
         }}
       >
         <Typography variant="h6" gutterBottom sx={{ color: PRIMARY_PURPLE }}>
-          Have Questions About Our Policies?
+          ມີຄຳຖາມກ່ຽວກັບນະໂຍບາຍຂອງພວກເຮົາແມ່ນບໍ່?
         </Typography>
         <Typography variant="body1" paragraph>
-          Our customer support team is here to help clarify any questions you might have.
+          ທີມງານສະຫນັບສະຫນູນລູກຄ້າຂອງພວກເຮົາພ້ອມທີ່ຈະຊ່ວຍແກ້ໄຂຄຳຖາມໃດໆທີ່ທ່ານອາດຈະມີ.
         </Typography>
         <Box 
           component="a" 
@@ -406,7 +406,7 @@ const TermsAndPrivacyPage = () => {
             transition: 'all 0.3s'
           }}
         >
-          Contact Support
+          ສອບຖາມຂໍ້ມູນເພີ່ມເຕີມ
         </Box>
       </Box>
     </Container>

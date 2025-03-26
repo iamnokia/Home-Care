@@ -29,7 +29,6 @@ import FeedbackIcon from '@mui/icons-material/Feedback';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { PAYMENT_PATH, SERVICE_STATUS_PATH } from "../../../routes/path";
-// No need for jsPDF import anymore, using html2canvas dynamically
 
 // Font size constants
 const fontSize = {
@@ -61,8 +60,7 @@ const billingData = {
   customerName: "ອຳມະລິນ ອຸນາລົມ",
   serviceType: "ທຳຄວາມສະອາດ",
   servicePrice: "500,000 ກີບ",
-  discount: "50,000 ກີບ",
-  totalPrice: "450,000 ກີບ",
+  totalPrice: "500,000 ກີບ",
 };
 
 const CommentPage = () => {
@@ -310,24 +308,6 @@ const CommentPage = () => {
       priceRow1.appendChild(priceValue1);
       priceSummaryCard.appendChild(priceRow1);
 
-      const priceRow2 = document.createElement('div');
-      priceRow2.style.display = 'flex';
-      priceRow2.style.justifyContent = 'space-between';
-      priceRow2.style.margin = '12px 0';
-      priceRow2.style.fontSize = '15px';
-
-      const priceLabel2 = document.createElement('div');
-      priceLabel2.textContent = 'ສ່ວນຫຼຸດ';
-      priceLabel2.style.color = '#666';
-
-      const priceValue2 = document.createElement('div');
-      priceValue2.textContent = '50,000 ກີບ';
-      priceValue2.style.color = '#d32f2f';
-
-      priceRow2.appendChild(priceLabel2);
-      priceRow2.appendChild(priceValue2);
-      priceSummaryCard.appendChild(priceRow2);
-
       // Add divider
       const divider = document.createElement('div');
       divider.style.height = '1px';
@@ -347,7 +327,7 @@ const CommentPage = () => {
       totalLabel.textContent = 'ລາຄາລວມ';
 
       const totalValue = document.createElement('div');
-      totalValue.textContent = '450,000 ກີບ';
+      totalValue.textContent = '500,000 ກີບ';
       totalValue.style.color = '#611463';
 
       totalRow.appendChild(totalLabel);
@@ -759,25 +739,6 @@ const CommentPage = () => {
                   </Box>
 
                   <Box sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mb: 1.5,
-                    p: 1.2,
-                    borderRadius: 2,
-                    backgroundColor: "rgba(244, 67, 54, 0.05)",
-                    "&:hover": {
-                      backgroundColor: "rgba(244, 67, 54, 0.08)"
-                    }
-                  }}>
-                    <Typography sx={{ fontSize: fontSize.text, color: "text.secondary" }}>
-                      ສ່ວນຫຼຸດ
-                    </Typography>
-                    <Typography sx={{ fontSize: fontSize.text, color: "#d32f2f" }}>
-                      - 50,000 ກີບ
-                    </Typography>
-                  </Box>
-
-                  <Box sx={{
                     height: "1px",
                     background: "linear-gradient(to right, rgba(97,20,99,0.05), rgba(97,20,99,0.15), rgba(97,20,99,0.05))",
                     my: 2
@@ -803,7 +764,7 @@ const CommentPage = () => {
                       borderRadius: 1.5,
                       boxShadow: "0 2px 8px rgba(97, 20, 99, 0.1)"
                     }}>
-                      450,000 ກີບ
+                      500,000 ກີບ
                     </Typography>
                   </Box>
                 </CardContent>
@@ -1040,7 +1001,7 @@ const CommentPage = () => {
                   background: "linear-gradient(135deg, #4a0d4c 0%, #7b1fa2 100%)",
                 },
               }}
-              onClick={() => window.location.href = "/"}
+              onClick={handleCommentSubmit}
             >
               ສົ່ງຄຳເຫັນ
             </Button>

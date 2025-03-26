@@ -21,7 +21,6 @@ import {
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import PersonIcon from "@mui/icons-material/Person";
 import CategoryIcon from "@mui/icons-material/Category";
 import HomeIcon from "@mui/icons-material/Home";
@@ -77,48 +76,22 @@ const PaymentPage = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   
   // State variables
-  const [discountAmount, setDiscountAmount] = useState(0);
-  const [discountPercentage, setDiscountPercentage] = useState(0);
-  const [totalBeforeDiscount, setTotalBeforeDiscount] = useState(0);
-  const [finalTotal, setFinalTotal] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [change, setChange] = useState(0);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState("success");
-  const [appliedCode, setAppliedCode] = useState("");
   const [paymentError, setPaymentError] = useState("");
 
-  // Get discount information from location state
+  // Calculate total when component loads
   useEffect(() => {
-    // Mock discount from previous page
-    const discountFromPreviousPage = location.state?.discount || {
-      code: "WELCOME10",
-      percentage: 10
-    };
+    const total = serviceItems.reduce((sum, item) => sum + item.price, 0);
+    setTotalAmount(total);
     
-    if (discountFromPreviousPage.code) {
-      setAppliedCode(discountFromPreviousPage.code);
-      setDiscountPercentage(discountFromPreviousPage.percentage);
-    }
-  }, [location]);
-
-  // Calculate totals when component loads or discount changes
-  useEffect(() => {
-    const subtotal = serviceItems.reduce((sum, item) => sum + item.price, 0);
-    setTotalBeforeDiscount(subtotal);
-    
-    // Calculate discount amount based on percentage
-    const discount = Math.round((subtotal * discountPercentage) / 100);
-    setDiscountAmount(discount);
-    
-    // Calculate final total
-    const total = subtotal - discount;
-    setFinalTotal(total);
-    
-    // Set initial payment amount to match final total
+    // Set initial payment amount to match total
     setPaymentAmount(total.toString());
-  }, [discountPercentage]);
+  }, []);
 
   // Format currency
   const formatCurrency = (value) => {
@@ -135,11 +108,11 @@ const PaymentPage = () => {
       
       // Calculate change
       const enteredAmount = parseInt(value) || 0;
-      const changeAmount = enteredAmount - finalTotal;
+      const changeAmount = enteredAmount - totalAmount;
       setChange(changeAmount >= 0 ? changeAmount : 0);
       
       // Validate payment amount
-      if (enteredAmount < finalTotal) {
+      if (enteredAmount < totalAmount) {
         setPaymentError("ຈຳນວນເງິນບໍ່ພຽງພໍ");
       } else {
         setPaymentError("");
@@ -156,7 +129,7 @@ const PaymentPage = () => {
   const handlePaymentSubmit = () => {
     const enteredAmount = parseInt(paymentAmount) || 0;
     
-    if (enteredAmount < finalTotal) {
+    if (enteredAmount < totalAmount) {
       setAlertMessage("ກະລຸນາໃສ່ຈຳນວນເງິນໃຫ້ພຽງພໍ!");
       setAlertSeverity("error");
       setAlertOpen(true);
@@ -420,57 +393,6 @@ const PaymentPage = () => {
                     </Card>
                   ))}
                 </Box>
-                
-                {/* Applied Discount */}
-                {appliedCode && (
-                  <Box sx={{ mb: 3 }}>
-                    <Typography
-                      variant="subtitle1"
-                      color={colors.primary}
-                      sx={{ 
-                        fontSize: fontSize.subtitle, 
-                        mb: 2, 
-                        fontWeight: "bold",
-                        display: "flex",
-                        alignItems: "center",
-                        borderBottom: `2px solid ${colors.accent}`,
-                        paddingBottom: 1
-                      }}
-                    >
-                      <LocalOfferIcon sx={{ mr: 1, fontSize: "1.2rem" }} />
-                      ສ່ວນຫຼຸດທີ່ນຳໃຊ້
-                    </Typography>
-                    
-                    <Card
-                      sx={{
-                        mb: 2,
-                        borderRadius: 2,
-                        boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
-                        background: "linear-gradient(135deg, #f0f7ff 0%, #e6f3ff 100%)",
-                        border: "1px dashed #3f51b5",
-                      }}
-                    >
-                      <CardContent sx={{ display: "flex", alignItems: "center", p: 2 }}>
-                        <LocalOfferIcon sx={{ color: colors.primary, mr: 2, transform: "rotate(-45deg)" }} />
-                        <Box flexGrow={1}>
-                          <Typography sx={{ fontSize: fontSize.text, fontWeight: "medium" }}>
-                            ລະຫັດສ່ວນຫຼຸດ: <strong>{appliedCode}</strong>
-                          </Typography>
-                        </Box>
-                        <Chip 
-                          label={`${discountPercentage}%`} 
-                          color="primary" 
-                          size="small"
-                          sx={{ 
-                            backgroundColor: colors.primary,
-                            fontWeight: "bold",
-                            px: 0.5
-                          }} 
-                        />
-                      </CardContent>
-                    </Card>
-                  </Box>
-                )}
               </Box>
             </Grid>
             
@@ -530,34 +452,7 @@ const PaymentPage = () => {
                     </Typography>
                     
                     <Box sx={{ p: 1 }}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={8}>
-                          <Typography sx={{ fontSize: fontSize.text }}>
-                            ລາຄາ:
-                          </Typography>
-                        </Grid>
-                        <Grid item xs={4} sx={{ textAlign: "right" }}>
-                          <Typography sx={{ fontSize: fontSize.text, fontWeight: "medium" }}>
-                            {formatCurrency(totalBeforeDiscount)}
-                          </Typography>
-                        </Grid>
-                        
-                        <Grid item xs={8}>
-                          <Typography sx={{ fontSize: fontSize.text, display: "flex", alignItems: "center" }}>
-                            <LocalOfferIcon sx={{ fontSize: "0.9rem", mr: 0.5, color: colors.error }} />
-                            ສ່ວນຫຼຸດ ({discountPercentage}%):
-                          </Typography>
-                        </Grid>
-                        <Grid item xs={4} sx={{ textAlign: "right" }}>
-                          <Typography sx={{ fontSize: fontSize.text, color: colors.error, fontWeight: "medium" }}>
-                            -{formatCurrency(discountAmount)}
-                          </Typography>
-                        </Grid>
-                        
-                        <Grid item xs={12}>
-                          <Divider sx={{ my: 1.5, borderStyle: "dashed" }} />
-                        </Grid>
-                        
+                      <Grid container spacing={2}>                        
                         <Grid item xs={7}>
                           <Typography sx={{ 
                             fontSize: fontSize.subtitle, 
@@ -577,7 +472,7 @@ const PaymentPage = () => {
                             borderRadius: 1,
                             display: "inline-block"
                           }}>
-                            {formatCurrency(finalTotal)}
+                            {formatCurrency(totalAmount)}
                           </Typography>
                         </Grid>
                       </Grid>
@@ -636,7 +531,7 @@ const PaymentPage = () => {
                       }}
                     />
                     
-                    {parseInt(paymentAmount) > finalTotal && (
+                    {parseInt(paymentAmount) > totalAmount && (
                       <Box sx={{ 
                         mt: 2, 
                         p: 2, 
@@ -717,7 +612,7 @@ const PaymentPage = () => {
                 }
               }}
               onClick={() => navigate(SERVICE_STATUS_PATH)} 
-              disabled={parseInt(paymentAmount) < finalTotal}
+              disabled={parseInt(paymentAmount) < totalAmount}
             >
               ຊຳລະເງິນ
             </Button>

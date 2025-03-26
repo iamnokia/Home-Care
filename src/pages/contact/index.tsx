@@ -50,7 +50,6 @@ const ContactUs = () => {
           background: "linear-gradient(135deg, #611463 0%, #8e24aa 50%, #f7931e 100%)",
           py: { xs: 6, md: 10 },
           position: "relative",
-          overflow: "hidden",
           mb: { xs: 12, md: 16 }
         }}
       >

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Button, Skeleton, Typography, Grid, Paper } from "@mui/material";
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import ElectricalServicesIcon from '@mui/icons-material/ElectricalServices';
@@ -7,7 +7,6 @@ import PlumbingIcon from '@mui/icons-material/Plumbing';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import WcIcon from '@mui/icons-material/Wc';
 import PestControlIcon from '@mui/icons-material/PestControl';
-import { useNavigate } from "react-router-dom";
 import CategoryIcon from '@mui/icons-material/Category';
 
 // Import the separated components
@@ -15,17 +14,47 @@ import ServiceProviderCard from "./ServiceProviderCard";
 import ServiceCategoryChip from "./ServiceCategoryChip";
 import { styles } from "./ServiceStyles";
 import useMainController from "../controllers";
+import { EmployeeModel } from "../../../models/employee";
+
+// Define types
+interface ServiceCategory {
+  id: string;
+  title: string;
+  icon: JSX.Element;
+  categoryType: string;
+}
+
+interface ServiceProvider {
+  id: string;
+  name: string;
+  surname: string;
+  location: string;
+  price: number;
+  imageUrl: string;
+  rating: number;
+  category: string;
+  gender: string;
+  age: number;
+  address: string;
+  city: string;
+  categoryType: string;
+  carId?: string;
+  carBrand?: string;
+  carModel?: string;
+  licensePlate?: string;
+  carImageUrl?: string;
+}
+
 
 const Services = () => {
-  const navigate = useNavigate();
-  const [activeCategory, setActiveCategory] = useState(null);
-  const [filteredProviders, setFilteredProviders] = useState([]);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [filteredProviders, setFilteredProviders] = useState<ServiceProvider[]>([]);
   
   // Get data from controller
-  const { loading, data } = useMainController();
+  const ctrl = useMainController();
 
   // Define service categories
-  const serviceCategories = [
+  const serviceCategories: ServiceCategory[] = [
     {
       id: 'all',
       title: 'ທັງຫມົດ',
@@ -77,12 +106,12 @@ const Services = () => {
   ];
 
   // Map the API data to format expected by ServiceProviderCard
-  const mapEmployeeToServiceProvider = (employee) => {
+  const mapEmployeeToServiceProvider = (employee: EmployeeModel): ServiceProvider => {
     // Convert cat_name to lowercase and simplify for categoryType
     // This assumes cat_name from API matches our service categories
-    const getCategoryType = (catName) => {
+    const getCategoryType = (catName: string | undefined): string => {
       // Convert to lowercase and remove spaces for comparison
-      const normalizedName = catName.toLowerCase();
+      const normalizedName = (catName || '').toLowerCase();
       
       if (normalizedName.includes('cleaning') || normalizedName.includes('ທຳຄວາມສະອາດ')) return 'cleaning';
       if (normalizedName.includes('electrical') || normalizedName.includes('ໄຟຟ້າ')) return 'electrical';
@@ -97,11 +126,14 @@ const Services = () => {
     // Get category type from cat_name
     const categoryType = getCategoryType(employee.cat_name);
 
-    // Parse address to extract village and city
-    // Assuming address format is "Village, City"
-    const addressParts = (employee.address || '').split(',');
-    const address = addressParts[0]?.trim() || 'N/A';
-    const city = addressParts[1]?.trim() || 'N/A';
+    // Extract village from address
+    // Now we use employee.city directly instead of trying to parse it from address
+    let village = 'N/A';
+    
+    if (employee.address && typeof employee.address === 'string' && employee.address.trim() !== '') {
+      // Just extract the village/address part
+      village = employee.address.split(',')[0]?.trim() || employee.address;
+    }
 
     // Determine if this is a car-based service (moving or bathroom)
     const isCarService = categoryType === 'moving' || categoryType === 'bathroom';
@@ -111,74 +143,79 @@ const Services = () => {
       name: employee.first_name,
       surname: employee.last_name,
       location: employee.address,
-      price: parseFloat(employee.price || 0),
+      price: parseFloat(employee.price?.toString() || '0'),
       imageUrl: employee.avatar,
-      rating: 5, // Default rating or could be added to your employee model
-      category: employee.cat_name, // Use cat_name directly
+      rating: 5, // Default rating
+      category: employee.cat_name,
       gender: employee.gender,
-      age: 30, // This is missing from your model, you might want to add it
-      address: address,
-      city: city,
+      age: 30, // Default age or calculate from created_at
+      address: village, 
+      city: employee.city || 'ວຽງຈັນ', // Use the city field directly from the model
       categoryType: categoryType,
       // Car details for moving and bathroom categories
-      // These fields would need to be added to your data model
       carId: isCarService ? `C${employee.id}` : undefined,
-      carBrand: isCarService ? 'Toyota' : undefined, // Default or from your data
-      carModel: isCarService ? 'Hilux' : undefined, // Default or from your data
+      carBrand: isCarService ? 'Toyota' : undefined,
+      carModel: isCarService ? 'Hilux' : undefined,
       licensePlate: isCarService ? 'ກຂ-' + employee.id : undefined,
       carImageUrl: isCarService ? '/api/placeholder/400/300' : undefined
     };
   };
 
   useEffect(() => {
-    if (!loading && data && data.length > 0) {
+    if (!ctrl?.loading && ctrl?.data && ctrl?.data.length > 0) {
       // Map the API data to the format expected by your UI
-      const mappedProviders = data.map(mapEmployeeToServiceProvider);
+      const mappedProviders = ctrl?.data.map(mapEmployeeToServiceProvider);
       setFilteredProviders(mappedProviders);
     }
-  }, [loading, data]);
+  }, [ctrl?.loading, ctrl?.data]);
 
-  const handleCategoryClick = (categoryId) => {
+  const handleCategoryClick = (categoryId: string) => {
     const selectedCategory = serviceCategories.find(cat => cat.id === categoryId);
 
     if (activeCategory === categoryId) {
       // If clicking the same category, clear filter
       setActiveCategory(null);
-      setFilteredProviders(data.map(mapEmployeeToServiceProvider));
+      if (ctrl?.data && ctrl?.data.length > 0) {
+        setFilteredProviders(ctrl?.data.map(mapEmployeeToServiceProvider));
+      }
     } else {
       // Set active category and filter
       setActiveCategory(categoryId);
 
-      if (selectedCategory.categoryType === 'all') {
-        setFilteredProviders(data.map(mapEmployeeToServiceProvider)); // Show all
-      } else {
+      if (selectedCategory && selectedCategory.categoryType === 'all') {
+        if (ctrl?.data && ctrl?.data.length > 0) {
+          setFilteredProviders(ctrl?.data.map(mapEmployeeToServiceProvider)); // Show all
+        }
+      } else if (selectedCategory) {
         // Filter by category type
         const categoryType = selectedCategory.categoryType;
         
         // Filter employees by category type derived from cat_name
-        const filtered = data
-          .filter(employee => {
-            // Use the same getCategoryType function to get the category type from cat_name
-            const getCategoryType = (catName) => {
-              // Convert to lowercase and remove spaces for comparison
-              const normalizedName = catName.toLowerCase();
+        if (ctrl?.data && ctrl?.data.length > 0) {
+          const filtered = ctrl?.data
+            .filter(employee => {
+              // Use the same getCategoryType function to get the category type from cat_name
+              const getCategoryType = (catName: string | undefined): string => {
+                // Convert to lowercase and remove spaces for comparison
+                const normalizedName = (catName || '').toLowerCase();
+                
+                if (normalizedName.includes('cleaning') || normalizedName.includes('ທຳຄວາມສະອາດ')) return 'cleaning';
+                if (normalizedName.includes('electrical') || normalizedName.includes('ໄຟຟ້າ')) return 'electrical';
+                if (normalizedName.includes('aircon') || normalizedName.includes('air') || normalizedName.includes('ແອ')) return 'aircon';
+                if (normalizedName.includes('plumbing') || normalizedName.includes('ປະປາ')) return 'plumbing';
+                if (normalizedName.includes('moving') || normalizedName.includes('ຂົນສົ່ງ')) return 'moving';
+                if (normalizedName.includes('bathroom') || normalizedName.includes('ຫ້ອງນ້ຳ')) return 'bathroom';
+                if (normalizedName.includes('pest') || normalizedName.includes('ກຳຈັດແມງໄມ້')) return 'pest';
+                return 'other';
+              };
               
-              if (normalizedName.includes('cleaning') || normalizedName.includes('ທຳຄວາມສະອາດ')) return 'cleaning';
-              if (normalizedName.includes('electrical') || normalizedName.includes('ໄຟຟ້າ')) return 'electrical';
-              if (normalizedName.includes('aircon') || normalizedName.includes('air') || normalizedName.includes('ແອ')) return 'aircon';
-              if (normalizedName.includes('plumbing') || normalizedName.includes('ປະປາ')) return 'plumbing';
-              if (normalizedName.includes('moving') || normalizedName.includes('ຂົນສົ່ງ')) return 'moving';
-              if (normalizedName.includes('bathroom') || normalizedName.includes('ຫ້ອງນ້ຳ')) return 'bathroom';
-              if (normalizedName.includes('pest') || normalizedName.includes('ກຳຈັດແມງໄມ້')) return 'pest';
-              return 'other';
-            };
+              const employeeCategoryType = getCategoryType(employee.cat_name);
+              return employeeCategoryType === categoryType;
+            })
+            .map(mapEmployeeToServiceProvider);
             
-            const employeeCategoryType = getCategoryType(employee.cat_name);
-            return employeeCategoryType === categoryType;
-          })
-          .map(mapEmployeeToServiceProvider);
-          
-        setFilteredProviders(filtered);
+          setFilteredProviders(filtered);
+        }
       }
     }
   };
@@ -228,7 +265,7 @@ const Services = () => {
             {/* Icon container */}
             <Box sx={styles.iconContainer}>
               <img
-                src="/public/IconHomeCare.svg"
+                src="/IconHomeCare.svg"
                 alt="HomeCare Icon"
                 style={{
                   width: '24px',
@@ -253,7 +290,9 @@ const Services = () => {
               size="medium"
               onClick={() => {
                 setActiveCategory(null);
-                setFilteredProviders(data.map(mapEmployeeToServiceProvider));
+                if (ctrl?.data && ctrl?.data.length > 0) {
+                  setFilteredProviders(ctrl?.data.map(mapEmployeeToServiceProvider));
+                }
               }}
               sx={styles.showAllButton}
               startIcon={<span style={{ fontSize: '0.8rem' }}>×</span>}
@@ -263,7 +302,7 @@ const Services = () => {
           )}
         </Box>
 
-        {loading ? (
+        {ctrl?.loading ? (
           <Grid container spacing={3} sx={{ px: { xs: 1, md: 2 } }}>
             {[...Array(4)].map((_, index) => (
               <Grid item xs={12} sm={6} md={3} key={index}>
@@ -298,7 +337,9 @@ const Services = () => {
                   variant="contained"
                   onClick={() => {
                     setActiveCategory(null);
-                    setFilteredProviders(data.map(mapEmployeeToServiceProvider));
+                    if (ctrl?.data && ctrl?.data.length > 0) {
+                      setFilteredProviders(ctrl?.data.map(mapEmployeeToServiceProvider));
+                    }
                   }}
                   sx={{
                     mt: 2,

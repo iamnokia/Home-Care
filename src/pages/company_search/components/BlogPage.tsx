@@ -17,7 +17,6 @@ import {
   alpha,
   Tooltip
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import ElectricalServicesIcon from '@mui/icons-material/ElectricalServices';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
@@ -84,9 +83,7 @@ const ServiceListing = () => {
   
   // Check if a service is a vehicle-based service
   const isVehicleService = (service) => {
-    return service.occupation.toLowerCase() === 'transportation' || 
-           service.occupation.toLowerCase() === 'bathroom specialist';
-  };
+    return service.occupation.toLowerCase() === 'transportation'   };
   
   // Enhanced sample data with vehicle information for certain services
   const [services, setServices] = useState([
@@ -199,12 +196,7 @@ const ServiceListing = () => {
       service: "ຕິດຕັ້ງສຸຂະພັນຫ້ອງນ້ຳ",
       date: "2025-03-20",
       status: "Completed",
-      // Car details for bathroom specialist
-      carId: "B002",
-      carBrand: "Isuzu",
-      carModel: "D-Max",
-      licensePlate: "ຄງ 5678",
-      carYear: "2019"
+   
     }
   ]);
 
@@ -221,11 +213,6 @@ const ServiceListing = () => {
       month: 'short', 
       day: 'numeric' 
     });
-  };
-
-  // Function to delete a service
-  const handleDelete = (id) => {
-    setServices(services.filter(service => service.id !== id));
   };
 
   return (
@@ -415,25 +402,6 @@ const ServiceListing = () => {
                     {formatDate(service.date)}
                   </Typography>
                 </Box>
-                
-                {/* Delete Button */}
-                <Tooltip title="ລຶບຂໍ້ມູນ" arrow>
-                  <IconButton 
-                    aria-label="delete"
-                    size="small" 
-                    onClick={() => handleDelete(service.id)}
-                    sx={{ 
-                      color: "#f44336",
-                      bgcolor: "rgba(244, 67, 54, 0.1)",
-                      padding: "4px",
-                      "&:hover": {
-                        bgcolor: "rgba(244, 67, 54, 0.2)"
-                      }
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
               </Box>
 
               {/* Main Card Content */}

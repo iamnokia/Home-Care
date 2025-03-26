@@ -1,4 +1,4 @@
-import React, { useState, useRef, ChangeEvent } from "react";
+import React, { useState, ChangeEvent } from "react";
 import {
   Autocomplete, 
   Box,
@@ -13,9 +13,7 @@ import {
   ListItem,
   ListItemText,
   FormControl,
-  RadioGroup,
   FormControlLabel,
-  Radio,
   Chip,
   Fade,
   Divider,
@@ -25,14 +23,12 @@ import {
   SelectChangeEvent,
   FormHelperText,
   Checkbox,
-  Snackbar,
-  Alert,
   AlertColor,
   Grid,
   Card,
   CardContent,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
@@ -130,9 +126,8 @@ const countryCodes: CountryCode[] = [
 ];
 
 const LocationDetailPage: React.FC = () => {
+  const {id} = useParams();
   const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
   // State hooks
   const [savedLocations, setSavedLocations] = useState<LocationType[]>(initialSavedLocations);
   const [selectedLocation, setSelectedLocation] = useState<LocationType | null>(null);
@@ -140,7 +135,6 @@ const LocationDetailPage: React.FC = () => {
   const [placeName, setPlaceName] = useState<string>("");
   const [placeVillage, setVillage] = useState<string>("");
   const [placeCity, setCity] = useState<string>("");
-  const [placeDetails, setPlaceDetails] = useState<string>("");
   const [countryCode, setCountryCode] = useState<string>("+856");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [hasWhatsapp, setHasWhatsapp] = useState<boolean>(false);
@@ -156,6 +150,16 @@ const LocationDetailPage: React.FC = () => {
     setSelectedLocation(location);
     setDetailAddress(location.description);
     setPlaceName(location.name);
+    
+    // Save location name to local storage
+    localStorage.setItem('selectedLocationName', location.name);
+    
+    // If you want to save more location information, you can store it as JSON
+    localStorage.setItem('selectedLocation', JSON.stringify({
+      id: location.id,
+      name: location.name,
+      description: location.description
+    }));
   };
 
   // Handle delete location
@@ -241,13 +245,6 @@ const LocationDetailPage: React.FC = () => {
     }
   };
 
-  // Handle image removal
-  const handleRemoveImage = (index: number): void => {
-    const newImages = [...images];
-    newImages.splice(index, 1);
-    setImages(newImages);
-  };
-
   // Handle country code change
   const handleCountryCodeChange = (event: SelectChangeEvent): void => {
     setCountryCode(event.target.value);
@@ -271,14 +268,6 @@ const LocationDetailPage: React.FC = () => {
       default:
         return "#f7931e";
     }
-  };
-
-  // Handle snackbar close
-  const handleCloseSnackbar = (event?: React.SyntheticEvent | Event, reason?: string): void => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpenSnackbar(false);
   };
 
   return (
@@ -326,7 +315,7 @@ const LocationDetailPage: React.FC = () => {
             }}
           >
             <IconButton
-              onClick={() => navigate(LOCATION_PATH)}
+              onClick={() => navigate(`/Location/${id}`)}
               sx={{
                 mr: 2,
                 backgroundColor: alpha("#611463", 0.08),
@@ -500,7 +489,7 @@ const LocationDetailPage: React.FC = () => {
               <Button
                 variant="contained"
                 fullWidth
-                onClick={() => navigate(LOCATION_PATH)}
+                onClick={() => navigate(`/Location/${id}`)}
                 sx={{
                   py: 1.5,
                   fontWeight: 600,

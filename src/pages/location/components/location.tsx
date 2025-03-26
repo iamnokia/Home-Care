@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -19,19 +19,21 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import CheckIcon from "@mui/icons-material/Check";
 import PersonIcon from "@mui/icons-material/Person";
 import CategoryIcon from "@mui/icons-material/Category";
 import HomeIcon from "@mui/icons-material/Home";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
-import WorkIcon from "@mui/icons-material/Work";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { LOCATION_DETAIL_PATH, PAYMENT_PATH, SERVICE_PATH } from "../../../routes/path";
+import { LOCATION_DETAIL_PATH, PAYMENT_PATH } from "../../../routes/path";
+import useMainController from "../controllers/index";
+import { EmployeeModel } from "../../../models/employee";
+import { AlertColor } from "@mui/material/Alert";
+import { Gender } from "../../../enums/gender";
 
+// Define font size constants
 const fontSize = {
   title: "1.6rem",
   subtitle: "1.1rem",
@@ -39,86 +41,123 @@ const fontSize = {
   button: "1rem",
 };
 
-// Enhanced sample data with more details
-const locations = [
-  {
-    id: 1,
-    firstName: "ອຳມະລິນ",
-    surname: "ອຸນາລົມ",
-    image: "https://via.placeholder.com/40",
-    category: "ແມ່ບ້ານ",
-    gender: "ຍິງ",
-    age: 21,
-    village: "ບ້ານ ໂນນສະຫວ່າງ",
-    city: "ວຽງຈັນ",
-    price: 250000,
-    priceFormatted: "250,000 KIP",
-  },
-];
+// Define the Location interface for the displayed service providers
+interface Location {
+  id: string;
+  firstName: string;
+  surname: string;
+  image: string;
+  category: string;
+  gender: string;
+  age: number;
+  village: string;
+  city: string;
+  price: number;
+  priceFormatted: string;
+  service?: string;
+}
 
-// Sample discount codes
-const discountCodes = {
-  "WELCOME10": 10, // 10% discount
-  "NEWUSER20": 20, // 20% discount
-  "SPECIAL50": 50  // 50% discount
-};
-
-const LocationPage = () => {
+const LocationPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
-  const [address, setAddress] = useState("");
-  const [discountCode, setDiscountCode] = useState("");
-  const [discountAmount, setDiscountAmount] = useState(0);
-  const [discountPercentage, setDiscountPercentage] = useState(0);
-  const [note, setNote] = useState("");
-  const [totalBeforeDiscount, setTotalBeforeDiscount] = useState(0);
-  const [finalTotal, setFinalTotal] = useState(0);
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState("success");
-  const [appliedCode, setAppliedCode] = useState("");
+  // Get data from controller
+  const { data, loading } = useMainController();
 
-  // Calculate totals whenever locations or discount changes
+  // State variables
+  const [address, setAddress] = useState<string>("");
+  const [note, setNote] = useState<string>("");
+  const [totalAmount, setTotalAmount] = useState<number>(0);
+  const [alertOpen, setAlertOpen] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState<string>("");
+  const [alertSeverity, setAlertSeverity] = useState<AlertColor>("success");
+  const [locations, setLocations] = useState<Location[]>([]);
+
+  // Map employee data to location format
   useEffect(() => {
-    const subtotal = locations.reduce((sum, item) => sum + item.price, 0);
-    setTotalBeforeDiscount(subtotal);
+    if (data && data.length > 0) {
+      const mappedLocations = data.map((employee: EmployeeModel) => {
+        // Extract village from address
+        let village = 'N/A';
+        if (employee.address && typeof employee.address === 'string' && employee.address.trim() !== '') {
+          village = employee.address.split(',')[0]?.trim() || employee.address;
+        }
 
-    // Calculate discount amount based on percentage
-    const discount = Math.round((subtotal * discountPercentage) / 100);
-    setDiscountAmount(discount);
+        // Format price with commas
+        const formatPrice = (price: string): string => {
+          const numPrice = parseFloat(price);
+          return numPrice.toLocaleString() + " KIP";
+        };
 
-    // Calculate final total
-    setFinalTotal(subtotal - discount);
-  }, [discountPercentage, locations]);
+        // Calculate age (placeholder)
+        const calculateAge = (): number => {
+          try {
+            const createdDate = new Date(employee.created_at);
+            const today = new Date();
+            const age = today.getFullYear() - createdDate.getFullYear();
+            return age > 0 ? age : 21; // Default to 21 if calculation fails
+          } catch (error) {
+            return 21; // Default age
+          }
+        };
+
+        // Map gender enum to display text
+        const genderText = employee.gender === Gender.MALE ? "ຊາຍ" : "ຍິງ";
+
+        return {
+          id: employee.id,
+          firstName: employee.first_name,
+          surname: employee.last_name,
+          image: employee.avatar || "https://via.placeholder.com/40",
+          category: employee.cat_name,
+          gender: genderText,
+          age: calculateAge(),
+          village: village,
+          city: employee.city || "ວຽງຈັນ",
+          price: parseFloat(employee.price),
+          priceFormatted: formatPrice(employee.price),
+          service: employee.cat_name, // Set service to category name
+        };
+      });
+
+      setLocations(mappedLocations);
+    }
+  }, [data]);
+
+  // Calculate total whenever locations change
+  useEffect(() => {
+    const total = locations.reduce((sum, item) => sum + item.price, 0);
+    setTotalAmount(total);
+
+    const savedLocationName = localStorage.getItem('selectedLocationName');
+
+    // If a location name exists in localStorage, set it to the address state
+    if (savedLocationName) {
+      setAddress(savedLocationName);
+    }
+  }, [locations]);
 
   // Format number as currency
-  const formatCurrency = (value) => {
+  const formatCurrency = (value: number): string => {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " KIP";
   };
 
-  // Handle discount code application
-  const applyDiscountCode = () => {
-    // Check if code exists
-    if (discountCodes[discountCode]) {
-      setDiscountPercentage(discountCodes[discountCode]);
-      setAppliedCode(discountCode);
-      setAlertMessage(`ສ່ວນຫຼຸດ ${discountCodes[discountCode]}% ໄດ້ຖືກນຳໃຊ້ແລ້ວ!`);
-      setAlertSeverity("success");
-      setAlertOpen(true);
-    } else {
-      setAlertMessage("ລະຫັດສ່ວນຫຼຸດບໍ່ຖືກຕ້ອງ");
-      setAlertSeverity("error");
-      setAlertOpen(true);
-    }
-  };
-
   // Handle alert close
-  const handleAlertClose = () => {
+  const handleAlertClose = (): void => {
     setAlertOpen(false);
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Typography variant="h6">Loading...</Typography>
+      </Box>
+    );
+  }
+
 
   return (
     <Box sx={{
@@ -153,15 +192,15 @@ const LocationPage = () => {
           }}
         >
           {/* Header with back button */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
             mb: 2,
             position: 'relative'
           }}>
             <IconButton
-              onClick={() => navigate('/service-detail/:id')}
-              sx={{ 
+              onClick={() => navigate(`/service-detail/${id}`)}
+              sx={{
                 color: '#611463',
                 '&:hover': {
                   backgroundColor: 'rgba(97, 20, 99, 0.08)',
@@ -172,7 +211,7 @@ const LocationPage = () => {
             >
               <ArrowBackIcon />
             </IconButton>
-            
+
             {/* Title */}
             <Typography
               variant="h5"
@@ -183,7 +222,7 @@ const LocationPage = () => {
                 fontWeight: "bold",
                 color: '#611463',
                 flexGrow: 1,
-                mb: 0, 
+                mb: 0,
                 background: 'linear-gradient(90deg, #611463 0%, #8a1c8d 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -197,10 +236,10 @@ const LocationPage = () => {
 
           {/* Address Input (Clickable) */}
           <Box sx={{ mb: 4, mt: 3 }}>
-            <Typography 
-              color="textSecondary" 
-              sx={{ 
-                fontSize: fontSize.subtitle, 
+            <Typography
+              color="textSecondary"
+              sx={{
+                fontSize: fontSize.subtitle,
                 mb: 1,
                 fontWeight: 500,
               }}
@@ -211,8 +250,8 @@ const LocationPage = () => {
               fullWidth
               variant="outlined"
               placeholder="ກົດເພື່ອໃສ່ຂໍ້ມູນ"
-              value={address}
-              onClick={() => navigate(LOCATION_DETAIL_PATH)}
+              value={address} // This will now show the value from localStorage
+              onClick={() => navigate(`/Location-detail/${id}`)}
               InputProps={{
                 readOnly: true,
                 startAdornment: (
@@ -234,7 +273,7 @@ const LocationPage = () => {
               sx={{
                 backgroundColor: "#f8f6f9",
                 cursor: "pointer",
-                "&:hover": { 
+                "&:hover": {
                   backgroundColor: "#efe8f0",
                   transform: 'translateY(-2px)',
                   boxShadow: '0 4px 12px rgba(97, 20, 99, 0.15)'
@@ -252,8 +291,8 @@ const LocationPage = () => {
             variant="subtitle1"
             fontWeight="bold"
             gutterBottom
-            sx={{ 
-              fontSize: fontSize.subtitle, 
+            sx={{
+              fontSize: fontSize.subtitle,
               mb: 2,
               color: '#611463',
               borderLeft: '4px solid #611463',
@@ -273,30 +312,30 @@ const LocationPage = () => {
                   borderRadius: 3,
                   boxShadow: "0 3px 10px rgba(0,0,0,0.06)",
                   transition: "all 0.3s ease",
-                  "&:hover": { 
+                  "&:hover": {
                     transform: "translateY(-3px)",
-                    boxShadow: "0 6px 15px rgba(97, 20, 99, 0.15)" 
+                    boxShadow: "0 6px 15px rgba(97, 20, 99, 0.15)"
                   }
                 }}
               >
                 <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                   {/* Main info row */}
                   <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                    <Avatar 
-                      src={location.image} 
-                      sx={{ 
-                        mr: 2, 
-                        width: 56, 
+                    <Avatar
+                      src={location.image}
+                      sx={{
+                        mr: 2,
+                        width: 56,
                         height: 56,
                         border: '2px solid #f0f0f0',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                      }} 
+                      }}
                     />
                     <Box flexGrow={1} sx={{ textAlign: "left" }}>
-                      <Typography sx={{ 
-                        fontSize: fontSize.subtitle, 
+                      <Typography sx={{
+                        fontSize: fontSize.subtitle,
                         fontWeight: "bold",
-                        color: '#611463' 
+                        color: '#611463'
                       }}>
                         {location.firstName} {location.surname}
                       </Typography>
@@ -306,9 +345,9 @@ const LocationPage = () => {
                         </Typography>
                       </Box>
                     </Box>
-                    <Typography 
-                      fontWeight="bold" 
-                      sx={{ 
+                    <Typography
+                      fontWeight="bold"
+                      sx={{
                         fontSize: fontSize.text,
                         bgcolor: '#f8f6f9',
                         color: '#611463',
@@ -327,10 +366,10 @@ const LocationPage = () => {
                     mb: 2,
                     flexWrap: "wrap"
                   }}>
-                    <Box sx={{ 
-                      display: "flex", 
-                      alignItems: "center", 
-                      mr: 2, 
+                    <Box sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      mr: 2,
                       mb: { xs: 1, sm: 0 },
                       bgcolor: '#f8f6f9',
                       borderRadius: 5,
@@ -342,8 +381,8 @@ const LocationPage = () => {
                         {location.category}
                       </Typography>
                     </Box>
-                    <Box sx={{ 
-                      display: "flex", 
+                    <Box sx={{
+                      display: "flex",
                       alignItems: "center",
                       bgcolor: '#f8f6f9',
                       borderRadius: 5,
@@ -352,7 +391,7 @@ const LocationPage = () => {
                     }}>
                       <PersonIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
                       <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
-                        {location.gender}, {location.age} ປີ
+                        {location.gender}
                       </Typography>
                     </Box>
                   </Box>
@@ -385,7 +424,7 @@ const LocationPage = () => {
             ))}
           </Box>
 
-          <Divider sx={{ 
+          <Divider sx={{
             my: 3,
             borderColor: 'rgba(97, 20, 99, 0.1)',
             borderWidth: 1
@@ -393,96 +432,13 @@ const LocationPage = () => {
 
           {/* Two-column layout on larger screens */}
           <Grid container spacing={3}>
-            {/* Left column - Discount and Notes */}
+            {/* Left column - Notes */}
             <Grid item xs={12} md={6}>
-              {/* Discount Code */}
-              <Grid container spacing={2} sx={{ mb: 2 }}>
-                <Grid item xs={isMobile ? 9 : 8}>
-                  <TextField
-                    label="ລະຫັດສ່ວນຫຼຸດ"
-                    fullWidth
-                    value={discountCode}
-                    onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <LocalOfferIcon sx={{ color: '#8a1c8d' }} fontSize="small" />
-                        </InputAdornment>
-                      ),
-                      sx: { 
-                        fontSize: fontSize.text,
-                        borderRadius: 2,
-                      }
-                    }}
-                    InputLabelProps={{ 
-                      sx: { 
-                        fontSize: fontSize.text,
-                        color: '#611463'
-                      } 
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#611463',
-                        },
-                      },
-                      '& label.Mui-focused': {
-                        color: '#611463',
-                      },
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={isMobile ? 3 : 4}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{
-                      height: "100%",
-                      backgroundColor: "#611463",
-                      borderRadius: 2,
-                      boxShadow: '0 4px 8px rgba(97, 20, 99, 0.25)',
-                      transition: 'all 0.3s ease',
-                      "&:hover": { 
-                        backgroundColor: "#4a0d4c",
-                        boxShadow: '0 6px 12px rgba(97, 20, 99, 0.35)',
-                        transform: 'translateY(-2px)'
-                      }
-                    }}
-                    onClick={applyDiscountCode}
-                  >
-                    {isMobile ? <CheckIcon /> : "ນຳໃຊ້"}
-                  </Button>
-                </Grid>
-              </Grid>
-
-              {/* Applied Discount */}
-              {appliedCode && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    mb: 2,
-                    p: 1.5,
-                    backgroundColor: "#e6f7e9",
-                    borderRadius: 2,
-                    boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
-                    border: '1px solid #c8e6cc',
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  <CheckIcon sx={{ color: "#2e7d32", mr: 1 }} />
-                  <Typography sx={{ fontSize: fontSize.text, color: "#2e7d32" }}>
-                    ນຳໃຊ້ລະຫັດ "{appliedCode}" - ສ່ວນຫຼຸດ {discountPercentage}%
-                  </Typography>
-                </Box>
-              )}
-
               {/* Notes - Editable */}
               <TextField
                 label="ໝາຍເຫດ"
                 fullWidth
-                sx={{ 
+                sx={{
                   mb: { xs: 2, md: 0 },
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 2,
@@ -498,16 +454,16 @@ const LocationPage = () => {
                 onChange={(e) => setNote(e.target.value)}
                 multiline
                 rows={isMobile ? 2 : 4}
-                InputProps={{ 
-                  sx: { 
+                InputProps={{
+                  sx: {
                     fontSize: fontSize.text,
-                  } 
+                  }
                 }}
-                InputLabelProps={{ 
-                  sx: { 
+                InputLabelProps={{
+                  sx: {
                     fontSize: fontSize.text,
                     color: '#611463'
-                  } 
+                  }
                 }}
               />
             </Grid>
@@ -557,42 +513,16 @@ const LocationPage = () => {
                   </Typography>
 
                   <Grid container spacing={2}>
-                    <Grid item xs={8}>
-                      <Typography sx={{ fontSize: fontSize.text, color: '#555' }}>
-                        ລາຄາ:
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={4} sx={{ textAlign: "right" }}>
-                      <Typography sx={{ fontSize: fontSize.text, fontWeight: 500 }}>
-                        {formatCurrency(totalBeforeDiscount)}
-                      </Typography>
-                    </Grid>
-
-                    <Grid item xs={8}>
-                      <Typography sx={{ fontSize: fontSize.text, color: '#555' }}>
-                        ສ່ວນຫຼຸດ ({discountPercentage}%):
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={4} sx={{ textAlign: "right" }}>
-                      <Typography sx={{ fontSize: fontSize.text, color: "#d32f2f", fontWeight: 500 }}>
-                        -{formatCurrency(discountAmount)}
-                      </Typography>
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <Divider sx={{ my: 2, borderStyle: 'dashed', borderColor: 'rgba(97, 20, 99, 0.15)' }} />
-                    </Grid>
-
-                    <Grid item xs={7}>
+                    <Grid item xs={6}>
                       <Typography sx={{ fontSize: fontSize.subtitle, fontWeight: "bold", color: '#611463' }}>
                         ລາຄາລວມ:
                       </Typography>
                     </Grid>
-                    <Grid item xs={5} sx={{ textAlign: "right" }}>
-                      <Typography 
-                        sx={{ 
-                          fontSize: fontSize.subtitle, 
-                          fontWeight: "bold", 
+                    <Grid item xs={6} sx={{ textAlign: "right" }}>
+                      <Typography
+                        sx={{
+                          fontSize: fontSize.subtitle,
+                          fontWeight: "bold",
                           color: "#007736",
                           bgcolor: 'rgba(0, 119, 54, 0.1)',
                           p: 1,
@@ -600,7 +530,7 @@ const LocationPage = () => {
                           display: 'inline-block'
                         }}
                       >
-                        {formatCurrency(finalTotal)}
+                        {formatCurrency(totalAmount)}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -618,7 +548,7 @@ const LocationPage = () => {
           >
             <Button
               variant="outlined"
-              onClick={() => navigate('service-detail/:id')}
+              onClick={() => navigate(`/service-detail/${id}`)}
               sx={{
                 fontSize: fontSize.button,
                 px: 4,
@@ -665,16 +595,16 @@ const LocationPage = () => {
         </Paper>
 
         {/* Snackbar Alert */}
-        <Snackbar 
-          open={alertOpen} 
-          autoHideDuration={6000} 
+        <Snackbar
+          open={alertOpen}
+          autoHideDuration={6000}
           onClose={handleAlertClose}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         >
-          <Alert 
-            onClose={handleAlertClose} 
-            severity={alertSeverity} 
-            sx={{ 
+          <Alert
+            onClose={handleAlertClose}
+            severity={alertSeverity}
+            sx={{
               width: '100%',
               borderRadius: 2,
               boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
