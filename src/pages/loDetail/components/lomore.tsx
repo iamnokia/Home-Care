@@ -138,6 +138,8 @@ const LocationDetailPage: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<LocationType | null>(null);
   const [detailAddress, setDetailAddress] = useState<string>("");
   const [placeName, setPlaceName] = useState<string>("");
+  const [placeVillage, setVillage] = useState<string>("");
+  const [placeCity, setCity] = useState<string>("");
   const [placeDetails, setPlaceDetails] = useState<string>("");
   const [countryCode, setCountryCode] = useState<string>("+856");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
@@ -750,13 +752,13 @@ const LocationDetailPage: React.FC = () => {
               placeholder="ປ້ອນຊື່ບ້ານເຊັ່ນ: ດົງໂດກ, ໜອງພະຍາ,..."
               value={placeName}
               onChange={(e) => {
-                setPlaceName(e.target.value);
+                setVillage(e.target.value);
                 if (e.target.value.trim()) {
-                  setErrors({ ...errors, placeName: undefined });
+                  setErrors({ ...errors, placeVillage: undefined });
                 }
               }}
-              error={!!errors.placeName}
-              helperText={errors.placeName}
+              error={!!errors.placeVillage}
+              helperText={errors.placeVillage}
               required
               sx={{
                 mb: 3,
@@ -800,9 +802,9 @@ const LocationDetailPage: React.FC = () => {
         options={districts}
         value={placeName}
         onChange={(event: React.SyntheticEvent, newValue: string | null) => {
-          setPlaceName(newValue);
+          setCity(newValue);
           if (newValue) {
-            setErrors({ ...errors, placeName: undefined });
+            setErrors({ ...errors, placeCity: undefined });
           }
         }}
         renderInput={(params) => (
@@ -810,8 +812,8 @@ const LocationDetailPage: React.FC = () => {
             {...params}
             variant="outlined"
             placeholder="ເລືອກເມືອງ"
-            error={!!errors.placeName}
-            helperText={errors.placeName}
+            error={!!errors.placeCity}
+            helperText={errors.placeCity}
             required
             sx={{
               mb: 3,
