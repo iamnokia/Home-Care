@@ -7,9 +7,10 @@ export interface EmployeeModel {
     password: string,
     address: string,
     gender: string,
-    cv: string,
+    cv: string, 
     avatar: string,
     cat_id: string,
+    cat_name: string;
     price: string,
     status: string,
     created_at: string,

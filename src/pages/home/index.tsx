@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import HeaderPage from "./components/header";
-import JobSearchPage from "../job_search";
+import ContactUs from "../contact";
 
 const HomePage = () => {
   return (
@@ -12,7 +12,7 @@ const HomePage = () => {
 
         <HeaderPage />
 
-        <JobSearchPage />
+        <ContactUs />
       </Box>
 
       <Box sx={{ width: "100%" }}>

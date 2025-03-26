@@ -8,6 +8,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import WcIcon from '@mui/icons-material/Wc';
 import PestControlIcon from '@mui/icons-material/PestControl';
 import { useNavigate } from "react-router-dom";
+import CategoryIcon from '@mui/icons-material/Category';
 
 // Import the separated components
 import ServiceProviderCard from "./ServiceProviderCard";
@@ -28,7 +29,7 @@ const Services = () => {
     {
       id: 'all',
       title: 'ທັງຫມົດ',
-      icon: <CleaningServicesIcon />,
+      icon: <CategoryIcon />,
       categoryType: 'all'
     },
     {
@@ -39,37 +40,37 @@ const Services = () => {
     },
     {
       id: 'electrical',
-      title: 'ໄຟຟ້າ',
+      title: 'ສ້ອມແປງໄຟຟ້າ',
       icon: <ElectricalServicesIcon />,
       categoryType: 'electrical'
     },
     {
       id: 'aircon',
-      title: 'ແອປັບອາກາດ',
+      title: 'ສ້ອມແປງແອອາກາດ',
       icon: <AcUnitIcon />,
       categoryType: 'aircon'
     },
     {
       id: 'plumbing',
-      title: 'ປະປາ',
+      title: 'ສ້ອມແປງປະປາ',
       icon: <PlumbingIcon />,
       categoryType: 'plumbing'
     },
     {
       id: 'moving',
-      title: 'ຂົນສົ່ງເຄື່ອງ',
+      title: 'ແກ່ເຄື່ອງ',
       icon: <LocalShippingIcon />,
       categoryType: 'moving'
     },
     {
       id: 'bathroom',
-      title: 'ຫ້ອງນ້ຳເຄື່ອນທີ່',
+      title: 'ດູດສ້ວມ',
       icon: <WcIcon />,
       categoryType: 'bathroom'
     },
     {
       id: 'pest',
-      title: 'ກຳຈັດແມງໄມ້',
+      title: 'ກຳຈັດປວກ',
       icon: <PestControlIcon />,
       categoryType: 'pest'
     },
@@ -77,24 +78,24 @@ const Services = () => {
 
   // Map the API data to format expected by ServiceProviderCard
   const mapEmployeeToServiceProvider = (employee) => {
-    // Parse the category type from the cat_id
-    const categoryMap = {
-      '1': 'cleaning',
-      '2': 'electrical',
-      '3': 'aircon',
-      '4': 'plumbing',
-      '5': 'moving',
-      '6': 'bathroom',
-      '7': 'pest'
-      // Add more mappings as needed
+    // Convert cat_name to lowercase and simplify for categoryType
+    // This assumes cat_name from API matches our service categories
+    const getCategoryType = (catName) => {
+      // Convert to lowercase and remove spaces for comparison
+      const normalizedName = catName.toLowerCase();
+      
+      if (normalizedName.includes('cleaning') || normalizedName.includes('ທຳຄວາມສະອາດ')) return 'cleaning';
+      if (normalizedName.includes('electrical') || normalizedName.includes('ໄຟຟ້າ')) return 'electrical';
+      if (normalizedName.includes('aircon') || normalizedName.includes('air') || normalizedName.includes('ແອ')) return 'aircon';
+      if (normalizedName.includes('plumbing') || normalizedName.includes('ປະປາ')) return 'plumbing';
+      if (normalizedName.includes('moving') || normalizedName.includes('ຂົນສົ່ງ')) return 'moving';
+      if (normalizedName.includes('bathroom') || normalizedName.includes('ຫ້ອງນ້ຳ')) return 'bathroom';
+      if (normalizedName.includes('pest') || normalizedName.includes('ກຳຈັດແມງໄມ້')) return 'pest';
+      return 'other';
     };
 
-    // Get category name from category type
-    const getCategoryName = (catId) => {
-      const categoryType = categoryMap[catId] || 'other';
-      const category = serviceCategories.find(cat => cat.categoryType === categoryType);
-      return category ? category.title : 'Other';
-    };
+    // Get category type from cat_name
+    const categoryType = getCategoryType(employee.cat_name);
 
     // Parse address to extract village and city
     // Assuming address format is "Village, City"
@@ -103,7 +104,6 @@ const Services = () => {
     const city = addressParts[1]?.trim() || 'N/A';
 
     // Determine if this is a car-based service (moving or bathroom)
-    const categoryType = categoryMap[employee.cat_id] || 'other';
     const isCarService = categoryType === 'moving' || categoryType === 'bathroom';
 
     return {
@@ -112,9 +112,9 @@ const Services = () => {
       surname: employee.last_name,
       location: employee.address,
       price: parseFloat(employee.price || 0),
-      imageUrl: employee.avatar || '/api/placeholder/400/300',
+      imageUrl: employee.avatar,
       rating: 5, // Default rating or could be added to your employee model
-      category: getCategoryName(employee.cat_id),
+      category: employee.cat_name, // Use cat_name directly
       gender: employee.gender,
       age: 30, // This is missing from your model, you might want to add it
       village: village,
@@ -154,25 +154,27 @@ const Services = () => {
       } else {
         // Filter by category type
         const categoryType = selectedCategory.categoryType;
-        const categoryId = Object.keys(serviceCategories).find(
-          key => serviceCategories[key]?.categoryType === categoryType
-        );
         
-        // Filter employees by cat_id
+        // Filter employees by category type derived from cat_name
         const filtered = data
           .filter(employee => {
-            // Map category types back to cat_id for comparison
-            const categoryMap = {
-              'cleaning': '1',
-              'electrical': '2',
-              'aircon': '3',
-              'plumbing': '4',
-              'moving': '5',
-              'bathroom': '6',
-              'pest': '7'
-              // Add more mappings as needed
+            // Use the same getCategoryType function to get the category type from cat_name
+            const getCategoryType = (catName) => {
+              // Convert to lowercase and remove spaces for comparison
+              const normalizedName = catName.toLowerCase();
+              
+              if (normalizedName.includes('cleaning') || normalizedName.includes('ທຳຄວາມສະອາດ')) return 'cleaning';
+              if (normalizedName.includes('electrical') || normalizedName.includes('ໄຟຟ້າ')) return 'electrical';
+              if (normalizedName.includes('aircon') || normalizedName.includes('air') || normalizedName.includes('ແອ')) return 'aircon';
+              if (normalizedName.includes('plumbing') || normalizedName.includes('ປະປາ')) return 'plumbing';
+              if (normalizedName.includes('moving') || normalizedName.includes('ຂົນສົ່ງ')) return 'moving';
+              if (normalizedName.includes('bathroom') || normalizedName.includes('ຫ້ອງນ້ຳ')) return 'bathroom';
+              if (normalizedName.includes('pest') || normalizedName.includes('ກຳຈັດແມງໄມ້')) return 'pest';
+              return 'other';
             };
-            return employee.cat_id === categoryMap[categoryType];
+            
+            const employeeCategoryType = getCategoryType(employee.cat_name);
+            return employeeCategoryType === categoryType;
           })
           .map(mapEmployeeToServiceProvider);
           
@@ -240,8 +242,8 @@ const Services = () => {
 
             <Typography variant="h5" sx={styles.filterTitle}>
               {activeCategory ?
-                `${serviceCategories.find(cat => cat.id === activeCategory)?.title}...` :
-                'ການບໍລິການທັງໝົດ'}
+                `${serviceCategories.find(cat => cat.id === activeCategory)?.title}` :
+                'ທັງໝົດ'}
             </Typography>
           </Box>
 
