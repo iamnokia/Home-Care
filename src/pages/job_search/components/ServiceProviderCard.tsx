@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Typography, Chip, Divider } from "@mui/material";
+import { Box, Button, Typography, Divider } from "@mui/material";
 import StarIcon from '@mui/icons-material/Star';
 import PersonIcon from '@mui/icons-material/Person';
 import HomeIcon from '@mui/icons-material/Home';
@@ -13,22 +13,19 @@ interface ServiceProviderCardProps {
   id: string | number;
   name?: string;
   surname?: string;
-  location?: string;
   price?: number;
   imageUrl?: string;
   rating?: number;
   category?: string;
   gender?: string;
-  age?: number;
   address?: string;
   city?: string;
-  categoryType?: string;
-  // Car details - for moving category only
+  cat_id?: number; // Category ID to determine if car details should be shown
+  // Car details
   carId?: string;
   carBrand?: string;
   carModel?: string;
   licensePlate?: string;
-  carImageUrl?: string;
 }
 
 const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({ 
@@ -40,11 +37,10 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
   rating = 5, 
   category, 
   gender, 
-  age, 
   address, 
-  city, 
-  categoryType,
-  // Car details - now only for moving category
+  city,
+  cat_id, // Added category ID
+  // Car details
   carId,
   carBrand,
   carModel,
@@ -52,8 +48,14 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  // Only show car details for moving services (category 5)
-  const isMovingService = categoryType === 'moving';
+  // Show car details only if category ID is 5 and we have car data
+  const showCarDetails = cat_id === 5 && !!carId;
+  
+  // Debug info
+  console.log(`Card ${id}: cat_id=${cat_id}, showCarDetails=${showCarDetails}, carId=${carId}`);
+  if (showCarDetails) {
+    console.log(`Car details for ${id}: Brand=${carBrand}, Model=${carModel}, Plate=${licensePlate}`);
+  }
 
   // Format price to have commas
   const formatPrice = (price?: number): string => {
@@ -102,7 +104,7 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
           </Box>
         </Box>
 
-        {/* Category and gender/age info */}
+        {/* Category and gender info */}
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, flexWrap: 'wrap' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 2, mb: 0.5 }}>
             <CategoryIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
@@ -111,13 +113,13 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <PersonIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
             <Typography variant="body2" color="text.secondary">
-              {gender || 'N/A'}, {age || 'N/A'} ປີ
+              {gender || 'N/A'}
             </Typography>
           </Box>
         </Box>
 
-        {/* Car details - ONLY for moving services */}
-        {isMovingService && (
+        {/* Car details - ONLY for category ID 5 */}
+        {showCarDetails && carId && (
           <Box 
             sx={{
               mb: 2,
@@ -133,7 +135,7 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
               <DirectionsCarIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                {carBrand || 'Toyota'} {carModel || 'Hilux'}
+                {carBrand || 'N/A'} {carModel || 'N/A'}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -141,13 +143,6 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
               <Typography variant="body2" color="text.secondary">
                 {licensePlate || 'N/A'}
               </Typography>
-              {carId && (
-                <Chip 
-                  size="small" 
-                  label={`ລະຫັດລົດ: ${carId}`} 
-                  sx={{ ml: 1, height: 20, fontSize: '0.7rem' }} 
-                />
-              )}
             </Box>
           </Box>
         )}

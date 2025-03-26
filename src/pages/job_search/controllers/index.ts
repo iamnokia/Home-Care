@@ -6,7 +6,7 @@ import { CarModel } from "../../../models/car";
 
 const useMainController = () => {
   const [data, setData] = useState<EmployeeModel[]>([]);
-  const [carData, setCarData] = useState<CarModel[]>([]);
+  const [car, setCar] = useState<CarModel[]>([])
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const handleNaVigate = (path: string) => {
@@ -29,29 +29,29 @@ const useMainController = () => {
     }
   };
 
-  const handleGetCarData = async (): Promise<void> => {
+  const handleGetCarByCatId = async (): Promise<void> => {
     try {
       setLoading(true);
-      const res = await axios.get("https://homecare-pro.onrender.com/emp_car/read_emp_car", {
+      // Using the id parameter in the URL
+      const res = await axios.get("https://homecare-pro.onrender.com/employees/read_emp_car_employees/5", {
         headers: {
-          // 'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json'
         }
       });
-      setCarData(res.data);
+      setCar(Array.isArray(res.data) ? res.data : [res.data]); // Handle both array and single object responses
     } catch (error) {
       console.error("Error fetching employee data:", error);
     } finally {
-      setLoading(false);
+      setLoading(false);  
     }
   };
 
   useEffect(() => {
     handleGetAllData();
-    handleGetCarData();
+    handleGetCarByCatId();
   }, []);
   return {
-    carData,
+    car,
     loading,
     data,
     handleNaVigate,

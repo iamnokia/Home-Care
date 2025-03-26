@@ -31,10 +31,8 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import BadgeIcon from "@mui/icons-material/Badge";
 import SpeedIcon from "@mui/icons-material/Speed";
 import TimeToLeaveIcon from "@mui/icons-material/TimeToLeave";
-import { LOCATION_PATH } from "../../../routes/path";
-import useMainController from "../controllers/index"
+import useMainController from "../controllers/index";
 import { Gender } from "../../../enums/gender";
-
 
 // Font size constants with responsive adjustments
 const getFontSize = (isSmallScreen) => ({
@@ -44,27 +42,6 @@ const getFontSize = (isSmallScreen) => ({
   button: isSmallScreen ? "0.95rem" : "1.05rem",
 });
 
-
-// Mock car data (this would ideally come from the API)
-const carData = {
-  moving: {
-    carId: "M001",
-    carBrand: "Toyota",
-    carModel: "Hiace",
-    licensePlate: "ກຂ 1234",
-    carYear: "2020",
-    carImage: "/api/placeholder/400/300",
-  },
-  bathroom: {
-    carId: "B002",
-    carBrand: "Isuzu",
-    carModel: "D-Max",
-    licensePlate: "ຄງ 5678",
-    carYear: "2019",
-    carImage: "/api/placeholder/400/300",
-  }
-};
-
 // Mock reviews data (this would ideally come from the API)
 const mockReviews = [
   { id: 1, rating: 5, comment: "ດີຫຼາຍ", user: "ນາງ ກອນນະລີ", date: "15 ມີນາ 2025" },
@@ -73,20 +50,20 @@ const mockReviews = [
 ];
 
 const ServiceDetailsPage = () => {
-  const {id} = useParams();
-  const { data, loading, handleNaVigate } = useMainController();
+  const { data, car, loading, handleNaVigate } = useMainController();
   const employee = data[0]; // Get the first employee from the data array
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isMediumScreen = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"));
   const navigate = useNavigate();
+  const { id } = useParams();
 
   // Apply font sizes based on screen size
   const fontSize = getFontSize(isSmallScreen);
 
   // Determine the service type based on category name
-  const getCategoryType = (categoryName: string): string => {
+  const getCategoryType = (categoryName) => {
     const lowerCaseCategory = categoryName?.toLowerCase() || "";
     if (lowerCaseCategory.includes("ຂົນສົ່ງ") || lowerCaseCategory.includes("moving")) {
       return "moving";
@@ -96,6 +73,9 @@ const ServiceDetailsPage = () => {
     return "cleaning"; // Default to cleaning
   };
 
+  // Check if category ID is 5 to show car details
+  const showCarDetails = employee?.cat_id === 5;
+
   // Service data from API
   const [serviceData, setServiceData] = useState({
     id: "",
@@ -104,11 +84,10 @@ const ServiceDetailsPage = () => {
     surname: "",
     price: 0,
     priceFormatted: "",
-    image: "/api/placeholder/400/300",
+    image: "",
     category: "",
     categoryType: "cleaning",
     gender: "",
-    age: 0,
     village: "",
     city: "",
     skills: "",
@@ -122,21 +101,8 @@ const ServiceDetailsPage = () => {
     if (employee) {
       const categoryType = getCategoryType(employee.cat_name);
       
-      // Calculate age if we have the created_at field (assuming it contains DOB)
-      const calculateAge = () => {
-        try {
-          // This is a placeholder - you'll need to adapt this based on your actual data structure
-          const createdDate = new Date(employee.created_at);
-          const today = new Date();
-          const age = today.getFullYear() - createdDate.getFullYear();
-          return age > 0 ? age : 21; // Default to 21 if calculation fails
-        } catch (error) {
-          return 21; // Default age
-        }
-      };
-
       // Format the price with commas
-      const formatPrice = (price: string) => {
+      const formatPrice = (price) => {
         const numPrice = parseFloat(price);
         return numPrice.toLocaleString() + " KIP";
       };
@@ -159,26 +125,38 @@ const ServiceDetailsPage = () => {
         category: employee.cat_name,
         categoryType: categoryType,
         gender: genderText,
-        age: calculateAge(),
+        cat_id: employee.cat_id, // Add category ID
         village: village,
         city: employee.city || "ວຽງຈັນ",
         skills: employee.cv || "ຂ້ອຍມີປະສົບການ 3 ປີໃນການເປັນແມ່ບ້ານ. ຂ້ອຍສາມາດດູດຝຸ່ນ, ອະນາໄມເຮືອນ, ຊັກເຄື່ອງ, ແລະ ປຸງແຕ່ງອາຫານໄດ້. ຂ້ອຍເຮັດວຽກຢ່າງຂະຫຍັນຂັນແຂ່ງ ແລະ ຮັບຜິດຊອບສູງ.",
-        rating: 4.5, // Placeholder - would ideally come from API
+        rating: 4.5,
         reviews: mockReviews,
       };
 
-      // Add car-related properties if it's a car service
-      if (categoryType === "moving" || categoryType === "bathroom") {
-        const carDetails = carData[categoryType];
-        Object.assign(newServiceData, carDetails);
+      // Add car-related properties if the category ID is 5 and we have car data
+      if (showCarDetails && car && car.length > 0) {
+        // Filter car data to find the matching car for this employee
+        const employeeCar = car.find(c => c.emp_id === employee.id);
+        
+        if (employeeCar) {
+          // Use the employee's specific car
+          Object.assign(newServiceData, {
+            carId: employeeCar.id || "N/A",
+            carBrand: employeeCar.car_brand || "N/A",
+            carModel: employeeCar.model || "N/A",
+            licensePlate: employeeCar.license_plate || "N/A",
+            carYear: employeeCar.created_at ? new Date(employeeCar.created_at).getFullYear().toString() : "N/A",
+            carImage: employeeCar.car_image,
+          });
+        } else {
+          // No matching car found for this employee
+          console.log("No car found for employee ID:", employee.id);
+        }
       }
 
       setServiceData(newServiceData);
     }
-  }, [employee]);
-
-  // Determine if this is a car-based service
-  const isCarService = serviceData.categoryType === 'moving';
+  }, [employee, car, showCarDetails]);
 
   // Calculate container width based on screen size
   const getContainerWidth = () => {
@@ -260,7 +238,7 @@ const ServiceDetailsPage = () => {
                 letterSpacing: "0.5px"
               }}
             >
-              {isCarService ? 'ລາຍລະອຽດການບໍລິການ ແລະ ລົດ' : 'ລາຍລະອຽດການບໍລິການ'}
+              {showCarDetails ? 'ລາຍລະອຽດການບໍລິການ ແລະ ລົດ' : 'ລາຍລະອຽດການບໍລິການ'}
             </Typography>
           </Box>
 
@@ -294,12 +272,6 @@ const ServiceDetailsPage = () => {
               </Typography>
               
               <Stack direction="row" spacing={2} sx={{ mb: 1.5 }}>
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <CalendarTodayIcon sx={{ fontSize: "1rem", mr: 0.5, opacity: 0.8 }} />
-                  <Typography sx={{ fontSize: fontSize.text }}>
-                    {serviceData.age} ປີ
-                  </Typography>
-                </Box>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <PersonIcon sx={{ fontSize: "1rem", mr: 0.5, opacity: 0.8 }} />
                   <Typography sx={{ fontSize: fontSize.text }}>
@@ -382,8 +354,8 @@ const ServiceDetailsPage = () => {
         </Box>
 
         <Box sx={{ px: { xs: 2, sm: 3 }, width: "100%" }}>
-          {/* Car details section - Only shown for moving and bathroom categories */}
-          {isCarService && (
+          {/* Car details section - Only shown for category ID 5 */}
+          {showCarDetails && (
             <>
               <Box sx={{ 
                 display: "flex", 
@@ -405,7 +377,6 @@ const ServiceDetailsPage = () => {
                 }}>
                   <img
                     src={serviceData.carImage}
-                    alt={`${serviceData.carBrand} ${serviceData.carModel}`}
                     style={{
                       width: "100%",
                       height: "100%",
@@ -413,28 +384,6 @@ const ServiceDetailsPage = () => {
                     }}
                   />
                   {/* Overlay gradient for better text visibility */}
-                  <Box sx={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: "40%",
-                    background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)",
-                    display: "flex",
-                    alignItems: "flex-end",
-                    p: 2,
-                  }}>
-                    <Typography
-                      sx={{
-                        color: "white",
-                        fontWeight: "bold",
-                        fontSize: { xs: "1.3rem", sm: "1.5rem" },
-                        textShadow: "0 2px 4px rgba(0,0,0,0.5)",
-                      }}
-                    >
-                      {serviceData.carBrand} {serviceData.carModel} • {serviceData.carYear}
-                    </Typography>
-                  </Box>
                 </Box>
 
                 {/* Right side: Vehicle information */}
@@ -459,7 +408,7 @@ const ServiceDetailsPage = () => {
                       overflow: "hidden",
                       border: "1px solid rgba(0,0,0,0.05)",
                       position: "relative",
-                      height: { md: "calc(100% - 42px)" }, // Adjust height to match the image (minus the heading)
+                      height: { md: "calc(100% - 42px)" },
                     }}
                   >
                     <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
@@ -479,18 +428,6 @@ const ServiceDetailsPage = () => {
 
                         <Grid item xs={6}>
                           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                            <CalendarTodayIcon sx={{ fontSize: "1.1rem", mr: 1, color: "#611463" }} />
-                            <Typography sx={{ fontSize: fontSize.text, fontWeight: "medium", color: "#611463" }}>
-                              ປີຜະລິດ
-                            </Typography>
-                          </Box>
-                          <Typography sx={{ fontSize: fontSize.text, ml: 4, color: "#424242" }}>
-                            {serviceData.carYear}
-                          </Typography>
-                        </Grid>
-
-                        <Grid item xs={6}>
-                          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                             <BadgeIcon sx={{ fontSize: "1.1rem", mr: 1, color: "#611463" }} />
                             <Typography sx={{ fontSize: fontSize.text, fontWeight: "medium", color: "#611463" }}>
                               ປ້າຍທະບຽນ
@@ -498,18 +435,6 @@ const ServiceDetailsPage = () => {
                           </Box>
                           <Typography sx={{ fontSize: fontSize.text, ml: 4, color: "#424242" }}>
                             {serviceData.licensePlate}
-                          </Typography>
-                        </Grid>
-
-                        <Grid item xs={6}>
-                          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                            <SpeedIcon sx={{ fontSize: "1.1rem", mr: 1, color: "#611463" }} />
-                            <Typography sx={{ fontSize: fontSize.text, fontWeight: "medium", color: "#611463" }}>
-                              ລະຫັດລົດ
-                            </Typography>
-                          </Box>
-                          <Typography sx={{ fontSize: fontSize.text, ml: 4, color: "#424242" }}>
-                            {serviceData.carId}
                           </Typography>
                         </Grid>
                       </Grid>
@@ -700,8 +625,7 @@ const ServiceDetailsPage = () => {
             </Button>
           </Paper>
         </Box>
-        </Box>
-
+      </Box>
     </Container>
   );
 };

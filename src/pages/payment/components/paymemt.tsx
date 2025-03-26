@@ -18,6 +18,9 @@ import {
   useTheme,
   useMediaQuery,
   Chip,
+  Dialog,
+  DialogContent,
+  Zoom,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -27,6 +30,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import PaymentsIcon from "@mui/icons-material/Payments";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { LOCATION_PATH, PAYMENT_PATH, SERVICE_STATUS_PATH } from "../../../routes/path";
 
 // Font size constants
@@ -69,6 +73,74 @@ const serviceItems = [
   },
 ];
 
+// Confetti component - simple implementation without external dependency
+const Confetti = ({ active }) => {
+  const [particles, setParticles] = useState([]);
+  const colors = ["#611463", "#7b2981", "#1e8e3e", "#f8f0f9", "#e6c9e9", "#FFD700"];
+  
+  useEffect(() => {
+    if (active) {
+      const newParticles = [];
+      for (let i = 0; i < 100; i++) {
+        newParticles.push({
+          left: Math.random() * 100 + '%',
+          top: Math.random() * 20 - 20 + '%',
+          size: Math.random() * 10 + 5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          speed: Math.random() * 3 + 2,
+          angle: Math.random() * 90 - 45,
+        });
+      }
+      setParticles(newParticles);
+      
+      // Clean up after animation
+      const timer = setTimeout(() => {
+        setParticles([]);
+      }, 2500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [active]);
+  
+  if (!active) return null;
+  
+  return (
+    <Box sx={{ 
+      position: 'absolute', 
+      width: '100%', 
+      height: '100%', 
+      top: 0, 
+      left: 0, 
+      overflow: 'hidden',
+      pointerEvents: 'none',
+      zIndex: 1000
+    }}>
+      {particles.map((particle, i) => (
+        <Box
+          key={i}
+          sx={{
+            position: 'absolute',
+            left: particle.left,
+            top: particle.top,
+            width: particle.size,
+            height: particle.size * 1.5,
+            backgroundColor: particle.color,
+            borderRadius: '2px',
+            transform: `rotate(${particle.angle}deg)`,
+            animation: `fall ${particle.speed}s linear forwards`,
+            '@keyframes fall': {
+              to: {
+                top: '120%',
+                transform: `rotate(${particle.angle + 360}deg)`
+              }
+            }
+          }}
+        />
+      ))}
+    </Box>
+  );
+};
+
 const PaymentPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -83,6 +155,8 @@ const PaymentPage = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState("success");
   const [paymentError, setPaymentError] = useState("");
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [isExploding, setIsExploding] = useState(false);
 
   // Calculate total when component loads
   useEffect(() => {
@@ -136,14 +210,17 @@ const PaymentPage = () => {
       return;
     }
     
-    setAlertMessage("ການຊຳລະເງິນສຳເລັດແລ້ວ!");
-    setAlertSeverity("success");
-    setAlertOpen(true);
+    // Show success dialog with animation
+    setSuccessDialogOpen(true);
     
-    // Navigate to confirmation page after a short delay
+    // Set confetti explosion
+    setIsExploding(true);
+    
+    // Hide the dialog and navigate after delay
     setTimeout(() => {
-      navigate("/confirmation");
-    }, 1500);
+      setSuccessDialogOpen(false);
+      navigate(SERVICE_STATUS_PATH);
+    }, 3000);
   };
 
   return (
@@ -611,13 +688,105 @@ const PaymentPage = () => {
                   color: "#f5f5f5"
                 }
               }}
-              onClick={() => navigate(SERVICE_STATUS_PATH)} 
+              onClick={handlePaymentSubmit} 
               disabled={parseInt(paymentAmount) < totalAmount}
             >
               ຊຳລະເງິນ
             </Button>
           </Stack>
         </Paper>
+        
+        {/* Success Payment Dialog */}
+        <Dialog
+          open={successDialogOpen}
+          maxWidth="sm"
+          fullWidth
+          TransitionComponent={Zoom}
+          PaperProps={{
+            style: {
+              borderRadius: '16px',
+              boxShadow: '0 12px 24px rgba(97, 20, 99, 0.2)',
+              padding: '8px',
+              background: 'linear-gradient(135deg, #fff 0%, #f8f0f9 100%)',
+              overflow: 'visible'
+            }
+          }}
+        >
+          <DialogContent sx={{ position: 'relative', textAlign: 'center', py: 4 }}>
+            {/* Confetti animation */}
+            <Confetti active={isExploding} />
+            
+            {/* Success icon with animation */}
+            <Box sx={{ 
+              position: 'relative',
+              animation: 'pulse 1.5s infinite',
+              '@keyframes pulse': {
+                '0%': {
+                  transform: 'scale(1)',
+                },
+                '50%': {
+                  transform: 'scale(1.05)',
+                },
+                '100%': {
+                  transform: 'scale(1)',
+                },
+              }
+            }}>
+              <CheckCircleIcon 
+                sx={{ 
+                  fontSize: '100px', 
+                  color: colors.success,
+                  filter: 'drop-shadow(0 4px 8px rgba(30, 142, 62, 0.3))',
+                }} 
+              />
+            </Box>
+            
+            {/* Success message */}
+            <Typography
+              variant="h5"
+              sx={{
+                mt: 3,
+                mb: 1,
+                fontWeight: 'bold',
+                color: colors.primary,
+                fontSize: '1.8rem',
+              }}
+            >
+              ການຊຳລະເງິນສຳເລັດແລ້ວ!
+            </Typography>
+            
+            <Typography
+              variant="body1"
+              sx={{
+                color: colors.textSecondary,
+                mb: 3,
+                fontSize: '1rem',
+              }}
+            >
+              ຂອບໃຈສຳລັບການຊຳລະເງິນ. ກຳລັງນຳທ່ານໄປຫາໜ້າຖັດໄປ...
+            </Typography>
+            
+            {/* Payment details */}
+            <Box sx={{
+              mt: 2,
+              p: 2,
+              backgroundColor: colors.secondary,
+              borderRadius: '12px',
+              border: `1px dashed ${colors.accent}`,
+              display: 'inline-block'
+            }}>
+              <Typography fontWeight="bold" sx={{ color: colors.primary }}>
+                ຈຳນວນເງິນທີ່ຊຳລະ: <span style={{ color: colors.success }}>{formatCurrency(paymentAmount)}</span>
+              </Typography>
+              
+              {change > 0 && (
+                <Typography fontWeight="bold" sx={{ mt: 1, color: colors.primary }}>
+                  ເງິນທອນ: <span style={{ color: colors.success }}>{formatCurrency(change)}</span>
+                </Typography>
+              )}
+            </Box>
+          </DialogContent>
+        </Dialog>
         
         {/* Snackbar Alert */}
         <Snackbar 

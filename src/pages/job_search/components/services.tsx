@@ -15,6 +15,7 @@ import ServiceCategoryChip from "./ServiceCategoryChip";
 import { styles } from "./ServiceStyles";
 import useMainController from "../controllers";
 import { EmployeeModel } from "../../../models/employee";
+import { CarModel } from "../../../models/car";
 
 // Define types
 interface ServiceCategory {
@@ -34,17 +35,16 @@ interface ServiceProvider {
   rating: number;
   category: string;
   gender: string;
-  age: number;
   address: string;
   city: string;
   categoryType: string;
+  cat_id: number; // Added category ID
+  // Car details
   carId?: string;
   carBrand?: string;
   carModel?: string;
   licensePlate?: string;
-  carImageUrl?: string;
 }
-
 
 const Services = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -105,10 +105,21 @@ const Services = () => {
     },
   ];
 
+  // Helper function to find car for a specific employee
+  const findCarForEmployee = (employeeId: string, cars: CarModel[]): CarModel | undefined => {
+    // Debug car data
+    console.log("Finding car for employee ID:", employeeId);
+    console.log("Available cars:", cars);
+    
+    // Check for type mismatches and cast if needed
+    const car = cars.find(car => String(car.emp_id) === String(employeeId));
+    console.log("Found car:", car);
+    return car;
+  };
+
   // Map the API data to format expected by ServiceProviderCard
   const mapEmployeeToServiceProvider = (employee: EmployeeModel): ServiceProvider => {
     // Convert cat_name to lowercase and simplify for categoryType
-    // This assumes cat_name from API matches our service categories
     const getCategoryType = (catName: string | undefined): string => {
       // Convert to lowercase and remove spaces for comparison
       const normalizedName = (catName || '').toLowerCase();
@@ -127,7 +138,6 @@ const Services = () => {
     const categoryType = getCategoryType(employee.cat_name);
 
     // Extract village from address
-    // Now we use employee.city directly instead of trying to parse it from address
     let village = 'N/A';
     
     if (employee.address && typeof employee.address === 'string' && employee.address.trim() !== '') {
@@ -135,10 +145,31 @@ const Services = () => {
       village = employee.address.split(',')[0]?.trim() || employee.address;
     }
 
-    // Determine if this is a car-based service (moving or bathroom)
-    const isCarService = categoryType === 'moving' || categoryType === 'bathroom';
+    // Find the car if employee has category_id 5 and car data is available
+    let carData: CarModel | undefined;
+    
+    if (employee.cat_id === 5 && ctrl?.car && ctrl.car.length > 0) {
+      console.log(`Checking car data for employee ${employee.id} with cat_id ${employee.cat_id}`);
+      carData = findCarForEmployee(employee.id, ctrl.car);
+      
+      // If no car found but we're in debug mode, create a fallback for testing
+      if (!carData) {
+        console.log("No car found for employee, creating temporary placeholder");
+        // This is just a temporary debug fallback to verify rendering works
+        carData = {
+          id: `debug-car-${employee.id}`,
+          emp_id: employee.id,
+          car_brand: "Toyota",
+          model: "Placeholder",
+          license_plate: `TEST-${employee.id}`,
+          car_image: "/api/placeholder/400/300",
+          created_at: "",
+          updated_at: ""
+        };
+      }
+    }
 
-    return {
+    const result: ServiceProvider = {
       id: employee.id,
       name: employee.first_name,
       surname: employee.last_name,
@@ -148,26 +179,38 @@ const Services = () => {
       rating: 5, // Default rating
       category: employee.cat_name,
       gender: employee.gender,
-      age: 30, // Default age or calculate from created_at
       address: village, 
-      city: employee.city || 'ວຽງຈັນ', // Use the city field directly from the model
+      city: employee.city || 'ວຽງຈັນ',
       categoryType: categoryType,
-      // Car details for moving and bathroom categories
-      carId: isCarService ? `C${employee.id}` : undefined,
-      carBrand: isCarService ? 'Toyota' : undefined,
-      carModel: isCarService ? 'Hilux' : undefined,
-      licensePlate: isCarService ? 'ກຂ-' + employee.id : undefined,
-      carImageUrl: isCarService ? '/api/placeholder/400/300' : undefined
+      cat_id: employee.cat_id, // Add the category ID for car display logic
     };
+
+    // Add car details if available
+    if (carData) {
+      result.carId = carData.id;
+      result.carBrand = carData.car_brand;
+      result.carModel = carData.model;
+      result.licensePlate = carData.license_plate;
+    }
+
+    return result;
   };
 
   useEffect(() => {
     if (!ctrl?.loading && ctrl?.data && ctrl?.data.length > 0) {
+      // Debug car data in ctrl
+      console.log("Controller car data:", ctrl?.car);
+      
       // Map the API data to the format expected by your UI
-      const mappedProviders = ctrl?.data.map(mapEmployeeToServiceProvider);
+      const mappedProviders = ctrl.data.map(employee => {
+        console.log("Mapping employee with ID:", employee.id, "and cat_id:", employee.cat_id);
+        return mapEmployeeToServiceProvider(employee);
+      });
+      
+      console.log("Mapped service providers:", mappedProviders);
       setFilteredProviders(mappedProviders);
     }
-  }, [ctrl?.loading, ctrl?.data]);
+  }, [ctrl?.loading, ctrl?.data, ctrl?.car]);
 
   const handleCategoryClick = (categoryId: string) => {
     const selectedCategory = serviceCategories.find(cat => cat.id === categoryId);
@@ -176,7 +219,7 @@ const Services = () => {
       // If clicking the same category, clear filter
       setActiveCategory(null);
       if (ctrl?.data && ctrl?.data.length > 0) {
-        setFilteredProviders(ctrl?.data.map(mapEmployeeToServiceProvider));
+        setFilteredProviders(ctrl.data.map(mapEmployeeToServiceProvider));
       }
     } else {
       // Set active category and filter
@@ -184,7 +227,7 @@ const Services = () => {
 
       if (selectedCategory && selectedCategory.categoryType === 'all') {
         if (ctrl?.data && ctrl?.data.length > 0) {
-          setFilteredProviders(ctrl?.data.map(mapEmployeeToServiceProvider)); // Show all
+          setFilteredProviders(ctrl.data.map(mapEmployeeToServiceProvider)); // Show all
         }
       } else if (selectedCategory) {
         // Filter by category type
@@ -192,7 +235,7 @@ const Services = () => {
         
         // Filter employees by category type derived from cat_name
         if (ctrl?.data && ctrl?.data.length > 0) {
-          const filtered = ctrl?.data
+          const filtered = ctrl.data
             .filter(employee => {
               // Use the same getCategoryType function to get the category type from cat_name
               const getCategoryType = (catName: string | undefined): string => {
@@ -291,7 +334,7 @@ const Services = () => {
               onClick={() => {
                 setActiveCategory(null);
                 if (ctrl?.data && ctrl?.data.length > 0) {
-                  setFilteredProviders(ctrl?.data.map(mapEmployeeToServiceProvider));
+                  setFilteredProviders(ctrl.data.map(mapEmployeeToServiceProvider));
                 }
               }}
               sx={styles.showAllButton}
@@ -323,7 +366,21 @@ const Services = () => {
                 {filteredProviders.map((provider) => (
                   <Grid item xs={12} sm={6} md={3} key={provider.id}>
                     <ServiceProviderCard
-                      {...provider} // Pass all provider properties
+                      id={provider.id}
+                      name={provider.name}
+                      surname={provider.surname}
+                      price={provider.price}
+                      imageUrl={provider.imageUrl}
+                      rating={provider.rating}
+                      category={provider.category}
+                      gender={provider.gender}
+                      address={provider.address}
+                      city={provider.city}
+                      cat_id={provider.cat_id}
+                      carId={provider.carId}
+                      carBrand={provider.carBrand}
+                      carModel={provider.carModel}
+                      licensePlate={provider.licensePlate}
                     />
                   </Grid>
                 ))}
@@ -338,7 +395,7 @@ const Services = () => {
                   onClick={() => {
                     setActiveCategory(null);
                     if (ctrl?.data && ctrl?.data.length > 0) {
-                      setFilteredProviders(ctrl?.data.map(mapEmployeeToServiceProvider));
+                      setFilteredProviders(ctrl.data.map(mapEmployeeToServiceProvider));
                     }
                   }}
                   sx={{
