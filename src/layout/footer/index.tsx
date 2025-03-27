@@ -34,7 +34,7 @@ const QUICK_LINKS = [
   { label: "ການບໍລິການ", path: SERVICE_PATH },
   { label: "ກ່ຽວກັບພວກເຮົາ", path: CONTACT_US_PATH },
   { label: "ຕິດຕໍ່ພວກເຮົາ", path: CONTACT_US_PATH },
-  { label: "ນນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ", path: TERMS_PRIVACY_PATH },
+  { label: "ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ", path: TERMS_PRIVACY_PATH },
 ];
 
 // Define social media links with placeholder URLs
