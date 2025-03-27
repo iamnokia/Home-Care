@@ -19,16 +19,13 @@ import {
   Rating,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
-import PersonIcon from "@mui/icons-material/Person";
 import CategoryIcon from "@mui/icons-material/Category";
 import HomeIcon from "@mui/icons-material/Home";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import DownloadIcon from "@mui/icons-material/Download";
-import StarIcon from '@mui/icons-material/Star';
-import FeedbackIcon from '@mui/icons-material/Feedback';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { PAYMENT_PATH, SERVICE_STATUS_PATH } from "../../../routes/path";
+import { HOME_PATH } from "../../../routes/path";
 
 // Font size constants
 const fontSize = {
@@ -110,7 +107,7 @@ const CommentPage = () => {
 
     // Navigate to confirmation page after a short delay
     setTimeout(() => {
-      navigate(SERVICE_STATUS_PATH);
+      navigate(HOME_PATH);
     }, 1500);
   };
 
