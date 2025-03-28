@@ -462,7 +462,7 @@ const SettingsPage = () => {
                                     textShadow: "1px 1px 3px rgba(0,0,0,0.2)"
                                 }}
                             >
-                                Settings
+                                ການຕັ້ງຄ່າ
                             </Typography>
                             <Typography
                                 variant="h6"
@@ -474,7 +474,7 @@ const SettingsPage = () => {
                                     mx: { xs: "auto", md: 0 }
                                 }}
                             >
-                                Customize your experience to make HomeCare work best for you
+                                ປັບແຕ່ງ HomeCare ເພື່ອປະສົບການທີ່ດີທີ່ສຸດ
                             </Typography>
                         </Grid>
                         <Grid item xs={12} md={6} sx={{ display: "flex", justifyContent: { xs: "center", md: "flex-end" } }}>
