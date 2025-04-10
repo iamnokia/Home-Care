@@ -1,6 +1,5 @@
-import React, { useState, ChangeEvent } from "react";
 import {
-  Autocomplete, 
+  Autocomplete,
   Box,
   Container,
   Typography,
@@ -13,17 +12,13 @@ import {
   ListItem,
   ListItemText,
   FormControl,
-  FormControlLabel,
   Chip,
   Fade,
   Divider,
   alpha,
   MenuItem,
   Select,
-  SelectChangeEvent,
   FormHelperText,
-  Checkbox,
-  AlertColor,
   Grid,
   Card,
   CardContent,
@@ -32,87 +27,36 @@ import { useNavigate, useParams } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
-import HomeIcon from "@mui/icons-material/Home";
-import BusinessIcon from "@mui/icons-material/Business";
-import StoreIcon from "@mui/icons-material/Store";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
-import previewImage from "@mui/icons-material/BookmarkBorder";
 import PhoneIcon from "@mui/icons-material/Phone";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import UploadIcon from "@mui/icons-material/Upload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
-import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import LinkIcon from "@mui/icons-material/Link";
 import LaunchIcon from "@mui/icons-material/Launch";
 import ErrorIcon from "@mui/icons-material/Error";
-import HouseOutlinedIcon from '@mui/icons-material/HouseOutlined';
-import LocationCityOutlinedIcon from '@mui/icons-material/LocationCityOutlined';
+import HouseOutlinedIcon from "@mui/icons-material/HouseOutlined";
+import LocationCityOutlinedIcon from "@mui/icons-material/LocationCityOutlined";
 import { LocationCity } from "@mui/icons-material";
 import { LOCATION_PATH } from "../../../routes/path";
-
+import useMainController from "../controllers";
+import HomeIcon from "@mui/icons-material/Home";
 
 const districts: string[] = [
-  'ຈັນທະບູລີ',
-  'ສີສັດຕະນາກ',
-  'ໄຊເສດຖາ',
-  'ຫາດຊາຍຟອງ',
-  'ນາຊາຍທອງ',
-  'ສີໂຄດຕະບອງ',
-  'ໄຊທານີ'
+  "CHANTHABULY",
+  "SIKHOTTABONG",
+  "XAYSETHA",
+  "SISATTANAK",
+  "NAXAITHONG",
+  "XAYTANY",
+  "HADXAIFONG",
 ];
-// Define types for errors
-interface ErrorState {
-  placeName?: string;
-  [key: string]: string | undefined;
-}
-
-// Define TypeScript interfaces
-interface LocationType {
-  id: number;
-  name: string;
-  description: string;
-  type: "home" | "work" | "other";
-}
 
 interface CountryCode {
   code: string;
   country: string;
 }
-
-interface ImageFile {
-  file: File;
-  preview: string;
-}
-
-interface ErrorState {
-  placeName?: string;
-  detailAddress?: string;
-  phoneNumber?: string;
-  mapLink?: string;
-}
-
-// Sample saved locations
-const initialSavedLocations: LocationType[] = [
-  {
-    id: 1,
-    name: "ບ້ານເລກທີ 123, ຖະໜົນ 23 ສິງຫາ",
-    description: "ຕຶກ ABC, ຊັ້ນ 3, ຫ້ອງ 302",
-    type: "home",
-  },
-  {
-    id: 2,
-    name: "ອາຄານ XYZ",
-    description: "ບ້ານເລກທີ 456, ຖະໜົນ ດົງປາລານ",
-    type: "work",
-  },
-  {
-    id: 3,
-    name: "ຮ້ານກາເຟສີຂຽວ",
-    description: "ບ້ານເລກທີ 789, ຖະໜົນ ໂພນຕ້ອງ",
-    type: "other",
-  },
-];
 
 // Country codes for phone numbers
 const countryCodes: CountryCode[] = [
@@ -126,149 +70,22 @@ const countryCodes: CountryCode[] = [
 ];
 
 const LocationDetailPage: React.FC = () => {
-  const {id} = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
-  // State hooks
-  const [savedLocations, setSavedLocations] = useState<LocationType[]>(initialSavedLocations);
-  const [selectedLocation, setSelectedLocation] = useState<LocationType | null>(null);
-  const [detailAddress, setDetailAddress] = useState<string>("");
-  const [placeName, setPlaceName] = useState<string>("");
-  const [placeVillage, setVillage] = useState<string>("");
-  const [placeCity, setCity] = useState<string>("");
-  const [countryCode, setCountryCode] = useState<string>("+856");
-  const [phoneNumber, setPhoneNumber] = useState<string>("");
-  const [hasWhatsapp, setHasWhatsapp] = useState<boolean>(false);
-  const [mapLink, setMapLink] = useState<string>("");
-  const [images, setImages] = useState<ImageFile[]>([]);
-  const [errors, setErrors] = useState<ErrorState>({});
-  const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
-  const [snackbarMessage, setSnackbarMessage] = useState<string>("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<AlertColor>("success");
+  const ctrl = useMainController();
 
-  // Handle location selection
-  const handleLocationSelect = (location: LocationType): void => {
-    setSelectedLocation(location);
-    setDetailAddress(location.description);
-    setPlaceName(location.name);
-    
-    // Save location name to local storage
-    localStorage.setItem('selectedLocationName', location.name);
-    
-    // If you want to save more location information, you can store it as JSON
-    localStorage.setItem('selectedLocation', JSON.stringify({
-      id: location.id,
-      name: location.name,
-      description: location.description
-    }));
-  };
-
-  // Handle delete location
-  const handleDeleteLocation = (id: number, event: React.MouseEvent): void => {
-    event.stopPropagation(); // Prevent triggering the onClick of parent ListItem
-    const updatedLocations = savedLocations.filter(location => location.id !== id);
-    setSavedLocations(updatedLocations);
-
-    // If the deleted location was selected, reset selection
-    if (selectedLocation && selectedLocation.id === id) {
-      setSelectedLocation(null);
-      setDetailAddress("");
-      setPlaceName("");
-    }
-  };
-
-  // Handle confirm location
-  const handleConfirmLocation = (): void => {
-    // Validation
-    const newErrors: ErrorState = {};
-    if (!placeName.trim()) newErrors.placeName = "ກະລຸນາໃສ່ຊື່ສະຖານທີ່";
-    if (!detailAddress.trim()) newErrors.detailAddress = "ກະລຸນາໃສ່ລາຍລະອຽດທີ່ຢູ່";
-    if (!phoneNumber.trim()) newErrors.phoneNumber = "ກະລຸນາໃສ່ເບີໂທລະສັບ";
-    if (!mapLink.trim()) newErrors.mapLink = "ກະລຸນາໃສ່ລິ້ງແຜນທີ່";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      setSnackbarMessage("ກະລຸນາກວດສອບຂໍ້ມູນອີກຄັ້ງ");
-      setSnackbarSeverity("error");
-      setOpenSnackbar(true);
-      return;
-    }
-
-    // Here you would typically save the selected location and navigate back
-    setSnackbarMessage("ບັນທຶກທີ່ຢູ່ສຳເລັດແລ້ວ");
-    setSnackbarSeverity("success");
-    setOpenSnackbar(true);
-
-    // Navigate after successful save
-    setTimeout(() => {
-      navigate(LOCATION_PATH);
-    }, 1500);
-  };
-
-  // Open Google Maps with the provided link
-  const handleOpenGoogleMaps = (): void => {
-    if (mapLink) {
-      window.open(mapLink, '_blank');
-    } else {
-      window.open('https://www.google.com/maps', '_blank');
-    }
-  };
-
-  // Handle image upload
-  const handleImageChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    if (event.target.files) {
-      const newFiles = Array.from(event.target.files);
-
-      // Check if adding new files would exceed the limit of 3
-      if (images.length + newFiles.length > 3) {
-        setSnackbarMessage("ສາມາດອັບໂຫລດຮູບພາບໄດ້ສູງສຸດ 3 ຮູບເທົ່ານັ້ນ");
-        setSnackbarSeverity("warning");
-        setOpenSnackbar(true);
-        return;
-      }
-
-      const newImages: ImageFile[] = [...images];
-
-      newFiles.forEach(file => {
-        // Create a preview URL
-        const reader = new FileReader();
-        reader.onload = (e: ProgressEvent<FileReader>) => {
-          if (e.target?.result) {
-            newImages.push({
-              file: file,
-              preview: e.target.result as string
-            });
-            setImages([...newImages]);
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-  };
-
-  // Handle country code change
-  const handleCountryCodeChange = (event: SelectChangeEvent): void => {
-    setCountryCode(event.target.value);
-  };
-
-  // Get icon based on location type
   const getLocationIcon = (type: string): React.ReactElement => {
     switch (type) {
       case "home":
         return <HomeIcon />;
-      case "work":
-        return <BusinessIcon />;
       default:
-        return <StoreIcon />;
+        return <HomeIcon />;
     }
   };
 
-  // Get color based on location type
-  const getLocationColor = (type: string): string => {
-    switch (type) {
-      default:
-        return "#f7931e";
-    }
-  };
+  const displayedAddresses = ctrl?.showAllAddresses
+    ? ctrl?.address
+    : ctrl?.address.slice(0, 3);
 
   return (
     <Box
@@ -349,7 +166,7 @@ const LocationDetailPage: React.FC = () => {
                 mb: 1.5,
                 fontWeight: 600,
                 display: "flex",
-                alignItems: "center"
+                alignItems: "center",
               }}
             >
               <BookmarkIcon sx={{ mr: 1, fontSize: "1.2rem" }} />
@@ -364,19 +181,20 @@ const LocationDetailPage: React.FC = () => {
                 overflow: "hidden",
               }}
             >
-              {savedLocations.map((location) => (
-                <Fade in={true} key={location.id} timeout={300 + (location.id * 100)}>
+              {displayedAddresses.map((location) => (
+                <Fade in={true} key={location.user_id}>
                   <ListItem
                     button
-                    onClick={() => handleLocationSelect(location)}
+                    onClick={() => ctrl?.handleLocationSelect(location)}
                     sx={{
                       mb: 0.5,
                       px: 2,
                       py: 1.5,
                       borderRadius: 1,
-                      backgroundColor: selectedLocation?.id === location.id
-                        ? alpha("#611463", 0.05)
-                        : "transparent",
+                      backgroundColor:
+                        ctrl?.selectedLocation?.user_id === location.user_id
+                          ? alpha("#611463", 0.05)
+                          : "transparent",
                       "&:hover": {
                         backgroundColor: alpha("#611463", 0.08),
                         transform: "translateY(-2px)",
@@ -385,15 +203,18 @@ const LocationDetailPage: React.FC = () => {
                       transition: "all 0.2s ease-in-out",
                       position: "relative",
                       overflow: "hidden",
-                      "&::after": selectedLocation?.id === location.id ? {
-                        content: '""',
-                        position: "absolute",
-                        left: 0,
-                        top: 0,
-                        bottom: 0,
-                        width: "4px",
-                        backgroundColor: getLocationColor(location.type),
-                      } : {},
+                      "&::after":
+                        ctrl?.selectedLocation?.user_id === location.user_id
+                          ? {
+                              content: '""',
+                              position: "absolute",
+                              left: 0,
+                              top: 0,
+                              bottom: 0,
+                              width: "4px",
+                              backgroundColor: ctrl?.getLocationColor("home"),
+                            }
+                          : {},
                     }}
                   >
                     <Box
@@ -401,46 +222,57 @@ const LocationDetailPage: React.FC = () => {
                         mr: 2,
                         p: 1,
                         borderRadius: 2,
-                        backgroundColor: alpha(getLocationColor(location.type), 0.1),
+                        backgroundColor: alpha(
+                          ctrl?.getLocationColor("home"),
+                          0.1
+                        ),
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center"
+                        justifyContent: "center",
                       }}
                     >
-                      {getLocationIcon(location.type)}
+                      {getLocationIcon("home")}
                     </Box>
 
                     <ListItemText
                       primary={
-                        <Typography sx={{ fontSize: "0.95rem", fontWeight: 600, color: "#333" }}>
-                          {location.name}
+                        <Typography
+                          sx={{
+                            fontSize: "0.95rem",
+                            fontWeight: 600,
+                            color: "#333",
+                          }}
+                        >
+                          {location.address_name}
                         </Typography>
                       }
                       secondary={
-                        <Typography sx={{ fontSize: "0.85rem", color: "#666", mt: 0.5 }}>
-                          {location.description}
+                        <Typography
+                          sx={{ fontSize: "0.85rem", color: "#666", mt: 0.5 }}
+                        >
+                          {location.address_description}
                         </Typography>
                       }
                     />
 
                     <Box sx={{ display: "flex", alignItems: "center", ml: 1 }}>
-                      {selectedLocation?.id === location.id && (
+                      {ctrl?.selectedLocation?.id === location.id && (
                         <Chip
                           color="primary"
                           size="small"
                           icon={<BookmarkIcon sx={{ fontSize: "1rem" }} />}
                           label="ເລືອກແລ້ວ"
                           sx={{
-                            backgroundColor: getLocationColor(location.type),
+                            backgroundColor: ctrl?.getLocationColor("້ome"),
                             mr: 1.5,
-                            fontSize: "0.75rem"
+                            fontSize: "0.75rem",
                           }}
                         />
                       )}
 
                       <IconButton
                         size="small"
-                        onClick={(e) => handleDeleteLocation(location.id, e)}
+                        onClick={() => ctrl?.handleDeleteLocation()}
                         sx={{
                           color: "#d32f2f",
                           p: 1,
@@ -457,35 +289,27 @@ const LocationDetailPage: React.FC = () => {
                 </Fade>
               ))}
             </List>
+            {ctrl?.address.length > 3 && (
+              <Button
+                onClick={() =>
+                  ctrl?.setShowAllAddresses(!ctrl?.showAllAddresses)
+                }
+                sx={{
+                  mt: 2,
+                  fontWeight: 500,
+                  fontSize: "0.9rem",
+                  color: "#611463",
+                  textTransform: "none",
+                }}
+              >
+                {ctrl?.showAllAddresses ? "Show less" : "Show more"}
+              </Button>
+            )}
           </Box>
 
           {/* Action buttons */}
-          <Grid container spacing={2} sx={{ mt: 3 }}>
-            <Grid item xs={12} sm={6}>
-              <Button
-                variant="outlined"
-                fullWidth
-                onClick={() => navigate("/")}
-                sx={{
-                  py: 1.5,
-                  color: "#f7931e",
-                  borderColor: "#f7931e",
-                  borderWidth: 1.5,
-                  borderRadius: 2,
-                  fontWeight: 600,
-                  transition: "all 0.2s",
-                  "&:hover": {
-                    borderColor: "#f7931e",
-                    backgroundColor: alpha("#f7931e", 0.05),
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 4px 12px rgba(247, 147, 30, 0.15)",
-                  },
-                }}
-              >
-                ແກ້ໄຂທີ່ຢູ່
-              </Button>
-            </Grid>
-            <Grid item xs={12} sm={6}>
+          <Grid container sx={{ mt: 3 }}>
+            <Grid item xs={12} sm={12}>
               <Button
                 variant="contained"
                 fullWidth
@@ -494,10 +318,12 @@ const LocationDetailPage: React.FC = () => {
                   py: 1.5,
                   fontWeight: 600,
                   borderRadius: 2,
-                  background: "linear-gradient(135deg, #611463 0%, #812e84 100%)",
+                  background:
+                    "linear-gradient(135deg, #611463 0%, #812e84 100%)",
                   transition: "all 0.2s",
                   "&:hover": {
-                    background: "linear-gradient(135deg, #7a1980 0%, #974099 100%)",
+                    background:
+                      "linear-gradient(135deg, #7a1980 0%, #974099 100%)",
                     transform: "translateY(-2px)",
                     boxShadow: "0 4px 12px rgba(97, 20, 99, 0.2)",
                   },
@@ -558,15 +384,15 @@ const LocationDetailPage: React.FC = () => {
               fullWidth
               variant="outlined"
               placeholder="ວາງລິ້ງແຜນທີ່ຈາກ Google Maps ທີ່ນີ້"
-              value={mapLink}
+              value={ctrl?.mapLink ?? ""}
               onChange={(e) => {
-                setMapLink(e.target.value);
+                ctrl?.setMapLink(e.target.value);
                 if (e.target.value.trim()) {
-                  setErrors({ ...errors, mapLink: undefined });
+                  ctrl?.setErrors({ ...ctrl?.errors, mapLink: undefined });
                 }
               }}
-              error={!!errors.mapLink}
-              helperText={errors.mapLink}
+              error={!!ctrl?.errors.mapLink}
+              helperText={ctrl?.errors.mapLink}
               required
               sx={{
                 mb: 2,
@@ -588,7 +414,7 @@ const LocationDetailPage: React.FC = () => {
                   <InputAdornment position="end">
                     <Button
                       variant="contained"
-                      onClick={handleOpenGoogleMaps}
+                      onClick={ctrl?.handleOpenGoogleMaps}
                       startIcon={<LaunchIcon />}
                       sx={{
                         background: "#f79313",
@@ -632,15 +458,15 @@ const LocationDetailPage: React.FC = () => {
               fullWidth
               variant="outlined"
               placeholder="ຊື່ອາຄານ, ທີ່ຢູ່, ຫລືຊື່ຮ້ານ"
-              value={placeName}
+              value={ctrl?.placeName ?? ""}
               onChange={(e) => {
-                setPlaceName(e.target.value);
+                ctrl?.setPlaceName(e.target.value);
                 if (e.target.value.trim()) {
-                  setErrors({ ...errors, placeName: undefined });
+                  ctrl?.setErrors({ ...ctrl?.errors, placeName: undefined });
                 }
               }}
-              error={!!errors.placeName}
-              helperText={errors.placeName}
+              error={!!ctrl?.errors.placeName}
+              helperText={ctrl?.errors.placeName}
               required
               sx={{
                 mb: 3,
@@ -659,7 +485,7 @@ const LocationDetailPage: React.FC = () => {
               }}
               InputProps={{
                 sx: { fontSize: "0.95rem", py: 0.5 },
-                endAdornment: errors.placeName && (
+                endAdornment: ctrl?.errors.placeName && (
                   <InputAdornment position="end">
                     <ErrorIcon color="error" />
                   </InputAdornment>
@@ -687,15 +513,18 @@ const LocationDetailPage: React.FC = () => {
               multiline
               rows={3}
               placeholder="ປ້ອນລາຍລະອຽດເພີ່ມເຕີມເຊັ່ນ: ໝາຍເລກອາຄານ, ຊັ້ນ, ຫ້ອງ"
-              value={detailAddress}
+              value={ctrl?.detailAddress ?? ""}
               onChange={(e) => {
-                setDetailAddress(e.target.value);
+                ctrl?.setDetailAddress(e.target.value);
                 if (e.target.value.trim()) {
-                  setErrors({ ...errors, detailAddress: undefined });
+                  ctrl?.setErrors({
+                    ...ctrl?.errors,
+                    detailAddress: undefined,
+                  });
                 }
               }}
-              error={!!errors.detailAddress}
-              helperText={errors.detailAddress}
+              error={!!ctrl?.errors.detailAddress}
+              helperText={ctrl?.errors.detailAddress}
               required
               sx={{
                 mb: 3,
@@ -714,7 +543,7 @@ const LocationDetailPage: React.FC = () => {
               }}
               InputProps={{
                 sx: { fontSize: "0.95rem" },
-                endAdornment: errors.detailAddress && (
+                endAdornment: ctrl?.errors.detailAddress && (
                   <InputAdornment position="end">
                     <ErrorIcon color="error" />
                   </InputAdornment>
@@ -739,15 +568,15 @@ const LocationDetailPage: React.FC = () => {
               fullWidth
               variant="outlined"
               placeholder="ປ້ອນຊື່ບ້ານເຊັ່ນ: ດົງໂດກ, ໜອງພະຍາ,..."
-              value={placeName}
+              value={ctrl?.placeVillage ?? ""}
               onChange={(e) => {
-                setVillage(e.target.value);
+                ctrl?.setVillage(e.target.value);
                 if (e.target.value.trim()) {
-                  setErrors({ ...errors, placeVillage: undefined });
+                  ctrl?.setErrors({ ...ctrl?.errors, placeVillage: undefined });
                 }
               }}
-              error={!!errors.placeVillage}
-              helperText={errors.placeVillage}
+              error={!!ctrl?.errors.placeVillage}
+              helperText={ctrl?.errors.placeVillage}
               required
               sx={{
                 mb: 3,
@@ -766,7 +595,7 @@ const LocationDetailPage: React.FC = () => {
               }}
               InputProps={{
                 sx: { fontSize: "0.95rem", py: 0.5 },
-                endAdornment: errors.placeName && (
+                endAdornment: ctrl?.errors.placeName && (
                   <InputAdornment position="end">
                     <ErrorIcon color="error" />
                   </InputAdornment>
@@ -783,61 +612,64 @@ const LocationDetailPage: React.FC = () => {
                 alignItems: "center",
               }}
             >
-              <LocationCityOutlinedIcon sx={{ mr: 1, color: "#611463" }} /> ເມືອງ *
-      </Typography>
-      
-      <Autocomplete
-        fullWidth
-        options={districts}
-        value={placeName}
-        onChange={(event: React.SyntheticEvent, newValue: string | null) => {
-          setCity(newValue);
-          if (newValue) {
-            setErrors({ ...errors, placeCity: undefined });
-          }
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="outlined"
-            placeholder="ເລືອກເມືອງ"
-            error={!!errors.placeCity}
-            helperText={errors.placeCity}
-            required
-            sx={{
-              mb: 3,
-              backgroundColor: "#fff",
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                transition: "all 0.2s",
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: alpha("#611463", 0.5),
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#611463",
-                  borderWidth: 2,
-                },
-              },
-            }}
-            InputProps={{
-              ...params.InputProps,
-              sx: { fontSize: "0.95rem", py: 0.5 },
-              endAdornment: (
-                <>
-                  {errors.placeName && (
-                    <InputAdornment position="end">
-                      <ErrorIcon color="error" />
-                    </InputAdornment>
-                  )}
-                  {params.InputProps.endAdornment}
-                </>
-              ),
-            }}
-          />
-        )}
-      />
+              <LocationCityOutlinedIcon sx={{ mr: 1, color: "#611463" }} />{" "}
+              ເມືອງ *
+            </Typography>
+
+            <Autocomplete
+              fullWidth
+              options={districts}
+              value={ctrl?.placeCity ?? ""}
+              onChange={(
+                event: React.SyntheticEvent,
+                newValue: string | null
+              ) => {
+                ctrl?.setCity(newValue ?? ""); // ✅ use the parameter, not ctrl?.newValue
+                if (newValue) {
+                  ctrl?.setErrors({ ...ctrl?.errors, placeCity: undefined });
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="outlined"
+                  placeholder="ເລືອກເມືອງ"
+                  error={!!ctrl?.errors.placeCity}
+                  helperText={ctrl?.errors.placeCity}
+                  required
+                  sx={{
+                    mb: 3,
+                    backgroundColor: "#fff",
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      transition: "all 0.2s",
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: alpha("#611463", 0.5),
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#611463",
+                        borderWidth: 2,
+                      },
+                    },
+                  }}
+                  InputProps={{
+                    ...params.InputProps,
+                    sx: { fontSize: "0.95rem", py: 0.5 },
+                    endAdornment: (
+                      <>
+                        {ctrl?.errors.placeName && (
+                          <InputAdornment position="end">
+                            <ErrorIcon color="error" />
+                          </InputAdornment>
+                        )}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+            />
           </Box>
-          
 
           {/* Phone number section */}
           <Box sx={{ mb: 4 }}>
@@ -856,11 +688,11 @@ const LocationDetailPage: React.FC = () => {
             </Typography>
 
             <Grid container spacing={2} sx={{ mb: 2 }}>
-              <Grid item xs={3}>
+              <Grid item xs={1.5}>
                 <FormControl fullWidth>
                   <Select
-                    value={countryCode}
-                    onChange={handleCountryCodeChange}
+                    value={ctrl?.countryCode}
+                    onChange={ctrl?.handleCountryCodeChange}
                     sx={{
                       borderRadius: 2,
                       backgroundColor: "#fff",
@@ -883,20 +715,23 @@ const LocationDetailPage: React.FC = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={9}>
+              <Grid item xs={10.5}>
                 <TextField
                   fullWidth
                   variant="outlined"
                   placeholder="XX XXXXXXXX"
-                  value={phoneNumber}
+                  value={ctrl?.phoneNumber}
                   onChange={(e) => {
-                    setPhoneNumber(e.target.value);
+                    ctrl?.setPhoneNumber(e.target.value);
                     if (e.target.value.trim()) {
-                      setErrors({ ...errors, phoneNumber: undefined });
+                      ctrl?.setErrors({
+                        ...ctrl?.errors,
+                        phoneNumber: undefined,
+                      });
                     }
                   }}
-                  error={!!errors.phoneNumber}
-                  helperText={errors.phoneNumber}
+                  error={!!ctrl?.errors.phoneNumber}
+                  helperText={ctrl?.errors.phoneNumber}
                   required
                   sx={{
                     backgroundColor: "#fff",
@@ -914,7 +749,7 @@ const LocationDetailPage: React.FC = () => {
                   }}
                   InputProps={{
                     sx: { fontSize: "0.95rem", py: 0.5 },
-                    endAdornment: errors.phoneNumber && (
+                    endAdornment: ctrl?.errors.phoneNumber && (
                       <InputAdornment position="end">
                         <ErrorIcon color="error" />
                       </InputAdornment>
@@ -923,152 +758,130 @@ const LocationDetailPage: React.FC = () => {
                 />
               </Grid>
             </Grid>
-
-            {/* WhatsApp Option */}
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={hasWhatsapp}
-                  onChange={(e) => setHasWhatsapp(e.target.checked)}
-                  sx={{
-                    color: "#25D366",
-                    '&.Mui-checked': {
-                      color: "#25D366",
-                    },
-                  }}
-                />
-              }
-              label={
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <WhatsAppIcon sx={{ color: "#25D366", mr: 1 }} />
-                  <Typography sx={{ fontSize: "0.95rem" }}>
-                    ໝາຍເລກນີ້ໃຊ້ WhatsApp ໄດ້
-                  </Typography>
-                </Box>
-              }
-              sx={{ mb: 3 }}
-            />
           </Box>
 
-                 {/* Upload picture */}
-      <Typography
-        variant="subtitle1"
-        sx={{ 
-          fontSize: "1rem", 
-          mb: 1.5, 
-          fontWeight: 600,
-          display: "flex",
-          alignItems: "center", 
-          mt: 1,
-        }}
-      >
-        <CameraAltOutlinedIcon sx={{ mr: 1, color: "#611463" }} />
-        ຮູບພາບຂອງສະຖານທີ່
-      </Typography>
-      <Card
-        sx={{
-          mb: 4,
-          borderRadius: 3,
-          boxShadow: "none",
-          border: "1px dashed",
-          borderColor: alpha("#611463", 0.3),
-          overflow: "hidden",
-          transition: "all 0.2s",
-          "&:hover": {
-            borderColor: "#611463",
-            backgroundColor: alpha("#611463", 0.02),
-          },
-        }}
-      >
-        <CardContent sx={{ p: 2 }}>
-          <Box
+          <Typography
+            variant="subtitle1"
             sx={{
+              fontSize: "1rem",
+              mb: 1.5,
+              fontWeight: 600,
               display: "flex",
-              flexDirection: "column",
               alignItems: "center",
-              justifyContent: "center",
-              p: 3,
-              borderRadius: 2,
+              mt: 1,
             }}
           >
-            {previewImage ? (
-              <Box
-                sx={{
-                  width: "100%",
-                  height: 220,
-                  mb: 2,
-                  display: "flex",
-                  justifyContent: "center",
-                  position: "relative",
-                  borderRadius: 2,
-                  overflow: "hidden",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                }}
-              >
-                <img
-                  src={previewImage}
-                  alt="Preview"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-              </Box>
-            ) : (
+            <CameraAltOutlinedIcon sx={{ mr: 1, color: "#611463" }} />
+            ຮູບພາບຂອງສະຖານທີ່
+          </Typography>
+
+          <Card
+            sx={{
+              mb: 4,
+              borderRadius: 3,
+              boxShadow: "none",
+              border: "1px dashed",
+              borderColor: alpha("#611463", 0.3),
+              overflow: "hidden",
+              transition: "all 0.2s",
+              "&:hover": {
+                borderColor: "#611463",
+                backgroundColor: alpha("#611463", 0.02),
+              },
+            }}
+          >
+            <CardContent sx={{ p: 2 }}>
               <Box
                 sx={{
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  py: 5,
-                }}
-              >
-                <PhotoCameraIcon
-                  sx={{ fontSize: 60, color: alpha("#611463", 0.7), mb: 2 }}
-                />
-                <Typography sx={{ color: "#666", mb: 2, textAlign: "center" }}>
-                  ອັບໂຫລດຮູບພາບເພື່ອໃຫ້ຜູ້ໃຫ້ບໍລິການເຫັນສະຖານທີ່ຂອງທ່ານໄດ້ງ່າຍຂຶ້ນ
-                </Typography>
-              </Box>
-            )}
-
-            <input
-              type="file"
-              accept="image/*"
-              id="upload-image"
-              onChange={handleImageChange}
-              style={{ display: "none" }}
-            />
-            <label htmlFor="upload-image">
-              <Button
-                variant="contained"
-                component="span"
-                startIcon={<UploadIcon />}
-                sx={{
-                  background: "linear-gradient(135deg, #611463 0%, #812e84 100%)",
+                  p: 3,
                   borderRadius: 2,
-                  boxShadow: "0 4px 12px rgba(97, 20, 99, 0.15)",
-                  px: 3,
-                  py: 1.2,
-                  transition: "all 0.2s",
-                  "&:hover": { 
-                    background: "linear-gradient(135deg, #7a1980 0%, #974099 100%)",
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 6px 16px rgba(97, 20, 99, 0.25)",
-                  },
-                  fontSize: "0.95rem",
-                  fontWeight: 600,
                 }}
               >
-                {previewImage ? "ປ່ຽນຮູບພາບ" : "ອັບໂຫລດຮູບພາບ"}
-              </Button>
-            </label>
-          </Box>
-        </CardContent>
-      </Card>
+                {ctrl.images[0]?.preview ? (
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: 220,
+                      mb: 2,
+                      display: "flex",
+                      justifyContent: "center",
+                      position: "relative",
+                      borderRadius: 2,
+                      overflow: "hidden",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <img
+                      src={ctrl.images[0].preview}
+                      alt="Preview"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      py: 5,
+                    }}
+                  >
+                    <PhotoCameraIcon
+                      sx={{ fontSize: 60, color: alpha("#611463", 0.7), mb: 2 }}
+                    />
+                    <Typography
+                      sx={{ color: "#666", mb: 2, textAlign: "center" }}
+                    >
+                      ອັບໂຫລດຮູບພາບເພື່ອໃຫ້ຜູ້ໃຫ້ບໍລິການເຫັນສະຖານທີ່ຂອງທ່ານໄດ້ງ່າຍຂຶ້ນ
+                    </Typography>
+                  </Box>
+                )}
 
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="upload-image"
+                  onChange={ctrl.handleImageChange}
+                  style={{ display: "none" }}
+                />
+                <label htmlFor="upload-image">
+                  <Button
+                    variant="contained"
+                    component="span"
+                    startIcon={<UploadIcon />}
+                    sx={{
+                      background:
+                        "linear-gradient(135deg, #611463 0%, #812e84 100%)",
+                      borderRadius: 2,
+                      boxShadow: "0 4px 12px rgba(97, 20, 99, 0.15)",
+                      px: 3,
+                      py: 1.2,
+                      transition: "all 0.2s",
+                      "&:hover": {
+                        background:
+                          "linear-gradient(135deg, #7a1980 0%, #974099 100%)",
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 6px 16px rgba(97, 20, 99, 0.25)",
+                      },
+                      fontSize: "0.95rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {ctrl.images[0]?.preview ? "ປ່ຽນຮູບພາບ" : "ອັບໂຫລດຮູບພາບ"}
+                  </Button>
+                </label>
+              </Box>
+            </CardContent>
+          </Card>
 
           {/* Action buttons */}
           <Grid container spacing={2} sx={{ mt: 2 }}>
@@ -1100,15 +913,17 @@ const LocationDetailPage: React.FC = () => {
               <Button
                 variant="contained"
                 fullWidth
-                onClick={handleConfirmLocation}
+                onClick={ctrl?.handleSubmit}
                 sx={{
                   py: 1.5,
                   fontWeight: 600,
                   borderRadius: 2,
-                  background: "linear-gradient(135deg, #611463 0%, #812e84 100%)",
+                  background:
+                    "linear-gradient(135deg, #611463 0%, #812e84 100%)",
                   transition: "all 0.2s",
-                  "&:hover": { 
-                    background: "linear-gradient(135deg, #7a1980 0%, #974099 100%)",
+                  "&:hover": {
+                    background:
+                      "linear-gradient(135deg, #7a1980 0%, #974099 100%)",
                     transform: "translateY(-2px)",
                     boxShadow: "0 4px 12px rgba(97, 20, 99, 0.2)",
                   },
