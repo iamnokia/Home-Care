@@ -356,82 +356,6 @@ const SettingsPage = () => {
                         </Grid>
                     </Box>
                 );
-            case 2: // Preferences
-                return (
-                    <Box>
-                        <Typography variant="h6" fontWeight={600} color="#611463" sx={{ mb: 3 }}>
-                            ການປັບແຕ່ງສ່ວນໂຕ
-                        </Typography>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                                        <DarkModeIcon sx={{ color: "#611463", mr: 2 }} />
-                                        <Typography variant="subtitle1">ໂໝດກາງຄືນ</Typography>
-                                    </Box>
-                                    <Switch
-                                        checked={settings.darkMode}
-                                        onChange={handleToggleChange("darkMode")}
-                                        sx={{
-                                            '& .MuiSwitch-switchBase.Mui-checked': {
-                                                color: "#611463",
-                                                '&:hover': {
-                                                    backgroundColor: "rgba(97, 20, 99, 0.08)",
-                                                },
-                                            },
-                                            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                                                backgroundColor: "#8e24aa",
-                                            },
-                                        }}
-                                    />
-                                </Box>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                                    <LanguageIcon sx={{ color: "#611463", mr: 2 }} />
-                                    <Typography variant="subtitle1">ພາສາ</Typography>
-                                </Box>
-                                <Select
-                                    fullWidth
-                                    value={settings.language}
-                                    onChange={handleSelectChange("language")}
-                                    sx={{ borderRadius: 2 }}
-                                >
-                                    <MenuItem value="english">English</MenuItem>
-                                    <MenuItem value="thai">ไทย</MenuItem>
-                                    <MenuItem value="ລາວ">Lao</MenuItem>
-                                    <MenuItem value="chinese">漢語</MenuItem>
-                                </Select>
-                            </Grid>
-
-                            <Grid item xs={12}>
-                                <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-                                    <Button
-                                        variant="contained"
-                                        startIcon={<SaveIcon />}
-                                        sx={{
-                                            py: 1,
-                                            px: 3,
-                                            borderRadius: 2,
-                                            background: "linear-gradient(45deg, #611463 30%, #8e24aa 90%)",
-                                            boxShadow: "0 3px 5px 2px rgba(97, 20, 99, .3)",
-                                            fontWeight: 600,
-                                            transition: "all 0.3s ease",
-                                            marginLeft: "auto",
-                                            "&:hover": {
-                                                background: "linear-gradient(45deg, #8e24aa 30%, #611463 90%)",
-                                                transform: "translateY(-2px)",
-                                                boxShadow: "0 6px 10px 2px rgba(97, 20, 99, .4)"
-                                            }
-                                        }}
-                                    >
-                                        ບັນທຶກ
-                                    </Button>
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                );
 
             default:
                 return null;
@@ -534,7 +458,7 @@ const SettingsPage = () => {
                                 </Typography>
                             </Box>
 
-                            <Box sx={{ py: 2 }}>
+                            <Box sx={{ py: 1 }}>
                                 <Tabs
                                     orientation={isMobile ? "horizontal" : "vertical"}
                                     variant={isMobile ? "fullWidth" : "standard"}
@@ -576,13 +500,6 @@ const SettingsPage = () => {
                                         label="ຄວາມປອດໄພ"
                                         sx={{ borderLeft: tabValue === 1 ? "3px solid #f7931e" : "none" }}
                                     />
-                                    <Tab
-                                        icon={<ColorLensIcon />}
-                                        iconPosition="start"
-                                        label="ປັບແຕ່ງ"
-                                        sx={{ borderLeft: tabValue === 2 ? "3px solid #f7931e" : "none" }}
-                                    />
-
                                 </Tabs>
                             </Box>
 

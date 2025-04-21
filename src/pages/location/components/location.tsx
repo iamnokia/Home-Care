@@ -18,6 +18,7 @@ import {
   IconButton,
   Snackbar,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -27,6 +28,10 @@ import CategoryIcon from "@mui/icons-material/Category";
 import HomeIcon from "@mui/icons-material/Home";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import BadgeIcon from "@mui/icons-material/Badge";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import TimeToLeaveIcon from "@mui/icons-material/TimeToLeave";
 import { LOCATION_DETAIL_PATH, PAYMENT_PATH } from "../../../routes/path";
 import useMainController from "../controllers/index";
 import { EmployeeModel } from "../../../models/employee";
@@ -55,6 +60,14 @@ interface Location {
   price: number;
   priceFormatted: string;
   service?: string;
+  cat_id?: number; // Added category ID field
+  // Car details
+  carId?: string;
+  carBrand?: string;
+  carModel?: string;
+  carYear?: string;
+  licensePlate?: string;
+  carImage?: string;
 }
 
 const LocationPage: React.FC = () => {
@@ -62,9 +75,9 @@ const LocationPage: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
+  
   // Get data from controller
-  const { data, loading } = useMainController();
+  const { data, car, loading } = useMainController();
 
   // State variables
   const [address, setAddress] = useState<string>("");
@@ -106,7 +119,26 @@ const LocationPage: React.FC = () => {
         // Map gender enum to display text
         const genderText = employee.gender === Gender.MALE ? "ຊາຍ" : "ຍິງ";
 
-        return {
+        // Safely extract the numeric category ID
+        let categoryId: number | undefined;
+        try {
+          if (employee.cat_id !== undefined) {
+            categoryId = typeof employee.cat_id === 'string' 
+              ? parseInt(employee.cat_id, 10) 
+              : employee.cat_id;
+            
+            // Check if parsing resulted in NaN
+            if (isNaN(categoryId)) {
+              categoryId = undefined;
+            }
+          }
+        } catch (error) {
+          console.error(`Error parsing cat_id for employee ${employee.id}:`, error);
+          categoryId = undefined;
+        }
+
+        // Initialize location object with basic information
+        const locationObject: Location = {
           id: employee.id,
           firstName: employee.first_name,
           surname: employee.last_name,
@@ -119,12 +151,37 @@ const LocationPage: React.FC = () => {
           price: parseFloat(employee.price),
           priceFormatted: formatPrice(employee.price),
           service: employee.cat_name, // Set service to category name
+          cat_id: categoryId, // Add safely parsed category ID
+          // Basic car details from employee (these might be null/undefined)
+          carId: employee?.car_id,
+          carBrand: employee?.car_brand,
+          carModel: employee?.car_model,
+          licensePlate: employee?.license_plate,
         };
+
+        // For category ID 5 (moving service), try to find matching car data
+        if (categoryId === 5 && car && car.length > 0) {
+          // Find car that belongs to this employee
+          const employeeCar = car.find(c => c.emp_id === employee.id);
+          
+          if (employeeCar) {
+            // Update with detailed car information
+            locationObject.carId = employeeCar.id || locationObject.carId;
+            locationObject.carBrand = employeeCar.car_brand || locationObject.carBrand;
+            locationObject.carModel = employeeCar.model || locationObject.carModel;
+            locationObject.licensePlate = employeeCar.license_plate || locationObject.licensePlate;
+            locationObject.carYear = employeeCar.created_at ? 
+              new Date(employeeCar.created_at).getFullYear().toString() : undefined;
+            locationObject.carImage = employeeCar.car_image || "https://via.placeholder.com/400/300";
+          }
+        }
+
+        return locationObject;
       });
 
       setLocations(mappedLocations);
     }
-  }, [data]);
+  }, [data, car]);
 
   // Calculate total whenever locations change
   useEffect(() => {
@@ -153,11 +210,10 @@ const LocationPage: React.FC = () => {
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Typography variant="h6">Loading...</Typography>
+        <CircularProgress sx={{ color: "#611463" }} />
       </Box>
     );
   }
-
 
   return (
     <Box sx={{
@@ -303,7 +359,7 @@ const LocationPage: React.FC = () => {
             ລາຍການເອີ້ນໃຊ້
           </Typography>
 
-          <Box sx={{ maxHeight: '300px', overflowY: 'auto', mb: 3, pr: 1 }}>
+          <Box sx={{ maxHeight: '400px', overflowY: 'auto', mb: 3, pr: 1 }}>
             {locations.map((location) => (
               <Card
                 key={location.id}
@@ -395,6 +451,83 @@ const LocationPage: React.FC = () => {
                       </Typography>
                     </Box>
                   </Box>
+
+                  {/* Car details - ONLY for category ID 5 */}
+                  {location.cat_id === 5 && (
+                    <>
+                      {/* Enhanced car details with image (similar to ServiceDetailsPage) */}
+                      <Box sx={{ 
+                        display: "flex", 
+                        flexDirection: { xs: "column", sm: "row" },
+                        alignItems: { xs: "center", sm: "flex-start" },
+                        gap: 2,
+                        mb: 2,
+                        p: 2,
+                        backgroundColor: '#f0e9f1',
+                        borderRadius: 2,
+                        border: '1px dashed rgba(97, 20, 99, 0.2)',
+                        borderLeft: '3px solid #8a1c8d'
+                      }}>
+                        {/* Car image - only if available */}
+                        {location.carImage && (
+                          <Box sx={{
+                            width: { xs: "100%", sm: "40%" },
+                            height: { xs: 150, sm: 120 },
+                            borderRadius: 2,
+                            overflow: "hidden",
+                            position: "relative",
+                            boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+                            flexShrink: 0,
+                          }}>
+                            <img
+                              src={location.carImage}
+                              alt="Vehicle"
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </Box>
+                        )}
+
+                        {/* Car details */}
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="subtitle2" sx={{ mb: 1, color: '#611463', fontWeight: 600 }}>
+                            ຂໍ້ມູນລົດ
+                          </Typography>
+                          <Grid container spacing={1}>
+                            <Grid item xs={12} sm={6}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                                <TimeToLeaveIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
+                                <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555', fontWeight: 500 }}>
+                                  {location.carBrand || 'N/A'} {location.carModel || 'N/A'}
+                                </Typography>
+                              </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <BadgeIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
+                                <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
+                                  {location.licensePlate || 'N/A'}
+                                </Typography>
+                              </Box>
+                            </Grid>
+                            {location.carYear && (
+                              <Grid item xs={12} sm={6}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                                  <CalendarTodayIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
+                                  <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
+                                    ປີ {location.carYear}
+                                  </Typography>
+                                </Box>
+                              </Grid>
+                            )}
+                          </Grid>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
 
                   {/* Location info row */}
                   <Box sx={{
@@ -571,7 +704,7 @@ const LocationPage: React.FC = () => {
             </Button>
             <Button
               variant="contained"
-              onClick={() => navigate(PAYMENT_PATH)}
+              onClick={() => navigate(`/payment/${id}`)}
               sx={{
                 fontSize: fontSize.button,
                 px: 4,

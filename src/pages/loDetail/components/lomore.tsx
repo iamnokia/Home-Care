@@ -28,6 +28,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import PhoneIcon from "@mui/icons-material/Phone";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import UploadIcon from "@mui/icons-material/Upload";
@@ -58,16 +59,7 @@ interface CountryCode {
   country: string;
 }
 
-// Country codes for phone numbers
-const countryCodes: CountryCode[] = [
-  { code: "+856", country: "Laos" },
-  { code: "+66", country: "Thailand" },
-  { code: "+84", country: "Vietnam" },
-  { code: "+855", country: "Cambodia" },
-  { code: "+95", country: "Myanmar" },
-  { code: "+60", country: "Malaysia" },
-  { code: "+65", country: "Singapore" },
-];
+
 
 const LocationDetailPage: React.FC = () => {
   const { id } = useParams();
@@ -206,14 +198,14 @@ const LocationDetailPage: React.FC = () => {
                       "&::after":
                         ctrl?.selectedLocation?.user_id === location.user_id
                           ? {
-                              content: '""',
-                              position: "absolute",
-                              left: 0,
-                              top: 0,
-                              bottom: 0,
-                              width: "4px",
-                              backgroundColor: ctrl?.getLocationColor("home"),
-                            }
+                            content: '""',
+                            position: "absolute",
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: "4px",
+                            backgroundColor: ctrl?.getLocationColor("home"),
+                          }
                           : {},
                     }}
                   >
@@ -260,7 +252,7 @@ const LocationDetailPage: React.FC = () => {
                         <Chip
                           color="primary"
                           size="small"
-                          icon={<BookmarkIcon sx={{ fontSize: "1rem" }} />}
+                          icon={<CheckCircleRoundedIcon sx={{ fontSize: "1rem" }} />}
                           label="ເລືອກແລ້ວ"
                           sx={{
                             backgroundColor: ctrl?.getLocationColor("້ome"),
@@ -291,18 +283,34 @@ const LocationDetailPage: React.FC = () => {
             </List>
             {ctrl?.address.length > 3 && (
               <Button
-                onClick={() =>
-                  ctrl?.setShowAllAddresses(!ctrl?.showAllAddresses)
-                }
+                onClick={() => ctrl?.setShowAllAddresses(!ctrl?.showAllAddresses)}
                 sx={{
                   mt: 2,
-                  fontWeight: 500,
+                  fontWeight: "bold",
                   fontSize: "0.9rem",
                   color: "#611463",
                   textTransform: "none",
+                  px: 3,
+                  py: 1,
+                  borderRadius: "24px",
+                  background: "linear-gradient(to right, #f3e7f3, #faf5fa)",
+                  transition: "all 0.3s ease",
+                  boxShadow: "0 2px 4px rgba(97, 20, 99, 0.1)",
+                  border: "1px solid #e0c9e1",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  "&:hover": {
+                    background: "linear-gradient(to right, #e9d6eb, #f5ebf6)",
+                    boxShadow: "0 4px 8px rgba(97, 20, 99, 0.15)",
+                    transform: "translateY(-2px)"
+                  }
                 }}
               >
-                {ctrl?.showAllAddresses ? "Show less" : "Show more"}
+                {ctrl?.showAllAddresses ? "ເບິ່ງໜ້ອຍລົງ" : "ເບິ່ງເພີ່ມເຕີມ"}
+                <span style={{ marginLeft: "5px", transition: "transform 0.3s" }}>
+                  {ctrl?.showAllAddresses}
+                </span>
               </Button>
             )}
           </Box>
@@ -687,39 +695,13 @@ const LocationDetailPage: React.FC = () => {
               ເບີໂທລະສັບ *
             </Typography>
 
-            <Grid container spacing={2} sx={{ mb: 2 }}>
-              <Grid item xs={1.5}>
-                <FormControl fullWidth>
-                  <Select
-                    value={ctrl?.countryCode}
-                    onChange={ctrl?.handleCountryCodeChange}
-                    sx={{
-                      borderRadius: 2,
-                      backgroundColor: "#fff",
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: alpha("#611463", 0.2),
-                      },
-                      "&:hover .MuiOutlinedInput-notchedOutline": {
-                        borderColor: alpha("#611463", 0.5),
-                      },
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#611463",
-                      },
-                    }}
-                  >
-                    {countryCodes.map((option) => (
-                      <MenuItem key={option.code} value={option.code}>
-                        {option.code}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={10.5}>
+            <Grid container spacing={2} sx={{ mb: 2,  }}>
+            
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   variant="outlined"
-                  placeholder="XX XXXXXXXX"
+                  placeholder="ໃສ່ເບີໂທລະສັບ"
                   value={ctrl?.phoneNumber}
                   onChange={(e) => {
                     ctrl?.setPhoneNumber(e.target.value);

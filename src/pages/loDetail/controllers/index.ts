@@ -67,10 +67,11 @@ const useMainController = () => {
       text: "ກົດຕົກລົງເພື່ອບັນທຶກຂໍ້ມູນທີ່ຢູ່ໃໝ່.",
       icon: "question",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
+      confirmButtonColor: "#611463",
       cancelButtonColor: "#d33",
       confirmButtonText: "ຕົກລົງ",
       cancelButtonText: "ຍົກເລີກ",
+      
     });
 
     if (!result.isConfirmed) return;

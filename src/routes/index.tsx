@@ -42,7 +42,7 @@ const RoutesComponent = () => {
         { path: CONTACT_US_PATH, element: <ContactUs/> },
         { path: "/Location/:id", element: <LocationPage/> },
         { path: "/Location-detail/:id", element: <LocationDetailPage/> },
-        { path: PAYMENT_PATH, element: <PaymentPage/> },
+        { path: "/payment/:id", element: <PaymentPage/> },
         { path: SERVICE_STATUS_PATH, element: <ServiceStatus/> },
         { path: COMMENT_PATH, element: <CommentPage/> },
         { path: TERMS_PRIVACY_PATH, element: <TermsAndPrivacyPage/> },

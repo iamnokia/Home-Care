@@ -50,7 +50,7 @@ const pages: PageItem[] = [
   { to: HOME_PATH, label: "ໜ້າຫຼັກ" },
   { to: SERVICE_PATH, label: "ການບໍລິການ" },
   { to: HISTORY_PATH, label: "ປະຫວັດການບໍລິການ" },
-  { to: CONTACT_US_PATH, label: "ຕີດຕໍ່ພວກເຮົາ" },
+  { to: CONTACT_US_PATH, label: "ຕິດຕໍ່ພວກເຮົາ" },
 ];
 
 function ResponsiveAppBar() {

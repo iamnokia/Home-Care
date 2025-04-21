@@ -12,8 +12,8 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^5.16.14",
-    "@mui/material": "^5.16.14",
+    "@mui/icons-material": "^5.17.1",
+    "@mui/material": "^5.17.1",
     "@reduxjs/toolkit": "^2.2.7",
     "axios": "^1.8.4",
     "firebase": "^11.5.0",
@@ -27,7 +27,8 @@
     "redux": "^5.0.1",
     "sweetalert2": "^11.6.13",
     "swiper": "^11.2.5",
-    "toolkit": "^1.5.4"
+    "toolkit": "^1.5.4",
+    "use-sound": "^5.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

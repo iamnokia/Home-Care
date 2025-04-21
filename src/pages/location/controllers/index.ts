@@ -1,11 +1,12 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EmployeeModel } from "../../../models/employee";
+import { CarModel } from "../../../models/car";
 import axios from "axios";
 
 const useMainController = () => {
   const [data, setData] = useState<EmployeeModel[]>([]);
+  const [car, setCar] = useState<CarModel[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -27,17 +28,36 @@ const useMainController = () => {
     } catch (error) {
       console.error("Error fetching employee data:", error);
     } finally {
-      setLoading(false);  
+      setLoading(false);
+    }
+  };
+
+  const handleGetCarByCatId = async (): Promise<void> => {
+    try {
+      // Using the id parameter in the URL
+      const res = await axios.get("https://homecare-pro.onrender.com/employees/read_emp_car_employees/5", {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      setCar(Array.isArray(res.data) ? res.data : [res.data]); // Handle both array and single object responses
+    } catch (error) {
+      console.error("Error fetching car data:", error);
     }
   };
 
   useEffect(() => {
-    if (id) {
-      handleGetDataById();
-    }
+    setLoading(true);
+    Promise.all([
+      handleGetCarByCatId(),
+      id ? handleGetDataById() : Promise.resolve()
+    ]).finally(() => {
+      setLoading(false);
+    });
   }, [id]); // Add id to the dependency array so it refetches when id changes
 
   return {
+    car,
     loading,
     data,
     handleNaVigate,
