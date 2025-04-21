@@ -52,7 +52,7 @@ const fontSize = {
 const PaymentPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  
+
   // Get everything from the controller
   const {
     locations,
@@ -100,7 +100,7 @@ const PaymentPage: React.FC = () => {
               <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
               <Skeleton variant="text" sx={{ fontSize: fontSize.title, width: '60%' }} />
             </Box>
-            
+
             <Grid container spacing={4}>
               <Grid item xs={12} md={6}>
                 <Skeleton variant="text" sx={{ fontSize: fontSize.subtitle, mb: 2 }} />
@@ -112,7 +112,7 @@ const PaymentPage: React.FC = () => {
                 <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 3, mb: 2 }} />
               </Grid>
             </Grid>
-            
+
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
               <CircularProgress sx={{ color: '#611463' }} />
             </Box>
@@ -171,9 +171,9 @@ const PaymentPage: React.FC = () => {
             }}>
               <ErrorIcon sx={{ fontSize: '0.9rem', mr: 0.5 }} />
               ກຳລັງໃຊ້ຂໍ້ມູນຕົວຢ່າງ (ມີຂໍ້ຜິດພາດໃນການໂຫຼດຂໍ້ມູນ)
-              <IconButton 
-                size="small" 
-                onClick={retry} 
+              <IconButton
+                size="small"
+                onClick={retry}
                 sx={{ ml: 1, color: '#d32f2f', p: 0.2 }}
                 aria-label="Retry loading data"
               >
@@ -191,7 +191,7 @@ const PaymentPage: React.FC = () => {
             mt: error ? 2 : 0
           }}>
             <IconButton
-              onClick={() => navigate(LOCATION_PATH)}
+              onClick={() => navigate("/Location/:id")}
               sx={{
                 color: '#611463',
                 '&:hover': {
@@ -350,8 +350,8 @@ const PaymentPage: React.FC = () => {
 
                         {/* Car details - ONLY for category ID 5 */}
                         {location.cat_id === 5 && (
-                          <Box sx={{ 
-                            display: "flex", 
+                          <Box sx={{
+                            display: "flex",
                             flexDirection: { xs: "column", sm: "row" },
                             alignItems: { xs: "center", sm: "flex-start" },
                             gap: 2,
@@ -495,7 +495,7 @@ const PaymentPage: React.FC = () => {
                   }}
                 />
               </Box>
-              
+
               {/* Payment Section */}
               <Card
                 sx={{
@@ -567,8 +567,8 @@ const PaymentPage: React.FC = () => {
                   borderRadius: 3,
                   boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
                   transition: "all 0.3s ease",
-                  border: paymentError ? 
-                    (paymentState === "insufficient" ? "1px solid #d32f2f" : "1px solid #ff9800") : 
+                  border: paymentError ?
+                    (paymentState === "insufficient" ? "1px solid #d32f2f" : "1px solid #ff9800") :
                     "1px solid rgba(97, 20, 99, 0.08)",
                   '&:hover': {
                     boxShadow: "0 6px 15px rgba(97, 20, 99, 0.15)"
@@ -588,12 +588,21 @@ const PaymentPage: React.FC = () => {
                   >
                     ໃສ່ຈຳນວນເງິນ
                     {paymentState === "excess" && (
-                      <WarningIcon 
-                        sx={{ 
-                          ml: 1, 
-                          fontSize: '1.1rem', 
+                      <WarningIcon
+                        sx={{
+                          ml: 1,
+                          fontSize: '1.1rem',
                           color: '#ff9800'
-                        }} 
+                        }}
+                      />
+                    )}
+                    {paymentState === "insufficient" && (
+                      <WarningIcon
+                        sx={{
+                          ml: 1,
+                          fontSize: '1.1rem',
+                          color: '#d32f2f'
+                        }}
                       />
                     )}
                   </Typography>
@@ -611,24 +620,24 @@ const PaymentPage: React.FC = () => {
                         borderRadius: 2,
                         fontSize: fontSize.text,
                         '&.Mui-focused fieldset': {
-                          borderColor: paymentState === "insufficient" ? '#d32f2f' : 
-                                        paymentState === "excess" ? '#ff9800' : '#611463',
+                          borderColor: paymentState === "insufficient" ? '#d32f2f' :
+                            paymentState === "excess" ? '#ff9800' : '#611463',
                         },
                       },
                       '& label.Mui-focused': {
-                        color: paymentState === "insufficient" ? '#d32f2f' : 
-                               paymentState === "excess" ? '#ff9800' : '#611463',
+                        color: paymentState === "insufficient" ? '#d32f2f' :
+                          paymentState === "excess" ? '#ff9800' : '#611463',
                       },
                       '& .MuiFormHelperText-root': {
-                        color: paymentState === "insufficient" ? '#d32f2f' : 
-                               paymentState === "excess" ? '#ff9800' : 'inherit',
+                        color: paymentState === "insufficient" ? '#d32f2f' :
+                          paymentState === "excess" ? '#ff9800' : 'inherit',
                       }
                     }}
                     InputLabelProps={{
                       sx: {
                         fontSize: fontSize.text,
-                        color: paymentState === "insufficient" ? '#d32f2f' : 
-                               paymentState === "excess" ? '#ff9800' : '#611463'
+                        color: paymentState === "insufficient" ? '#d32f2f' :
+                          paymentState === "excess" ? '#ff9800' : '#611463'
                       }
                     }}
                   />
@@ -637,9 +646,9 @@ const PaymentPage: React.FC = () => {
 
               {/* Payment Recommendations */}
               {paymentState === "excess" && (
-                <Card sx={{ 
-                  mb: 2, 
-                  borderRadius: 2, 
+                <Card sx={{
+                  mb: 2,
+                  borderRadius: 2,
                   bgcolor: 'rgba(255, 152, 0, 0.08)',
                   border: '1px solid rgba(255, 152, 0, 0.2)'
                 }}>
@@ -653,12 +662,30 @@ const PaymentPage: React.FC = () => {
                   </CardContent>
                 </Card>
               )}
+              {/* Add this new code block for insufficient payment */}
+              {paymentState === "insufficient" && (
+                <Card sx={{
+                  mb: 2,
+                  borderRadius: 2,
+                  bgcolor: 'rgba(211, 47, 47, 0.08)',
+                  border: '1px solid rgba(211, 47, 47, 0.2)'
+                }}>
+                  <CardContent sx={{ p: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                      <WarningIcon sx={{ color: '#d32f2f', mr: 1, mt: 0.2, fontSize: '1rem' }} />
+                      <Typography sx={{ fontSize: '0.85rem', color: '#666' }}>
+                        ຈຳນວນເງິນທີ່ປ້ອນເຂົ້າແມ່ນບໍ່ພຽງພໍສຳລັບການຊຳລະ. ກະລຸນາກວດສອບຈຳນວນເງິນຂອງທ່ານ.
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Debug Button - Helps with troubleshooting */}
               {error && (
                 <Box sx={{ textAlign: 'center', mt: 1, mb: 1 }}>
-                  <Button 
-                    size="small" 
+                  <Button
+                    size="small"
                     onClick={() => console.log("Debug info", { locations, totalAmount })}
                     sx={{ fontSize: '0.7rem', color: 'rgba(97, 20, 99, 0.6)' }}
                   >

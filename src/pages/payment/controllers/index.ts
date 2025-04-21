@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EmployeeModel } from "../../../models/employee";
 import { CarModel } from "../../../models/car";
@@ -68,8 +68,129 @@ const useMainController = () => {
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [alertSeverity, setAlertSeverity] = useState<AlertColor>("success");
   
+  // Audio context ref for payment sound
+  const audioContextRef = useRef<AudioContext | null>(null);
+  
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+
+  // Create Web Audio Context when needed
+  const createAudioContext = () => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    return audioContextRef.current;
+  };
+
+  // Function to play success payment sound
+  const playPaymentSuccessSound = () => {
+    try {
+      const audioContext = createAudioContext();
+      
+      // Create oscillator for "coin" sound
+      const playSuccessSound = () => {
+        // Create oscillators for a pleasant chord
+        const oscillator1 = audioContext.createOscillator();
+        const oscillator2 = audioContext.createOscillator();
+        const oscillator3 = audioContext.createOscillator();
+        
+        // Create gain nodes to control volume
+        const gainNode1 = audioContext.createGain();
+        const gainNode2 = audioContext.createGain();
+        const gainNode3 = audioContext.createGain();
+        
+        // Set initial gain (volume)
+        gainNode1.gain.value = 0.2;
+        gainNode2.gain.value = 0.15;
+        gainNode3.gain.value = 0.1;
+        
+        // Connect oscillators to gain nodes
+        oscillator1.connect(gainNode1);
+        oscillator2.connect(gainNode2);
+        oscillator3.connect(gainNode3);
+        
+        // Connect gain nodes to audio output
+        gainNode1.connect(audioContext.destination);
+        gainNode2.connect(audioContext.destination);
+        gainNode3.connect(audioContext.destination);
+        
+        // Set oscillator types for a pleasant sound
+        oscillator1.type = "sine";
+        oscillator2.type = "triangle";
+        oscillator3.type = "sine";
+        
+        // Set frequencies for a pleasing chord (C major)
+        oscillator1.frequency.value = 523.25; // C5
+        oscillator2.frequency.value = 659.25; // E5
+        oscillator3.frequency.value = 783.99; // G5
+        
+        // Schedule gain (volume) changes for fade-out effect
+        const currentTime = audioContext.currentTime;
+        
+        // Attack
+        gainNode1.gain.setValueAtTime(0, currentTime);
+        gainNode2.gain.setValueAtTime(0, currentTime);
+        gainNode3.gain.setValueAtTime(0, currentTime);
+        
+        gainNode1.gain.linearRampToValueAtTime(0.2, currentTime + 0.1);
+        gainNode2.gain.linearRampToValueAtTime(0.15, currentTime + 0.1);
+        gainNode3.gain.linearRampToValueAtTime(0.1, currentTime + 0.1);
+        
+        // Release (fade out)
+        gainNode1.gain.exponentialRampToValueAtTime(0.001, currentTime + 1.5);
+        gainNode2.gain.exponentialRampToValueAtTime(0.001, currentTime + 1.8);
+        gainNode3.gain.exponentialRampToValueAtTime(0.001, currentTime + 2.0);
+        
+        // Start and stop oscillators
+        oscillator1.start(currentTime);
+        oscillator2.start(currentTime + 0.05);
+        oscillator3.start(currentTime + 0.1);
+        
+        oscillator1.stop(currentTime + 1.5);
+        oscillator2.stop(currentTime + 1.8);
+        oscillator3.stop(currentTime + 2.0);
+      };
+      
+      // Play coins falling sound
+      const playCoinSound = () => {
+        // Duration of the overall sound effect
+        const duration = 1.5;
+        const numberOfCoins = 6;
+        
+        for (let i = 0; i < numberOfCoins; i++) {
+          setTimeout(() => {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Randomize frequency a bit for coin-like tinkle effect
+            const baseFreq = 2000 + Math.random() * 1000;
+            oscillator.frequency.value = baseFreq;
+            oscillator.type = "triangle";
+            
+            // Very short duration for each coin
+            const coinTime = audioContext.currentTime;
+            gainNode.gain.value = 0.05 + Math.random() * 0.1;
+            
+            // Fast fade out
+            gainNode.gain.exponentialRampToValueAtTime(0.001, coinTime + 0.15);
+            
+            oscillator.start(coinTime);
+            oscillator.stop(coinTime + 0.15);
+          }, i * (duration / numberOfCoins) * 300); // Stagger the coin sounds
+        }
+      };
+      
+      // Play success sound first, then coins sound
+      playSuccessSound();
+      setTimeout(playCoinSound, 300);
+      
+    } catch (error) {
+      console.error("Error playing payment sound:", error);
+    }
+  };
 
   // Handle navigation
   const handleNavigate = (path: string): void => {
@@ -204,7 +325,8 @@ const useMainController = () => {
         cat_id: categoryId,
         address_users_detail_id: addressId,
         amount: totalAmount,
-        payment_status: "paid" // Can be "paid" since this is the payment page
+        payment_status: "paid", // Can be "paid" since this is the payment page
+        service_status: "Not Start"
       };
 
       console.log("Creating service order with payload:", serviceOrderPayload);
@@ -221,6 +343,9 @@ const useMainController = () => {
       );
 
       console.log("Service order created successfully:", response.data);
+      
+      // Play the payment success sound
+      playPaymentSuccessSound();
 
       // Keep the success dialog open for a moment
       setTimeout(() => {
@@ -417,6 +542,7 @@ const useMainController = () => {
     handlePaymentAmountChange,
     handleAlertClose,
     handlePaymentSubmit,
+    playPaymentSuccessSound,
     id
   };
 };
