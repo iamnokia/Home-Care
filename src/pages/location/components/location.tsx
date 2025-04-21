@@ -194,7 +194,7 @@ const LocationPage: React.FC = () => {
     if (savedLocationName) {
       setAddress(savedLocationName);
     }
-  }, [locations]);
+  }, [locations]);  
 
   // Format number as currency
   const formatCurrency = (value: number): string => {

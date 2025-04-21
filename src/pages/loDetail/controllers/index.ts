@@ -187,22 +187,22 @@ const useMainController = () => {
   };
 
   // Handle location selection
-  const handleLocationSelect = (location: Useraddress): void => {
-    setSelectedLocation(location);
+    const handleLocationSelect = (location: Useraddress): void => {
+      setSelectedLocation(location);
 
-    // Save location name to local storage
-    localStorage.setItem("selectedLocationName", location.address_name);
+      const locationString = `${location.address_name}, ${location.village}, ${location.city}`;
+      localStorage.setItem("selectedLocationName", locationString);
 
-    // If you want to save more location information, you can store it as JSON
-    localStorage.setItem(
-      "selectedLocation",
-      JSON.stringify({
-        id: location.id,
-        name: location.address_name,
-        description: location.address_description,
-      })
-    );
-  };
+      // If you want to save more location information, you can store it as JSON
+      localStorage.setItem(
+        "selectedLocation",
+        JSON.stringify({
+          id: location.id,
+          name: location.address_name,
+          description: location.address_description,
+        })
+      );
+    };
 
   // Handle delete location
   const handleDeleteLocation = async () => {

@@ -242,8 +242,11 @@ const LocationDetailPage: React.FC = () => {
                         <Typography
                           sx={{ fontSize: "0.85rem", color: "#666", mt: 0.5 }}
                         >
-                          {location.address_description}
+                          {location.address_description}{" ,"}
+                          {location.village}{" ,"}
+                          {location.city}
                         </Typography>
+                        
                       }
                     />
 

@@ -8,6 +8,7 @@ export interface Useraddress{
     house_image:string,
     google_link_map:string,
     address_description:string,
+    village:string,
     city:string,
     tel:string,
 }

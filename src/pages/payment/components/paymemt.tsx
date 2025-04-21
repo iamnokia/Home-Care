@@ -132,7 +132,7 @@ const PaymentPage: React.FC = () => {
       p: 2
     }}>
       <Container
-        maxWidth="md"
+        maxWidth="lg"
         sx={{
           width: {
             xs: '100%',
