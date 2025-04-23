@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Box, 
   Typography, 
@@ -16,27 +16,26 @@ import FlagIcon from '@mui/icons-material/Flag';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import Homecare from '../../../assets/icons/HomeCareLogo.png';
-import { useNavigate } from 'react-router-dom';
-import { COMMENT_PATH } from '../../../routes/path';
+import { useMainController } from '../controllers/index';
+import { useParams } from 'react-router-dom';
 
-const ServiceStatus = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
-  const navigate = useNavigate();
-  
-  // Animation states
+interface ServiceStatusProps {
+  orderId: string;
+}
+
+const ServiceStatus: React.FC<ServiceStatusProps> = ({ orderId }) => {
   const [animate, setAnimate] = useState(false);
+  const {id} = useParams();
   
-  // Step status tracking
-  const [currentStepId, setCurrentStepId] = useState(null);
-  const [completedSteps, setCompletedSteps] = useState([]);
-  const [showStartButton, setShowStartButton] = useState(true);
-  const [showCompleteButton, setShowCompleteButton] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  
+  const {
+    showStartButton,
+    showCompleteButton,
+    handleStartClick,
+    handleCompleteClick,
+    getStepStatus,
+  } = useMainController(orderId);
+
   useEffect(() => {
-    // Trigger animations after component mounts
     setTimeout(() => {
       setAnimate(true);
     }, 100);
@@ -66,49 +65,6 @@ const ServiceStatus = () => {
       color: '#00BFA6',
     },
   ];
-
-  // Get status for each step
-  const getStepStatus = (stepId) => {
-    if (completedSteps.includes(stepId)) {
-      return 'completed';
-    }
-    if (currentStepId === stepId) {
-      return 'current';
-    }
-    return 'pending';
-  };
-
-  // Handle start button click
-  const handleStartClick = () => {
-    if (isProcessing) return;
-    
-    setIsProcessing(true);
-    setShowStartButton(false);
-    setCurrentStepId(1);
-    
-    // After 5 seconds, advance to step 2
-    setTimeout(() => {
-      setCompletedSteps([1]);
-      setCurrentStepId(2);
-      setShowCompleteButton(true);
-      setIsProcessing(false);
-    }, 5000);
-  };
-
-  // Handle complete button click
-  const handleCompleteClick = () => {
-    if (isProcessing) return;
-    
-    setIsProcessing(true);
-    setShowCompleteButton(false);
-    setCompletedSteps([1, 2]);
-    setCurrentStepId(3);
-    
-    // After 5 seconds, navigate to comment page
-    setTimeout(() => {
-      navigate(COMMENT_PATH);
-    }, 3000);
-  };
 
   return (
     <Box
@@ -247,8 +203,8 @@ const ServiceStatus = () => {
           mt: 2,
           px: { xs: 0, sm: 2, md: 3 },
         }}>
-               {/* Suggestion Text Before Start Button */}
-               {showStartButton && (
+          {/* Suggestion Text Before Start Button */}
+          {showStartButton && (
             <Grow in={animate} timeout={500}>
               <Paper
                 elevation={3}
@@ -291,6 +247,7 @@ const ServiceStatus = () => {
               </Paper>
             </Grow>
           )}
+          
           {/* Start Button */}
           {showStartButton && (
             <Grow in={animate} timeout={600}>

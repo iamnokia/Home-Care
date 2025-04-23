@@ -43,7 +43,7 @@ const RoutesComponent = () => {
         { path: "/Location/:id", element: <LocationPage/> },
         { path: "/Location-detail/:id", element: <LocationDetailPage/> },
         { path: "/payment/:id", element: <PaymentPage/> },
-        { path: SERVICE_STATUS_PATH, element: <ServiceStatus/> },
+        { path: "/service-status/:id", element: <ServiceStatus/> },
         { path: COMMENT_PATH, element: <CommentPage/> },
         { path: TERMS_PRIVACY_PATH, element: <TermsAndPrivacyPage/> },
         { path: SETTING_PATH, element: <SettingsPage/> },

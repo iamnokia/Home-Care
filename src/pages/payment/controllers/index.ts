@@ -72,7 +72,7 @@ const useMainController = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
 
   // Create Web Audio Context when needed
   const createAudioContext = () => {
@@ -357,7 +357,7 @@ const useMainController = () => {
         }
         
         // Navigate to status page
-        navigate(SERVICE_STATUS_PATH);
+        navigate(`/service-status/${id}`);
       }, 3000);
     } catch (error) {
       // Close success dialog if there's an error

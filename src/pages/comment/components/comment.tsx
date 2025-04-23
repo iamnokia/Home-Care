@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Box,
   Container,
@@ -6,26 +6,24 @@ import {
   Button,
   Grid,
   Paper,
-  IconButton,
   Card,
   CardContent,
   Avatar,
-  Stack,
   Snackbar,
   Alert,
   TextField,
   useTheme,
   useMediaQuery,
   Rating,
+  CircularProgress,
 } from "@mui/material";
-import { useLocation, useNavigate } from "react-router-dom";
 import CategoryIcon from "@mui/icons-material/Category";
 import HomeIcon from "@mui/icons-material/Home";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import DownloadIcon from "@mui/icons-material/Download";
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { HOME_PATH } from "../../../routes/path";
+import useCommentController from "../controllers/index";
 
 // Font size constants
 const fontSize = {
@@ -35,81 +33,45 @@ const fontSize = {
   button: "1rem",
 };
 
-// Enhanced service data with more details (same as payment page)
-const serviceItems = [
-  {
-    id: 1,
-    firstName: "ອຳມະລິນ",
-    surname: "ອຸນາລົມ",
-    price: 250000,
-    priceFormatted: "250,000 KIP",
-    image: "/api/placeholder/40/40",
-    category: "ແມ່ບ້ານ",
-    gender: "ຍິງ",
-    age: 21,
-    village: "ບ້ານ ໂນນສະຫວ່າງ",
-    city: "ວຽງຈັນ",
-  },
-];
-
-// New billing data based on the provided image
-const billingData = {
-  customerName: "ອຳມະລິນ ອຸນາລົມ",
-  serviceType: "ທຳຄວາມສະອາດ",
-  servicePrice: "500,000 ກີບ",
-  totalPrice: "500,000 ກີບ",
-};
-
-const CommentPage = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+const CommentPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // State variables
-  const [rating, setRating] = useState(3);
-  const [comment, setComment] = useState("");
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState("success");
-  const [commentError, setCommentError] = useState("");
+  // Get everything from the controller
+  const {
+    serviceDetails,
+    billingData,
+    loading,
+    error,
+    rating,
+    comment,
+    commentError,
+    alertOpen,
+    alertMessage,
+    alertSeverity,
+    setRating,
+    handleCommentChange,
+    handleAlertClose,
+    handleCommentSubmit,
+    handleDownloadReceipt
+  } = useCommentController();
 
-  // Handle comment change
-  const handleCommentChange = (e) => {
-    const value = e.target.value;
-    setComment(value);
-
-    // Validate comment
-    if (value.length > 500) {
-      setCommentError("ຄຳເຫັນຍາວເກີນໄປ (ສູງສຸດ 500 ຕົວອັກສອນ)");
-    } else {
-      setCommentError("");
-    }
-  };
-
-  // Handle alert close
-  const handleAlertClose = () => {
-    setAlertOpen(false);
-  };
-
-  // Handle comment submission
-  const handleCommentSubmit = () => {
-    if (comment.trim() === "") {
-      setAlertMessage("ກະລຸນາໃສ່ຄຳເຫັນຂອງທ່ານ!");
-      setAlertSeverity("error");
-      setAlertOpen(true);
-      return;
-    }
-
-    setAlertMessage("ສົ່ງຄຳເຫັນສຳເລັດແລ້ວ!");
-    setAlertSeverity("success");
-    setAlertOpen(true);
-
-    // Navigate to confirmation page after a short delay
-    setTimeout(() => {
-      navigate(HOME_PATH);
-    }, 1500);
-  };
+  // Show loading state
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #611463 0%, #8E24AA 100%)",
+        }}
+      >
+        <CircularProgress sx={{ color: "white" }} />
+      </Box>
+    );
+  }
 
   // Generate and download beautiful receipt as PNG
   const handleDownloadPDF = () => {
@@ -185,11 +147,10 @@ const CommentPage = () => {
       receiptMeta.style.fontSize = '14px';
 
       const receiptNumber = document.createElement('div');
-      receiptNumber.innerHTML = '<span style="font-weight:bold;">Receipt No:</span> HC-' + Math.floor(10000 + Math.random() * 90000);
+      receiptNumber.innerHTML = '<span style="font-weight:bold;">Receipt No:</span> ' + (billingData.receiptNo || `HC-${Math.floor(10000 + Math.random() * 90000)}`);
 
       const receiptDate = document.createElement('div');
-      const today = new Date();
-      receiptDate.innerHTML = '<span style="font-weight:bold;">Date:</span> ' + today.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      receiptDate.innerHTML = '<span style="font-weight:bold;">Date:</span> ' + (billingData.orderDate || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }));
 
       receiptMeta.appendChild(receiptNumber);
       receiptMeta.appendChild(receiptDate);
@@ -214,16 +175,19 @@ const CommentPage = () => {
 
       customerCard.appendChild(customerTitle);
 
+      // Get service details for the first item
+      const service = serviceDetails.length > 0 ? serviceDetails[0] : null;
+
       const customerName = document.createElement('div');
       customerName.style.fontWeight = 'bold';
       customerName.style.fontSize = '18px';
       customerName.style.marginBottom = '5px';
-      customerName.textContent = 'ອຳມະລິນ ອຸນາລົມ';
+      customerName.textContent = service ? `${service.firstName} ${service.surname}` : billingData.customerName;
 
       const customerDetails = document.createElement('div');
       customerDetails.style.fontSize = '14px';
       customerDetails.style.color = '#666';
-      customerDetails.textContent = 'ອາຍຸ, 21ປີ ບ້ານ ໂນນສະຫວ່າງ ເມືອງ ໄຊເສດຖາ';
+      customerDetails.textContent = service ? `${service.gender}, ${service.age}ປີ ${service.village} ${service.city}` : 'ອາຍຸ, 21ປີ ບ້ານ ໂນນສະຫວ່າງ ເມືອງ ໄຊເສດຖາ';
 
       customerCard.appendChild(customerName);
       customerCard.appendChild(customerDetails);
@@ -260,8 +224,8 @@ const CommentPage = () => {
       const tableBody = document.createElement('tbody');
       tableBody.innerHTML = `
         <tr style="border-bottom: 1px solid #eee;">
-          <td style="padding: 15px 15px; text-align: left;">ທຳຄວາມສະອາດ</td>
-          <td style="padding: 15px 15px; text-align: right;">500,000 ກີບ</td>
+          <td style="padding: 15px 15px; text-align: left;">${service ? service.service : billingData.serviceType}</td>
+          <td style="padding: 15px 15px; text-align: right;">${service ? service.priceFormatted : billingData.servicePrice}</td>
         </tr>
       `;
       serviceTable.appendChild(tableBody);
@@ -299,7 +263,7 @@ const CommentPage = () => {
       priceLabel1.style.color = '#666';
 
       const priceValue1 = document.createElement('div');
-      priceValue1.textContent = '500,000 ກີບ';
+      priceValue1.textContent = service ? service.priceFormatted : billingData.servicePrice;
 
       priceRow1.appendChild(priceLabel1);
       priceRow1.appendChild(priceValue1);
@@ -324,7 +288,7 @@ const CommentPage = () => {
       totalLabel.textContent = 'ລາຄາລວມ';
 
       const totalValue = document.createElement('div');
-      totalValue.textContent = '500,000 ກີບ';
+      totalValue.textContent = service ? service.priceFormatted : billingData.totalPrice;
       totalValue.style.color = '#611463';
 
       totalRow.appendChild(totalLabel);
@@ -398,19 +362,15 @@ const CommentPage = () => {
         document.body.removeChild(billElement);
 
         // Show success alert
-        setAlertMessage("ດາວໂຫຼດໃບບິນສຳເລັດແລ້ວ!");
-        setAlertSeverity("success");
-        setAlertOpen(true);
+        handleDownloadReceipt();
       }).catch(error => {
         console.error('Error generating bill image:', error);
 
         // Remove bill element from DOM
         document.body.removeChild(billElement);
 
-        // Show error alert
-        setAlertMessage("ເກີດຂໍ້ຜິດພາດໃນການດາວໂຫຼດໃບບິນ!");
-        setAlertSeverity("error");
-        setAlertOpen(true);
+        // Show error alert through controller
+        handleDownloadReceipt();
       });
     }).catch(error => {
       console.error('Error loading html2canvas:', error);
@@ -418,10 +378,8 @@ const CommentPage = () => {
       // Remove bill element from DOM
       document.body.removeChild(billElement);
 
-      // Show error alert
-      setAlertMessage("ເກີດຂໍ້ຜິດພາດໃນການດາວໂຫຼດໃບບິນ!");
-      setAlertSeverity("error");
-      setAlertOpen(true);
+      // Show error alert through controller
+      handleDownloadReceipt();
     });
   };
 
@@ -547,11 +505,11 @@ const CommentPage = () => {
               </Button>
             </Box>
 
-            {/* Service Items - Removed maxHeight and overflowY to show all content */}
+            {/* Service Items - Display actual data */}
             <Box sx={{ mb: 3.5 }}>
-              {serviceItems.map((item) => (
+              {serviceDetails.map((item, index) => (
                 <Card
-                  key={item.id}
+                  key={index}
                   sx={{
                     mb: 2.5,
                     borderRadius: 3,
@@ -731,7 +689,7 @@ const CommentPage = () => {
                       ລາຄາ
                     </Typography>
                     <Typography sx={{ fontSize: fontSize.text }}>
-                      500,000 ກີບ
+                      {serviceDetails.length > 0 ? serviceDetails[0].priceFormatted : billingData.servicePrice}
                     </Typography>
                   </Box>
 
@@ -761,7 +719,7 @@ const CommentPage = () => {
                       borderRadius: 1.5,
                       boxShadow: "0 2px 8px rgba(97, 20, 99, 0.1)"
                     }}>
-                      500,000 ກີບ
+                      {serviceDetails.length > 0 ? serviceDetails[0].priceFormatted : billingData.totalPrice}
                     </Typography>
                   </Box>
                 </CardContent>
@@ -832,7 +790,7 @@ const CommentPage = () => {
                     <Rating
                       value={rating}
                       onChange={(event, newValue) => {
-                        setRating(newValue);
+                        setRating(newValue || 3);
                       }}
                       size="large"
                       sx={{

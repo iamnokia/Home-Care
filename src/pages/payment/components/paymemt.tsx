@@ -467,33 +467,76 @@ const PaymentPage: React.FC = () => {
                 >
                   ທີ່ຢູ່
                 </Typography>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  placeholder="ທີ່ຢູ່ປັດຈຸບັນ"
-                  value={localStorage.getItem('selectedLocationName') || 'ບ້ານ ໂນນສະຫວ່າງ, ວຽງຈັນ'}
-                  InputProps={{
-                    readOnly: true,
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocationOnIcon sx={{ color: '#611463' }} />
-                      </InputAdornment>
-                    ),
-                    sx: {
-                      fontSize: fontSize.text,
-                      borderRadius: 2,
-                      transition: 'all 0.3s ease',
-                      py: 1.5,
-                    }
-                  }}
+
+                {/* Custom Address Display Box */}
+                <Box
                   sx={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
                     backgroundColor: "#f8f6f9",
                     fontSize: fontSize.text,
                     boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
                     borderRadius: 2,
                     transition: 'all 0.3s ease',
+                    py: 1.5,
+                    px: 2,
+                    border: '1px solid rgba(0, 0, 0, 0.23)',
                   }}
-                />
+                >
+                  {/* Start Icon */}
+                  <LocationOnIcon sx={{ color: '#611463', mr: 1.5, mt: 0.5 }} />
+
+                  {/* Address Content */}
+                  <Box sx={{ flexGrow: 1 }}>
+                    {localStorage.getItem('addressName') ? (
+                      <>
+                        <Typography
+                          component="div"
+                          sx={{
+                            fontWeight: 'bold',
+                            fontSize: fontSize.text,
+                            lineHeight: 1.2
+                          }}
+                        >
+                          {localStorage.getItem("addressName") || ""}
+                        </Typography>
+                        <Typography
+                          component="div"
+                          sx={{
+                            fontSize: fontSize.text,
+                            color: 'text.secondary',
+                            mt: 0.5
+                          }}
+                        >
+                          {localStorage.getItem("addressVillage") || ""}, {localStorage.getItem("addressCity") || ""}
+                        </Typography>
+                      </>
+                    ) : (
+                      <>
+                        <Typography
+                          component="div"
+                          sx={{
+                            fontWeight: 'bold',
+                            fontSize: fontSize.text,
+                            lineHeight: 1.2
+                          }}
+                        >
+                          ບ້ານ ໂນນສະຫວ່າງ
+                        </Typography>
+                        <Typography
+                          component="div"
+                          sx={{
+                            fontSize: fontSize.text,
+                            color: 'text.secondary',
+                            mt: 0.5
+                          }}
+                        >
+                          ວຽງຈັນ
+                        </Typography>
+                      </>
+                    )}
+                  </Box>
+                </Box>
               </Box>
 
               {/* Payment Section */}

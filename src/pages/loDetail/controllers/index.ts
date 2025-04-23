@@ -187,11 +187,17 @@ const useMainController = () => {
   };
 
   // Handle location selection
-    const handleLocationSelect = (location: Useraddress): void => {
-      setSelectedLocation(location);
-
-      const locationString = `${location.address_name}, ${location.village}, ${location.city}`;
-      localStorage.setItem("selectedLocationName", locationString);
+const handleLocationSelect = (location: Useraddress): void => {
+  setSelectedLocation(location);
+  
+  // Store each component separately
+  localStorage.setItem("addressName", location.address_name);
+  localStorage.setItem("addressVillage", location.village);
+  localStorage.setItem("addressCity", location.city);
+  
+  // Also store the combined string for backwards compatibility
+  const locationString = `${location.address_name}, ${location.village}, ${location.city}`;
+  localStorage.setItem("selectedLocationName", locationString);
 
       // If you want to save more location information, you can store it as JSON
       localStorage.setItem(

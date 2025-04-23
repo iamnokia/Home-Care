@@ -290,58 +290,79 @@ const LocationPage: React.FC = () => {
             <Box sx={{ width: 40 }} /> {/* Spacer for alignment */}
           </Box>
 
-          {/* Address Input (Clickable) */}
-          <Box sx={{ mb: 4, mt: 3 }}>
-            <Typography
-              color="textSecondary"
-              sx={{
-                fontSize: fontSize.subtitle,
-                mb: 1,
-                fontWeight: 500,
-              }}
-            >
-              ທີ່ຢູ່
-            </Typography>
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="ກົດເພື່ອໃສ່ຂໍ້ມູນ"
-              value={address} // This will now show the value from localStorage
-              onClick={() => navigate(`/Location-detail/${id}`)}
-              InputProps={{
-                readOnly: true,
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LocationOnIcon sx={{ color: '#611463' }} />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <KeyboardArrowRightIcon sx={{ color: '#611463' }} />
-                  </InputAdornment>
-                ),
-                sx: {
-                  fontSize: fontSize.text,
-                  borderRadius: 2,
-                  transition: 'all 0.3s ease',
-                }
-              }}
-              sx={{
-                backgroundColor: "#f8f6f9",
-                cursor: "pointer",
-                "&:hover": {
-                  backgroundColor: "#efe8f0",
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 12px rgba(97, 20, 99, 0.15)'
-                },
-                fontSize: fontSize.text,
-                boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
-                borderRadius: 2,
-                transition: 'all 0.3s ease',
-              }}
-            />
-          </Box>
-
+ {/* Address Input (Clickable) */}
+<Box sx={{ mb: 4, mt: 3 }}>
+  <Typography
+    color="textSecondary"
+    sx={{
+      fontSize: fontSize.subtitle,
+      mb: 1,
+      fontWeight: 500,
+    }}
+  >
+    ທີ່ຢູ່
+  </Typography>
+  
+  {/* Styled Box that looks like TextField but allows for formatted content */}
+  <Box
+    onClick={() => navigate(`/Location-detail/${id}`)}
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      backgroundColor: "#f8f6f9",
+      cursor: "pointer",
+      "&:hover": {
+        backgroundColor: "#efe8f0",
+        transform: 'translateY(-2px)',
+        boxShadow: '0 4px 12px rgba(97, 20, 99, 0.15)'
+      },
+      fontSize: fontSize.text,
+      boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+      borderRadius: 2,
+      transition: 'all 0.3s ease',
+      py: 1.5,
+      px: 2,
+      border: '1px solid rgba(0, 0, 0, 0.23)',
+    }}
+  >
+    {/* Start Icon */}
+    <LocationOnIcon sx={{ color: '#611463', mr: 1 }} />
+    
+    {/* Address Content with bold name */}
+    <Box sx={{ flexGrow: 1 }}>
+      {address ? (
+        <>
+          <Typography 
+            component="div" 
+            sx={{ 
+              fontWeight: 'bold',
+              fontSize: fontSize.text,
+              lineHeight: 1.2
+            }}
+          >
+            {localStorage.getItem("addressName") || ""}
+          </Typography>
+          <Typography 
+            component="div" 
+            sx={{ 
+              fontSize: fontSize.text,
+              color: 'text.secondary'
+            }}
+          >
+            {localStorage.getItem("addressVillage") || ""}, {localStorage.getItem("addressCity") || ""}
+          </Typography>
+        </>
+      ) : (
+        <Typography sx={{ color: 'text.secondary', fontSize: fontSize.text }}>
+          ກົດເພື່ອໃສ່ຂໍ້ມູນ
+        </Typography>
+      )}
+    </Box>
+    
+    {/* End Icon */}
+    <KeyboardArrowRightIcon sx={{ color: '#611463' }} />
+  </Box>
+</Box>
           {/* Service Items List */}
           <Typography
             variant="subtitle1"
@@ -539,6 +560,7 @@ const LocationPage: React.FC = () => {
                     flexWrap: { xs: "wrap", sm: "nowrap" },
                     borderLeft: '3px solid #8a1c8d'
                   }}>
+
                     <Box sx={{ display: "flex", alignItems: "center", mr: 2, mb: { xs: 1, sm: 0 }, minWidth: "45%" }}>
                       <HomeIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
                       <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
