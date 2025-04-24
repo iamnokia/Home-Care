@@ -44,20 +44,35 @@ import { LOCATION_PATH } from "../../../routes/path";
 import useMainController from "../controllers";
 import HomeIcon from "@mui/icons-material/Home";
 
-const districts: string[] = [
-  "CHANTHABULY",
-  "SIKHOTTABONG",
-  "XAYSETHA",
-  "SISATTANAK",
-  "NAXAITHONG",
-  "XAYTANY",
-  "HADXAIFONG",
+
+// Define districts with both English and Lao values
+const districts = [
+  { en: 'CHANTHABULY', lo: 'ຈັນທະບູລີ' },
+  { en: 'SIKHOTTABONG', lo: 'ສີໂຄດຕະບອງ' },
+  { en: 'XAYSETHA', lo: 'ໄຊເສດຖາ' },
+  { en: 'SISATTANAK', lo: 'ສີສັດຕະນາກ' },
+  { en: 'NAXAITHONG', lo: 'ນາຊາຍທອງ' },
+  { en: 'XAYTANY', lo: 'ໄຊທານີ' },
+  { en: 'HADXAIFONG', lo: 'ຫາດຊາຍຟອງ' }
 ];
 
-interface CountryCode {
-  code: string;
-  country: string;
-}
+// Helper function to find the city object from English value
+const findCityByEnglishValue = (englishValue) => {
+  return districts.find(district => district.en === englishValue) || null;
+};
+
+// Helper function to find the city object from Lao value
+const findCityByLaoValue = (laoValue) => {
+  return districts.find(district => district.lo === laoValue) || null;
+};
+
+// Helper to display city in proper language
+const displayCity = (englishValue) => {
+  const city = findCityByEnglishValue(englishValue);
+  return city ? city.lo : englishValue;
+};
+
+
 
 
 
@@ -442,7 +457,7 @@ const LocationDetailPage: React.FC = () => {
                 ),
               }}
             />
-            <FormHelperText sx={{ mb: 1, ml: 1 }}>
+            <FormHelperText sx={{ mb: 1, ml: 1, color:"#f7931e" }}>
               ແນະນຳ: ສາມາດຄົ້ນຫາສະຖານທີ່ໃນ Google Maps ແລ້ວວາງລິ້ງຈາກນັ້ນບ່ອນນີ້
             </FormHelperText>
           </Box>
@@ -613,138 +628,80 @@ const LocationDetailPage: React.FC = () => {
                 ),
               }}
             />
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontSize: "1rem",
-                mb: 1.5,
-                fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <LocationCityOutlinedIcon sx={{ mr: 1, color: "#611463" }} />{" "}
-              ເມືອງ *
-            </Typography>
-
-            <Autocomplete
-              fullWidth
-              options={districts}
-              value={ctrl?.placeCity ?? ""}
-              onChange={(
-                event: React.SyntheticEvent,
-                newValue: string | null
-              ) => {
-                ctrl?.setCity(newValue ?? ""); // ✅ use the parameter, not ctrl?.newValue
-                if (newValue) {
-                  ctrl?.setErrors({ ...ctrl?.errors, placeCity: undefined });
-                }
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  variant="outlined"
-                  placeholder="ເລືອກເມືອງ"
-                  error={!!ctrl?.errors.placeCity}
-                  helperText={ctrl?.errors.placeCity}
-                  required
-                  sx={{
-                    mb: 3,
-                    backgroundColor: "#fff",
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 2,
-                      transition: "all 0.2s",
-                      "&:hover .MuiOutlinedInput-notchedOutline": {
-                        borderColor: alpha("#611463", 0.5),
-                      },
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#611463",
-                        borderWidth: 2,
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    ...params.InputProps,
-                    sx: { fontSize: "0.95rem", py: 0.5 },
-                    endAdornment: (
-                      <>
-                        {ctrl?.errors.placeName && (
-                          <InputAdornment position="end">
-                            <ErrorIcon color="error" />
-                          </InputAdornment>
-                        )}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
+             <Typography
+    variant="subtitle1"
+    sx={{
+      fontSize: "1rem",
+      mb: 1.5,
+      fontWeight: 600,
+      display: "flex",
+      alignItems: "center",
+    }}
+  >
+    <LocationCityOutlinedIcon sx={{ mr: 1, color: "#611463" }} />{" "}
+    ເມືອງ *
+  </Typography>
+  
+  <Autocomplete
+    fullWidth
+    options={districts}
+    getOptionLabel={(option) => typeof option === 'string' ? displayCity(option) : option.lo}
+    value={ctrl?.placeCity ? findCityByEnglishValue(ctrl?.placeCity) : null}
+    onChange={(
+      event: React.SyntheticEvent,
+      newValue: { en: string, lo: string } | null
+    ) => {
+      ctrl?.setCity(newValue ? newValue.en : "");
+      if (newValue) {
+        ctrl?.setErrors({ ...ctrl?.errors, placeCity: undefined });
+      }
+    }}
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        variant="outlined"
+        placeholder="ເລືອກເມືອງ"
+        error={!!ctrl?.errors.placeCity}
+        helperText={ctrl?.errors.placeCity}
+        required
+        sx={{
+          mb: 3,
+          backgroundColor: "#fff",
+          "& .MuiOutlinedInput-root": {
+            borderRadius: 2,
+            transition: "all 0.2s",
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: alpha("#611463", 0.5),
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#611463",
+              borderWidth: 2,
+            },
+          },
+        }}
+        InputProps={{
+          ...params.InputProps,
+          sx: { fontSize: "0.95rem", py: 0.5 },
+          endAdornment: (
+            <>
+              {ctrl?.errors.placeName && (
+                <InputAdornment position="end">
+                  <ErrorIcon color="error" />
+                </InputAdornment>
               )}
-            />
-          </Box>
-
-          {/* Phone number section */}
-          <Box sx={{ mb: 4 }}>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontSize: "1rem",
-                mb: 1.5,
-                fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <PhoneIcon sx={{ mr: 1, color: "#611463" }} />
-              ເບີໂທລະສັບ *
-            </Typography>
-
-            <Grid container spacing={2} sx={{ mb: 2,  }}>
-            
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  placeholder="ໃສ່ເບີໂທລະສັບ"
-                  value={ctrl?.phoneNumber}
-                  onChange={(e) => {
-                    ctrl?.setPhoneNumber(e.target.value);
-                    if (e.target.value.trim()) {
-                      ctrl?.setErrors({
-                        ...ctrl?.errors,
-                        phoneNumber: undefined,
-                      });
-                    }
-                  }}
-                  error={!!ctrl?.errors.phoneNumber}
-                  helperText={ctrl?.errors.phoneNumber}
-                  required
-                  sx={{
-                    backgroundColor: "#fff",
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 2,
-                      transition: "all 0.2s",
-                      "&:hover .MuiOutlinedInput-notchedOutline": {
-                        borderColor: alpha("#611463", 0.5),
-                      },
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#611463",
-                        borderWidth: 2,
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    sx: { fontSize: "0.95rem", py: 0.5 },
-                    endAdornment: ctrl?.errors.phoneNumber && (
-                      <InputAdornment position="end">
-                        <ErrorIcon color="error" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-            </Grid>
-          </Box>
-
+              {params.InputProps.endAdornment}
+            </>
+          ),
+        }}
+      />
+    )}
+    renderOption={(props, option) => (
+      <li {...props}>
+        {option.lo}
+      </li>
+    )}
+  />
+</Box>
           <Typography
             variant="subtitle1"
             sx={{
