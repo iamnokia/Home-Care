@@ -14,7 +14,6 @@ import PaymentPage from "../pages/payment/components/paymemt";
 import TermsAndPrivacyPage from "../pages/privacy/components";
 import SettingsPage from "../pages/setting/components/setting";
 
-
 import {
   BLOG_PROFILE_PATH,
   COMMENT_PATH,
@@ -26,6 +25,8 @@ import {
   SERVICE_STATUS_PATH,
   SETTING_PATH,
   TERMS_PRIVACY_PATH,
+  LOCATION_PATH,
+  LOCATION_DETAIL_PATH,
 } from "./path";
 import { useRoutes } from "react-router-dom";
 
@@ -39,16 +40,18 @@ const RoutesComponent = () => {
         { path: SERVICE_PATH, element: <JobSearchPage /> },
         { path: HISTORY_PATH, element: <Company_searchPage /> },
         { path: BLOG_PROFILE_PATH, element: <BlogProfile /> },
-        { path: CONTACT_US_PATH, element: <ContactUs/> },
-        { path: "/Location/:id", element: <LocationPage/> },
-        { path: "/Location-detail/:id", element: <LocationDetailPage/> },
-        { path: "/payment/:id", element: <PaymentPage/> },
-        { path: "/service-status/:id", element: <ServiceStatus/> },
-        { path: COMMENT_PATH, element: <CommentPage/> },
-        { path: TERMS_PRIVACY_PATH, element: <TermsAndPrivacyPage/> },
-        { path: SETTING_PATH, element: <SettingsPage/> },
-        { path: "/service-detail/:id", element: <ServiceDetail/>},
-
+        { path: CONTACT_US_PATH, element: <ContactUs /> },
+        { path: `${LOCATION_PATH}/:id`, element: <LocationPage /> },
+        { path: `${LOCATION_DETAIL_PATH}/:id`, element: <LocationDetailPage /> },
+        { path: `${PAYMENT_PATH}/:id`, element: <PaymentPage /> },
+        { path: `${SERVICE_STATUS_PATH}/:id`, element: <ServiceStatus /> },
+        // Updated to include ID parameter
+        { path: `${COMMENT_PATH}/:id`, element: <CommentPage /> },
+        // Keep the original route for backward compatibility
+        { path: COMMENT_PATH, element: <CommentPage /> },
+        { path: TERMS_PRIVACY_PATH, element: <TermsAndPrivacyPage /> },
+        { path: SETTING_PATH, element: <SettingsPage /> },
+        { path: "/service-detail/:id", element: <ServiceDetail /> },
       ],
     },
     {

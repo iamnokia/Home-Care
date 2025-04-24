@@ -74,50 +74,160 @@ const PaymentPage: React.FC = () => {
     handlePaymentSubmit
   } = useMainController();
 
-  // Show loading skeleton
+  // Loading component with white background, #611463 and #f7931e accents
+
+  // Show enhanced loading state
   if (loading) {
     return (
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #611463 0%, #8a1c8d 100%)',
-        p: 2
-      }}>
-        <Container maxWidth="md">
-          <Paper
-            elevation={8}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          background: "white",
+          overflow: "hidden",
+          position: "relative"
+        }}
+      >
+        {/* Background decorative elements */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: "10%",
+            left: "10%",
+            width: "200px",
+            height: "200px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(97,20,99,0.05) 0%, rgba(97,20,99,0) 70%)",
+            animation: "pulse 3s infinite ease-in-out",
+            "@keyframes pulse": {
+              "0%": { transform: "scale(1)", opacity: 0.3 },
+              "50%": { transform: "scale(1.1)", opacity: 0.1 },
+              "100%": { transform: "scale(1)", opacity: 0.3 }
+            }
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "15%",
+            right: "10%",
+            width: "180px",
+            height: "180px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(247,147,30,0.05) 0%, rgba(247,147,30,0) 70%)",
+            animation: "pulse 3s infinite ease-in-out 1s",
+          }}
+        />
+
+        {/* Main loading spinner with custom animation */}
+        <Box
+          sx={{
+            position: "relative",
+            width: "120px",
+            height: "120px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            mb: 2
+          }}
+        >
+          {/* Outer spinning circle - purple */}
+          <Box
             sx={{
-              p: { xs: 2, sm: 3, md: 4 },
-              borderRadius: 3,
-              maxWidth: '100%',
-              mx: 'auto',
-              boxShadow: '0 8px 24px rgba(97, 20, 99, 0.2)',
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              border: "4px solid rgba(97,20,99,0.1)",
+              borderTop: "4px solid #611463",
+              borderRadius: "50%",
+              animation: "spin 1.5s linear infinite",
+              "@keyframes spin": {
+                "0%": { transform: "rotate(0deg)" },
+                "100%": { transform: "rotate(360deg)" }
+              }
             }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-              <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
-              <Skeleton variant="text" sx={{ fontSize: fontSize.title, width: '60%' }} />
-            </Box>
+          />
 
-            <Grid container spacing={4}>
-              <Grid item xs={12} md={6}>
-                <Skeleton variant="text" sx={{ fontSize: fontSize.subtitle, mb: 2 }} />
-                <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 3, mb: 2 }} />
-                <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 3, mb: 2 }} />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 3, mb: 3 }} />
-                <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 3, mb: 2 }} />
-              </Grid>
-            </Grid>
+          {/* Inner spinning circle - orange */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "70%",
+              height: "70%",
+              border: "4px solid rgba(247,147,30,0.1)",
+              borderBottom: "4px solid #f7931e",
+              borderRadius: "50%",
+              animation: "spinReverse 1.2s linear infinite",
+              "@keyframes spinReverse": {
+                "0%": { transform: "rotate(0deg)" },
+                "100%": { transform: "rotate(-360deg)" }
+              }
+            }}
+          />
 
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-              <CircularProgress sx={{ color: '#611463' }} />
-            </Box>
-          </Paper>
-        </Container>
+          {/* Center pulsing dot - mix */}
+          <Box
+            sx={{
+              width: "20px",
+              height: "20px",
+              background: "linear-gradient(135deg, #611463, #f7931e)",
+              borderRadius: "50%",
+              animation: "pulse 1.5s infinite ease-in-out",
+            }}
+          />
+        </Box>
+
+        {/* Loading text with animation */}
+        <Typography
+          variant="h6"
+          sx={{
+            color: "#611463",
+            mt: 2,
+            fontSize: "1.1rem",
+            fontWeight: 500,
+            letterSpacing: "1px",
+            animation: "fadeInOut 1.5s infinite ease-in-out",
+            "@keyframes fadeInOut": {
+              "0%": { opacity: 0.5 },
+              "50%": { opacity: 1 },
+              "100%": { opacity: 0.5 }
+            }
+          }}
+        >
+          ກຳລັງໂຫຼດ...
+        </Typography>
+
+        {/* Animated progress dots - alternating colors */}
+        <Box
+          sx={{
+            display: "flex",
+            mt: 1,
+            gap: "8px",
+            alignItems: "center"
+          }}
+        >
+          {[0, 1, 2].map((i) => (
+            <Box
+              key={i}
+              sx={{
+                width: "8px",
+                height: "8px",
+                backgroundColor: i === 1 ? "#f7931e" : "#611463",
+                borderRadius: "50%",
+                opacity: 0.7,
+                animation: "bounce 1.4s infinite ease-in-out",
+                animationDelay: `${i * 0.2}s`,
+                "@keyframes bounce": {
+                  "0%, 100%": { transform: "scale(1)" },
+                  "50%": { transform: "scale(1.5)" }
+                }
+              }}
+            />
+          ))}
+        </Box>
       </Box>
     );
   }

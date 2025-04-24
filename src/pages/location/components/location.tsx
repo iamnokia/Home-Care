@@ -75,7 +75,7 @@ const LocationPage: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   // Get data from controller
   const { data, car, loading } = useMainController();
 
@@ -123,10 +123,10 @@ const LocationPage: React.FC = () => {
         let categoryId: number | undefined;
         try {
           if (employee.cat_id !== undefined) {
-            categoryId = typeof employee.cat_id === 'string' 
-              ? parseInt(employee.cat_id, 10) 
+            categoryId = typeof employee.cat_id === 'string'
+              ? parseInt(employee.cat_id, 10)
               : employee.cat_id;
-            
+
             // Check if parsing resulted in NaN
             if (isNaN(categoryId)) {
               categoryId = undefined;
@@ -163,14 +163,14 @@ const LocationPage: React.FC = () => {
         if (categoryId === 5 && car && car.length > 0) {
           // Find car that belongs to this employee
           const employeeCar = car.find(c => c.emp_id === employee.id);
-          
+
           if (employeeCar) {
             // Update with detailed car information
             locationObject.carId = employeeCar.id || locationObject.carId;
             locationObject.carBrand = employeeCar.car_brand || locationObject.carBrand;
             locationObject.carModel = employeeCar.model || locationObject.carModel;
             locationObject.licensePlate = employeeCar.license_plate || locationObject.licensePlate;
-            locationObject.carYear = employeeCar.created_at ? 
+            locationObject.carYear = employeeCar.created_at ?
               new Date(employeeCar.created_at).getFullYear().toString() : undefined;
             locationObject.carImage = employeeCar.car_image || "https://via.placeholder.com/400/300";
           }
@@ -194,7 +194,7 @@ const LocationPage: React.FC = () => {
     if (savedLocationName) {
       setAddress(savedLocationName);
     }
-  }, [locations]);  
+  }, [locations]);
 
   // Format number as currency
   const formatCurrency = (value: number): string => {
@@ -206,11 +206,160 @@ const LocationPage: React.FC = () => {
     setAlertOpen(false);
   };
 
-  // Show loading state
+  // Loading component with white background, #611463 and #f7931e accents
+
+  // Show enhanced loading state
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress sx={{ color: "#611463" }} />
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          background: "white",
+          overflow: "hidden",
+          position: "relative"
+        }}
+      >
+        {/* Background decorative elements */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: "10%",
+            left: "10%",
+            width: "200px",
+            height: "200px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(97,20,99,0.05) 0%, rgba(97,20,99,0) 70%)",
+            animation: "pulse 3s infinite ease-in-out",
+            "@keyframes pulse": {
+              "0%": { transform: "scale(1)", opacity: 0.3 },
+              "50%": { transform: "scale(1.1)", opacity: 0.1 },
+              "100%": { transform: "scale(1)", opacity: 0.3 }
+            }
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "15%",
+            right: "10%",
+            width: "180px",
+            height: "180px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(247,147,30,0.05) 0%, rgba(247,147,30,0) 70%)",
+            animation: "pulse 3s infinite ease-in-out 1s",
+          }}
+        />
+
+        {/* Main loading spinner with custom animation */}
+        <Box
+          sx={{
+            position: "relative",
+            width: "120px",
+            height: "120px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            mb: 2
+          }}
+        >
+          {/* Outer spinning circle - purple */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              border: "4px solid rgba(97,20,99,0.1)",
+              borderTop: "4px solid #611463",
+              borderRadius: "50%",
+              animation: "spin 1.5s linear infinite",
+              "@keyframes spin": {
+                "0%": { transform: "rotate(0deg)" },
+                "100%": { transform: "rotate(360deg)" }
+              }
+            }}
+          />
+
+          {/* Inner spinning circle - orange */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "70%",
+              height: "70%",
+              border: "4px solid rgba(247,147,30,0.1)",
+              borderBottom: "4px solid #f7931e",
+              borderRadius: "50%",
+              animation: "spinReverse 1.2s linear infinite",
+              "@keyframes spinReverse": {
+                "0%": { transform: "rotate(0deg)" },
+                "100%": { transform: "rotate(-360deg)" }
+              }
+            }}
+          />
+
+          {/* Center pulsing dot - mix */}
+          <Box
+            sx={{
+              width: "20px",
+              height: "20px",
+              background: "linear-gradient(135deg, #611463, #f7931e)",
+              borderRadius: "50%",
+              animation: "pulse 1.5s infinite ease-in-out",
+            }}
+          />
+        </Box>
+
+        {/* Loading text with animation */}
+        <Typography
+          variant="h6"
+          sx={{
+            color: "#611463",
+            mt: 2,
+            fontSize: "1.1rem",
+            fontWeight: 500,
+            letterSpacing: "1px",
+            animation: "fadeInOut 1.5s infinite ease-in-out",
+            "@keyframes fadeInOut": {
+              "0%": { opacity: 0.5 },
+              "50%": { opacity: 1 },
+              "100%": { opacity: 0.5 }
+            }
+          }}
+        >
+          ກຳລັງໂຫຼດ...
+        </Typography>
+
+        {/* Animated progress dots - alternating colors */}
+        <Box
+          sx={{
+            display: "flex",
+            mt: 1,
+            gap: "8px",
+            alignItems: "center"
+          }}
+        >
+          {[0, 1, 2].map((i) => (
+            <Box
+              key={i}
+              sx={{
+                width: "8px",
+                height: "8px",
+                backgroundColor: i === 1 ? "#f7931e" : "#611463",
+                borderRadius: "50%",
+                opacity: 0.7,
+                animation: "bounce 1.4s infinite ease-in-out",
+                animationDelay: `${i * 0.2}s`,
+                "@keyframes bounce": {
+                  "0%, 100%": { transform: "scale(1)" },
+                  "50%": { transform: "scale(1.5)" }
+                }
+              }}
+            />
+          ))}
+        </Box>
       </Box>
     );
   }
@@ -290,79 +439,79 @@ const LocationPage: React.FC = () => {
             <Box sx={{ width: 40 }} /> {/* Spacer for alignment */}
           </Box>
 
- {/* Address Input (Clickable) */}
-<Box sx={{ mb: 4, mt: 3 }}>
-  <Typography
-    color="textSecondary"
-    sx={{
-      fontSize: fontSize.subtitle,
-      mb: 1,
-      fontWeight: 500,
-    }}
-  >
-    ທີ່ຢູ່
-  </Typography>
-  
-  {/* Styled Box that looks like TextField but allows for formatted content */}
-  <Box
-    onClick={() => navigate(`/Location-detail/${id}`)}
-    sx={{
-      display: 'flex',
-      alignItems: 'center',
-      backgroundColor: "#f8f6f9",
-      cursor: "pointer",
-      "&:hover": {
-        backgroundColor: "#efe8f0",
-        transform: 'translateY(-2px)',
-        boxShadow: '0 4px 12px rgba(97, 20, 99, 0.15)'
-      },
-      fontSize: fontSize.text,
-      boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
-      borderRadius: 2,
-      transition: 'all 0.3s ease',
-      py: 1.5,
-      px: 2,
-      border: '1px solid rgba(0, 0, 0, 0.23)',
-    }}
-  >
-    {/* Start Icon */}
-    <LocationOnIcon sx={{ color: '#611463', mr: 1 }} />
-    
-    {/* Address Content with bold name */}
-    <Box sx={{ flexGrow: 1 }}>
-      {address ? (
-        <>
-          <Typography 
-            component="div" 
-            sx={{ 
-              fontWeight: 'bold',
-              fontSize: fontSize.text,
-              lineHeight: 1.2
-            }}
-          >
-            {localStorage.getItem("addressName") || ""}
-          </Typography>
-          <Typography 
-            component="div" 
-            sx={{ 
-              fontSize: fontSize.text,
-              color: 'text.secondary'
-            }}
-          >
-            {localStorage.getItem("addressVillage") || ""}, {localStorage.getItem("addressCity") || ""}
-          </Typography>
-        </>
-      ) : (
-        <Typography sx={{ color: 'text.secondary', fontSize: fontSize.text }}>
-          ກົດເພື່ອໃສ່ຂໍ້ມູນ
-        </Typography>
-      )}
-    </Box>
-    
-    {/* End Icon */}
-    <KeyboardArrowRightIcon sx={{ color: '#611463' }} />
-  </Box>
-</Box>
+          {/* Address Input (Clickable) */}
+          <Box sx={{ mb: 4, mt: 3 }}>
+            <Typography
+              color="textSecondary"
+              sx={{
+                fontSize: fontSize.subtitle,
+                mb: 1,
+                fontWeight: 500,
+              }}
+            >
+              ທີ່ຢູ່
+            </Typography>
+
+            {/* Styled Box that looks like TextField but allows for formatted content */}
+            <Box
+              onClick={() => navigate(`/Location-detail/${id}`)}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor: "#f8f6f9",
+                cursor: "pointer",
+                "&:hover": {
+                  backgroundColor: "#efe8f0",
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(97, 20, 99, 0.15)'
+                },
+                fontSize: fontSize.text,
+                boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
+                py: 1.5,
+                px: 2,
+                border: '1px solid rgba(0, 0, 0, 0.23)',
+              }}
+            >
+              {/* Start Icon */}
+              <LocationOnIcon sx={{ color: '#611463', mr: 1 }} />
+
+              {/* Address Content with bold name */}
+              <Box sx={{ flexGrow: 1 }}>
+                {address ? (
+                  <>
+                    <Typography
+                      component="div"
+                      sx={{
+                        fontWeight: 'bold',
+                        fontSize: fontSize.text,
+                        lineHeight: 1.2
+                      }}
+                    >
+                      {localStorage.getItem("addressName") || ""}
+                    </Typography>
+                    <Typography
+                      component="div"
+                      sx={{
+                        fontSize: fontSize.text,
+                        color: 'text.secondary'
+                      }}
+                    >
+                      {localStorage.getItem("addressVillage") || ""}, {localStorage.getItem("addressCity") || ""}
+                    </Typography>
+                  </>
+                ) : (
+                  <Typography sx={{ color: 'text.secondary', fontSize: fontSize.text }}>
+                    ກົດເພື່ອໃສ່ຂໍ້ມູນ
+                  </Typography>
+                )}
+              </Box>
+
+              {/* End Icon */}
+              <KeyboardArrowRightIcon sx={{ color: '#611463' }} />
+            </Box>
+          </Box>
           {/* Service Items List */}
           <Typography
             variant="subtitle1"
@@ -477,8 +626,8 @@ const LocationPage: React.FC = () => {
                   {location.cat_id === 5 && (
                     <>
                       {/* Enhanced car details with image (similar to ServiceDetailsPage) */}
-                      <Box sx={{ 
-                        display: "flex", 
+                      <Box sx={{
+                        display: "flex",
                         flexDirection: { xs: "column", sm: "row" },
                         alignItems: { xs: "center", sm: "flex-start" },
                         gap: 2,

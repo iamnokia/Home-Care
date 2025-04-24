@@ -71,7 +71,7 @@ export const useMainController = () => {
       
       // Navigate to comment path after completion
       setTimeout(() => {
-        navigate(COMMENT_PATH);
+        navigate(`${COMMENT_PATH}/${id}`);
       }, 2000);
     } catch (error) {
       console.error('Error in complete process:', error);

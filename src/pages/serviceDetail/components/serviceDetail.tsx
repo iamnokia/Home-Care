@@ -100,7 +100,7 @@ const ServiceDetailsPage = () => {
   useEffect(() => {
     if (employee) {
       const categoryType = getCategoryType(employee.cat_name);
-      
+
       // Format the price with commas
       const formatPrice = (price) => {
         const numPrice = parseFloat(price);
@@ -112,7 +112,7 @@ const ServiceDetailsPage = () => {
       // Extract address components (this is a placeholder - adjust according to your data structure)
       const addressParts = employee.address ? employee.address.split(',') : [];
       const village = addressParts[0] || "ບ້ານ ໂນນສະຫວ່າງ"; // Default if not available
-      
+
       // Create the service data object
       const newServiceData = {
         id: employee.id,
@@ -137,7 +137,7 @@ const ServiceDetailsPage = () => {
       if (showCarDetails && car && car.length > 0) {
         // Filter car data to find the matching car for this employee
         const employeeCar = car.find(c => c.emp_id === employee.id);
-        
+
         if (employeeCar) {
           // Use the employee's specific car
           Object.assign(newServiceData, {
@@ -170,11 +170,160 @@ const ServiceDetailsPage = () => {
     return isLargeScreen ? "850px" : "100%";
   };
 
-  // Show loading state
+  // Loading component with white background, #611463 and #f7931e accents
+
+  // Show enhanced loading state
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress sx={{ color: "#611463" }} />
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          background: "white",
+          overflow: "hidden",
+          position: "relative"
+        }}
+      >
+        {/* Background decorative elements */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: "10%",
+            left: "10%",
+            width: "200px",
+            height: "200px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(97,20,99,0.05) 0%, rgba(97,20,99,0) 70%)",
+            animation: "pulse 3s infinite ease-in-out",
+            "@keyframes pulse": {
+              "0%": { transform: "scale(1)", opacity: 0.3 },
+              "50%": { transform: "scale(1.1)", opacity: 0.1 },
+              "100%": { transform: "scale(1)", opacity: 0.3 }
+            }
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "15%",
+            right: "10%",
+            width: "180px",
+            height: "180px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(247,147,30,0.05) 0%, rgba(247,147,30,0) 70%)",
+            animation: "pulse 3s infinite ease-in-out 1s",
+          }}
+        />
+
+        {/* Main loading spinner with custom animation */}
+        <Box
+          sx={{
+            position: "relative",
+            width: "120px",
+            height: "120px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            mb: 2
+          }}
+        >
+          {/* Outer spinning circle - purple */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              border: "4px solid rgba(97,20,99,0.1)",
+              borderTop: "4px solid #611463",
+              borderRadius: "50%",
+              animation: "spin 1.5s linear infinite",
+              "@keyframes spin": {
+                "0%": { transform: "rotate(0deg)" },
+                "100%": { transform: "rotate(360deg)" }
+              }
+            }}
+          />
+
+          {/* Inner spinning circle - orange */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "70%",
+              height: "70%",
+              border: "4px solid rgba(247,147,30,0.1)",
+              borderBottom: "4px solid #f7931e",
+              borderRadius: "50%",
+              animation: "spinReverse 1.2s linear infinite",
+              "@keyframes spinReverse": {
+                "0%": { transform: "rotate(0deg)" },
+                "100%": { transform: "rotate(-360deg)" }
+              }
+            }}
+          />
+
+          {/* Center pulsing dot - mix */}
+          <Box
+            sx={{
+              width: "20px",
+              height: "20px",
+              background: "linear-gradient(135deg, #611463, #f7931e)",
+              borderRadius: "50%",
+              animation: "pulse 1.5s infinite ease-in-out",
+            }}
+          />
+        </Box>
+
+        {/* Loading text with animation */}
+        <Typography
+          variant="h6"
+          sx={{
+            color: "#611463",
+            mt: 2,
+            fontSize: "1.1rem",
+            fontWeight: 500,
+            letterSpacing: "1px",
+            animation: "fadeInOut 1.5s infinite ease-in-out",
+            "@keyframes fadeInOut": {
+              "0%": { opacity: 0.5 },
+              "50%": { opacity: 1 },
+              "100%": { opacity: 0.5 }
+            }
+          }}
+        >
+          ກຳລັງໂຫຼດ...
+        </Typography>
+
+        {/* Animated progress dots - alternating colors */}
+        <Box
+          sx={{
+            display: "flex",
+            mt: 1,
+            gap: "8px",
+            alignItems: "center"
+          }}
+        >
+          {[0, 1, 2].map((i) => (
+            <Box
+              key={i}
+              sx={{
+                width: "8px",
+                height: "8px",
+                backgroundColor: i === 1 ? "#f7931e" : "#611463",
+                borderRadius: "50%",
+                opacity: 0.7,
+                animation: "bounce 1.4s infinite ease-in-out",
+                animationDelay: `${i * 0.2}s`,
+                "@keyframes bounce": {
+                  "0%, 100%": { transform: "scale(1)" },
+                  "50%": { transform: "scale(1.5)" }
+                }
+              }}
+            />
+          ))}
+        </Box>
       </Box>
     );
   }
@@ -219,21 +368,21 @@ const ServiceDetailsPage = () => {
           <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
             <IconButton
               onClick={() => handleNaVigate("/Service")}
-              sx={{ 
-                color: "white", 
+              sx={{
+                color: "white",
                 mr: 1,
-                "&:hover": { 
-                  backgroundColor: "rgba(255,255,255,0.1)" 
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.1)"
                 }
               }}
               aria-label="Go back"
             >
               <ArrowBackIcon />
             </IconButton>
-            <Typography 
-              variant="h5" 
-              sx={{ 
-                fontSize: fontSize.title, 
+            <Typography
+              variant="h5"
+              sx={{
+                fontSize: fontSize.title,
                 fontWeight: "bold",
                 letterSpacing: "0.5px"
               }}
@@ -243,10 +392,10 @@ const ServiceDetailsPage = () => {
           </Box>
 
           {/* Profile info with improved styling */}
-          <Box sx={{ 
-            display: "flex", 
-            alignItems: "flex-start", 
-            mb: 3, 
+          <Box sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            mb: 3,
             background: "rgba(255,255,255,0.1)",
             borderRadius: 3,
             p: 2
@@ -262,15 +411,15 @@ const ServiceDetailsPage = () => {
               }}
             />
             <Box sx={{ flexGrow: 1 }}>
-              <Typography sx={{ 
-                fontSize: fontSize.subtitle, 
+              <Typography sx={{
+                fontSize: fontSize.subtitle,
                 fontWeight: "bold",
                 mb: 0.5,
                 letterSpacing: "0.5px"
               }}>
                 {serviceData.firstName} {serviceData.surname}
               </Typography>
-              
+
               <Stack direction="row" spacing={2} sx={{ mb: 1.5 }}>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <PersonIcon sx={{ fontSize: "1rem", mr: 0.5, opacity: 0.8 }} />
@@ -279,14 +428,14 @@ const ServiceDetailsPage = () => {
                   </Typography>
                 </Box>
               </Stack>
-              
+
               <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                 <LocationOnIcon sx={{ fontSize: "1.1rem", mr: 0.7, opacity: 0.8 }} />
                 <Typography sx={{ fontSize: fontSize.text }}>
                   {serviceData.village}, {serviceData.city}
                 </Typography>
               </Box>
-              
+
               {/* Rating display */}
               <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                 <Rating
@@ -305,7 +454,7 @@ const ServiceDetailsPage = () => {
                   {serviceData.rating}
                 </Typography>
               </Box>
-              
+
               {/* Category in stylish chip */}
               <Chip
                 icon={<CategoryIcon style={{ color: "#611463" }} />}
@@ -357,8 +506,8 @@ const ServiceDetailsPage = () => {
           {/* Car details section - Only shown for category ID 5 */}
           {showCarDetails && (
             <>
-              <Box sx={{ 
-                display: "flex", 
+              <Box sx={{
+                display: "flex",
                 flexDirection: { xs: "column", md: "row" },
                 alignItems: { xs: "flex-start", md: "flex-start" },
                 gap: 3,
@@ -388,9 +537,9 @@ const ServiceDetailsPage = () => {
 
                 {/* Right side: Vehicle information */}
                 <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ 
-                    fontSize: fontSize.subtitle, 
-                    fontWeight: "600", 
+                  <Typography sx={{
+                    fontSize: fontSize.subtitle,
+                    fontWeight: "600",
                     mb: 2,
                     display: "flex",
                     alignItems: "center",
@@ -448,9 +597,9 @@ const ServiceDetailsPage = () => {
           )}
 
           {/* Skills section with improved card design */}
-          <Typography sx={{ 
-            fontSize: fontSize.subtitle, 
-            fontWeight: "600", 
+          <Typography sx={{
+            fontSize: fontSize.subtitle,
+            fontWeight: "600",
             mb: 2,
             ml: 1,
             display: "flex",
@@ -472,8 +621,8 @@ const ServiceDetailsPage = () => {
             }}
           >
             <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
-              <Typography sx={{ 
-                fontSize: fontSize.text, 
+              <Typography sx={{
+                fontSize: fontSize.text,
                 lineHeight: 1.8,
                 color: "#424242"
               }}>
@@ -483,9 +632,9 @@ const ServiceDetailsPage = () => {
           </Card>
 
           {/* Reviews section with enhanced cards */}
-          <Typography sx={{ 
-            fontSize: fontSize.subtitle, 
-            fontWeight: "600", 
+          <Typography sx={{
+            fontSize: fontSize.subtitle,
+            fontWeight: "600",
             mb: 2,
             ml: 1,
             display: "flex",
@@ -514,9 +663,9 @@ const ServiceDetailsPage = () => {
                 <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
                   <Box sx={{ display: "flex", alignItems: "flex-start" }}>
                     <Avatar
-                      sx={{ 
-                        width: 45, 
-                        height: 45, 
+                      sx={{
+                        width: 45,
+                        height: 45,
                         mr: 2,
                         bgcolor: "#611463"
                       }}
@@ -524,21 +673,21 @@ const ServiceDetailsPage = () => {
                       {review.user.charAt(0)}
                     </Avatar>
                     <Box sx={{ flexGrow: 1 }}>
-                      <Box sx={{ 
-                        display: "flex", 
+                      <Box sx={{
+                        display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
                         mb: 0.7
                       }}>
-                        <Typography sx={{ 
-                          fontSize: fontSize.text, 
-                          fontWeight: "600" 
+                        <Typography sx={{
+                          fontSize: fontSize.text,
+                          fontWeight: "600"
                         }}>
                           {review.user}
                         </Typography>
-                        <Typography sx={{ 
-                          fontSize: "0.75rem", 
-                          color: "text.secondary" 
+                        <Typography sx={{
+                          fontSize: "0.75rem",
+                          color: "text.secondary"
                         }}>
                           {review.date}
                         </Typography>
@@ -554,7 +703,7 @@ const ServiceDetailsPage = () => {
                           },
                         }}
                       />
-                      <Typography sx={{ 
+                      <Typography sx={{
                         fontSize: fontSize.text,
                         color: "#424242",
                         fontStyle: "italic"
@@ -594,7 +743,7 @@ const ServiceDetailsPage = () => {
                 width: "48%",
                 borderRadius: 2,
                 borderWidth: 2,
-                "&:hover": { 
+                "&:hover": {
                   borderWidth: 2,
                   backgroundColor: "rgba(211, 47, 47, 0.04)"
                 },
@@ -613,7 +762,7 @@ const ServiceDetailsPage = () => {
                 borderRadius: 2,
                 background: "linear-gradient(45deg, #611463 30%, #8a1b92 90%)",
                 boxShadow: "0 4px 15px rgba(97, 20, 99, 0.4)",
-                "&:hover": { 
+                "&:hover": {
                   background: "linear-gradient(45deg, #4a0d4c 30%, #7d1f82 90%)",
                   boxShadow: "0 6px 20px rgba(97, 20, 99, 0.5)",
                 },
