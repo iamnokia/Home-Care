@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { Box, Button, Skeleton, Typography, Grid, Paper } from "@mui/material";
+import { Box, Button, Skeleton, Typography, Grid, Paper, TextField, InputAdornment } from "@mui/material";
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import ElectricalServicesIcon from '@mui/icons-material/ElectricalServices';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
@@ -38,7 +40,7 @@ interface ServiceProvider {
   address: string;
   city: string;
   categoryType: string;
-  cat_id: number; // Added category ID
+  cat_id: number;
   // Car details
   carId?: string;
   carBrand?: string;
@@ -49,6 +51,8 @@ interface ServiceProvider {
 const Services = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [filteredProviders, setFilteredProviders] = useState<ServiceProvider[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [allProviders, setAllProviders] = useState<ServiceProvider[]>([]);
   
   // Get data from controller
   const ctrl = useMainController();
@@ -107,11 +111,9 @@ const Services = () => {
 
   // Helper function to find car for a specific employee
   const findCarForEmployee = (employeeId: string, cars: CarModel[]): CarModel | undefined => {
-    // Debug car data
     console.log("Finding car for employee ID:", employeeId);
     console.log("Available cars:", cars);
     
-    // Check for type mismatches and cast if needed
     const car = cars.find(car => String(car.emp_id) === String(employeeId));
     console.log("Found car:", car);
     return car;
@@ -119,9 +121,7 @@ const Services = () => {
 
   // Map the API data to format expected by ServiceProviderCard
   const mapEmployeeToServiceProvider = (employee: EmployeeModel): ServiceProvider => {
-    // Convert cat_name to lowercase and simplify for categoryType
     const getCategoryType = (catName: string | undefined): string => {
-      // Convert to lowercase and remove spaces for comparison
       const normalizedName = (catName || '').toLowerCase();
       
       if (normalizedName.includes('cleaning') || normalizedName.includes('ທຳຄວາມສະອາດ')) return 'cleaning';
@@ -134,39 +134,19 @@ const Services = () => {
       return 'other';
     };
 
-    // Get category type from cat_name
     const categoryType = getCategoryType(employee.cat_name);
 
-    // Extract village from address
     let village = 'N/A';
     
     if (employee.address && typeof employee.address === 'string' && employee.address.trim() !== '') {
-      // Just extract the village/address part
       village = employee.address.split(',')[0]?.trim() || employee.address;
     }
 
-    // Find the car if employee has category_id 5 and car data is available
     let carData: CarModel | undefined;
     
     if (employee.cat_id === 5 && ctrl?.car && ctrl.car.length > 0) {
       console.log(`Checking car data for employee ${employee.id} with cat_id ${employee.cat_id}`);
       carData = findCarForEmployee(employee.id, ctrl.car);
-      
-      // If no car found but we're in debug mode, create a fallback for testing
-      if (!carData) {
-        console.log("No car found for employee, creating temporary placeholder");
-        // This is just a temporary debug fallback to verify rendering works
-        carData = {
-          id: `debug-car-${employee.id}`,
-          emp_id: employee.id,
-          car_brand: "Toyota",
-          model: "Placeholder",
-          license_plate: `TEST-${employee.id}`,
-          car_image: "/api/placeholder/400/300",
-          created_at: "",
-          updated_at: ""
-        };
-      }
     }
 
     const result: ServiceProvider = {
@@ -176,16 +156,15 @@ const Services = () => {
       location: employee.address,
       price: parseFloat(employee.price?.toString() || '0'),
       imageUrl: employee.avatar,
-      rating: 5, // Default rating
+      rating: 5,
       category: employee.cat_name,
       gender: employee.gender,
       address: village, 
       city: employee.city || 'ວຽງຈັນ',
       categoryType: categoryType,
-      cat_id: employee.cat_id, // Add the category ID for car display logic
+      cat_id: employee.cat_id,
     };
 
-    // Add car details if available
     if (carData) {
       result.carId = carData.id;
       result.carBrand = carData.car_brand;
@@ -196,71 +175,83 @@ const Services = () => {
     return result;
   };
 
+  // Search filter function
+  const filterProviders = (providers: ServiceProvider[], query: string, categoryFilter: string | null): ServiceProvider[] => {
+    let filtered = [...providers];
+
+    // Apply category filter first
+    if (categoryFilter && categoryFilter !== 'all') {
+      const categoryType = serviceCategories.find(cat => cat.id === categoryFilter)?.categoryType;
+      if (categoryType && categoryType !== 'all') {
+        filtered = filtered.filter(provider => provider.categoryType === categoryType);
+      }
+    }
+
+    // Apply search filter
+    if (query) {
+      const normalizedQuery = query.toLowerCase();
+      filtered = filtered.filter(provider => {
+        const searchableFields = [
+          provider.name,
+          provider.surname,
+          provider.address,
+          provider.gender,
+          provider.category,
+          provider.price.toString(),
+          provider.city,
+          provider.carBrand,
+          provider.carModel,
+          provider.licensePlate,
+        ];
+
+        // Check if any searchable field contains the query
+        return searchableFields.some(field => 
+          field?.toLowerCase().includes(normalizedQuery)
+        );
+      });
+    }
+
+    return filtered;
+  };
+
   useEffect(() => {
     if (!ctrl?.loading && ctrl?.data && ctrl?.data.length > 0) {
-      // Debug car data in ctrl
       console.log("Controller car data:", ctrl?.car);
       
-      // Map the API data to the format expected by your UI
       const mappedProviders = ctrl.data.map(employee => {
         console.log("Mapping employee with ID:", employee.id, "and cat_id:", employee.cat_id);
         return mapEmployeeToServiceProvider(employee);
       });
       
       console.log("Mapped service providers:", mappedProviders);
-      setFilteredProviders(mappedProviders);
+      setAllProviders(mappedProviders);
+      
+      // Apply filters on initial load
+      const filtered = filterProviders(mappedProviders, searchQuery, activeCategory);
+      setFilteredProviders(filtered);
     }
   }, [ctrl?.loading, ctrl?.data, ctrl?.car]);
 
+  // Update filtered providers when search query or category changes
+  useEffect(() => {
+    const filtered = filterProviders(allProviders, searchQuery, activeCategory);
+    setFilteredProviders(filtered);
+  }, [searchQuery, activeCategory, allProviders]);
+
   const handleCategoryClick = (categoryId: string) => {
-    const selectedCategory = serviceCategories.find(cat => cat.id === categoryId);
-
     if (activeCategory === categoryId) {
-      // If clicking the same category, clear filter
       setActiveCategory(null);
-      if (ctrl?.data && ctrl?.data.length > 0) {
-        setFilteredProviders(ctrl.data.map(mapEmployeeToServiceProvider));
-      }
     } else {
-      // Set active category and filter
       setActiveCategory(categoryId);
-
-      if (selectedCategory && selectedCategory.categoryType === 'all') {
-        if (ctrl?.data && ctrl?.data.length > 0) {
-          setFilteredProviders(ctrl.data.map(mapEmployeeToServiceProvider)); // Show all
-        }
-      } else if (selectedCategory) {
-        // Filter by category type
-        const categoryType = selectedCategory.categoryType;
-        
-        // Filter employees by category type derived from cat_name
-        if (ctrl?.data && ctrl?.data.length > 0) {
-          const filtered = ctrl.data
-            .filter(employee => {
-              // Use the same getCategoryType function to get the category type from cat_name
-              const getCategoryType = (catName: string | undefined): string => {
-                // Convert to lowercase and remove spaces for comparison
-                const normalizedName = (catName || '').toLowerCase();
-                
-                if (normalizedName.includes('cleaning') || normalizedName.includes('ທຳຄວາມສະອາດ')) return 'cleaning';
-                if (normalizedName.includes('electrical') || normalizedName.includes('ໄຟຟ້າ')) return 'electrical';
-                if (normalizedName.includes('aircon') || normalizedName.includes('air') || normalizedName.includes('ແອ')) return 'aircon';
-                if (normalizedName.includes('plumbing') || normalizedName.includes('ປະປາ')) return 'plumbing';
-                if (normalizedName.includes('moving') || normalizedName.includes('ຂົນສົ່ງ')) return 'moving';
-                if (normalizedName.includes('bathroom') || normalizedName.includes('ຫ້ອງນ້ຳ')) return 'bathroom';
-                if (normalizedName.includes('pest') || normalizedName.includes('ກຳຈັດແມງໄມ້')) return 'pest';
-                return 'other';
-              };
-              
-              const employeeCategoryType = getCategoryType(employee.cat_name);
-              return employeeCategoryType === categoryType;
-            })
-            .map(mapEmployeeToServiceProvider);
-            
-          setFilteredProviders(filtered);
-        }
-      }
     }
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
   };
 
   return (
@@ -270,7 +261,6 @@ const Services = () => {
 
       {/* Service Categories Section */}
       <Box sx={styles.categoriesSection}>
-        {/* Creative decorative element */}
         <Box sx={styles.decorativeDotsContainer}>
           {[...Array(5)].map((_, i) => (
             <Box key={i} sx={{
@@ -301,11 +291,148 @@ const Services = () => {
       {/* Divider */}
       <Box sx={styles.divider} />
 
+      {/* Search Section - Modern Design */}
+      <Box sx={{ 
+        mb: 6, 
+        px: { xs: 1, md: 2 },
+        display: 'flex',
+        justifyContent: 'center'
+      }}>
+        <Box sx={{
+          maxWidth: '600px',
+          width: '100%',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: -15,
+            left: -15,
+            right: -15,
+            bottom: -15,
+            borderRadius: '50px',
+            background: 'linear-gradient(135deg, rgba(97, 20, 99, 0.1), rgba(247, 147, 30, 0.1))',
+            filter: 'blur(20px)',
+            opacity: 0.6,
+            zIndex: 0,
+          }
+        }}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="ຄົ້ນຫາ..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Box sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #611463, #f7931e)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mr: 1.5,
+                    boxShadow: '0 4px 15px rgba(97, 20, 99, 0.3)',
+                  }}>
+                    <SearchIcon sx={{ color: '#fff', fontSize: '1.4rem' }} />
+                  </Box>
+                </InputAdornment>
+              ),
+              endAdornment: searchQuery && (
+                <InputAdornment position="end">
+                  <Box
+                    onClick={handleClearSearch}
+                    sx={{ 
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      background: 'rgba(97, 20, 99, 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      '&:hover': { 
+                        background: '#611463',
+                        transform: 'scale(1.1)',
+                        '& .MuiSvgIcon-root': {
+                          color: '#fff'
+                        }
+                      }
+                    }}
+                  >
+                    <ClearIcon sx={{ color: '#611463', fontSize: '1.2rem', transition: 'color 0.3s ease' }} />
+                  </Box>
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              position: 'relative',
+              zIndex: 1,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '30px',
+                background: 'linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9))',
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.06), inset 0 2px 4px rgba(97, 20, 99, 0.08)',
+                height: '60px',
+                '& fieldset': {
+                  border: '1px solid rgba(97, 20, 99, 0.1)',
+                  transition: 'all 0.3s ease',
+                },
+                '&:hover fieldset': {
+                  borderColor: '#f7931e',
+                  boxShadow: '0 0 0 1px rgba(247, 147, 30, 0.3)',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#611463',
+                  borderWidth: '2px',
+                  boxShadow: '0 0 0 3px rgba(97, 20, 99, 0.15)',
+                },
+              },
+              '& .MuiInputBase-input': {
+                padding: '12px 10px',
+                fontSize: '1.1rem',
+                color: '#611463',
+                fontWeight: 500,
+                '&::placeholder': {
+                  opacity: 0.7,
+                  color: '#611463',
+                  fontWeight: 400,
+                  fontSize: '1rem',
+                },
+              },
+            }}
+          />
+          
+          {/* Search helper text */}
+          <Typography
+            variant="body2"
+            sx={{
+              position: 'absolute',
+              bottom: '-24px',
+              left: '20px',
+              color: 'rgba(97, 20, 99, 0.6)',
+              fontSize: '0.9rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              '&::before': {
+                content: '"✨"',
+                fontSize: '0.8rem',
+              }
+            }}
+          >
+            ຄົ້ນຫາຕາມຊື່, ປະເພດບໍລິການ, ທີ່ຢູ່, ແລະອື່ນໆ...
+          </Typography>
+        </Box>
+      </Box>
+
       {/* Services Section with Filter Result Title */}
       <Box sx={styles.servicesSection}>
         <Box sx={styles.filterResultsContainer}>
           <Box sx={styles.filterTitleContainer}>
-            {/* Icon container */}
             <Box sx={styles.iconContainer}>
               <img
                 src="/IconHomeCare.svg"
@@ -333,9 +460,6 @@ const Services = () => {
               size="medium"
               onClick={() => {
                 setActiveCategory(null);
-                if (ctrl?.data && ctrl?.data.length > 0) {
-                  setFilteredProviders(ctrl.data.map(mapEmployeeToServiceProvider));
-                }
               }}
               sx={styles.showAllButton}
               startIcon={<span style={{ fontSize: '0.8rem' }}>×</span>}
@@ -388,15 +512,15 @@ const Services = () => {
             ) : (
               <Box sx={{ textAlign: 'center', py: 8 }}>
                 <Typography variant="h6" color="text.secondary">
-                  No services found in this category.
+                  {searchQuery 
+                    ? `ບໍ່ພົບຜົນຄົ້ນຫາສຳລັບ "${searchQuery}"`
+                    : "No services found in this category."}
                 </Typography>
                 <Button
                   variant="contained"
                   onClick={() => {
                     setActiveCategory(null);
-                    if (ctrl?.data && ctrl?.data.length > 0) {
-                      setFilteredProviders(ctrl.data.map(mapEmployeeToServiceProvider));
-                    }
+                    setSearchQuery("");
                   }}
                   sx={{
                     mt: 2,
