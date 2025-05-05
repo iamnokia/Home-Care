@@ -57,7 +57,7 @@ const Services = () => {
   const serviceCategories: ServiceCategory[] = [
     {
       id: 'all',
-      title: 'ທັງຫມົດ',
+      title: 'ທັງໝົດ',
       icon: <CategoryIcon />,
       categoryType: 'all'
     },

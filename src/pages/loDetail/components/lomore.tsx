@@ -179,6 +179,7 @@ const LocationDetailPage: React.FC = () => {
               <BookmarkIcon sx={{ mr: 1, fontSize: "1.2rem" }} />
               ທີ່ຢູ່ທີ່ບັນທຶກໄວ້
             </Typography>
+           
 
             <List
               sx={{

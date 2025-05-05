@@ -312,7 +312,7 @@ const CommentPage: React.FC = () => {
       customerTitle.style.color = '#611463';
       customerTitle.style.display = 'flex';
       customerTitle.style.alignItems = 'center';
-      customerTitle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#611463" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> ຂໍ້ມູນລູກຄ້າ';
+      customerTitle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#611463" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> ຂໍ້ມູນຜູ້ໃຫ້ບໍລິການ';
 
       customerCard.appendChild(customerTitle);
 
