@@ -16,7 +16,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import BadgeIcon from "@mui/icons-material/Badge";
-import StarIcon from "@mui/icons-material/Star";
 import {
   SERVICE_PATH,
   HOME_PATH,
@@ -24,7 +23,7 @@ import {
   CONTACT_US_PATH,
   SETTING_PATH
 } from "../../routes/path";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
   Button,
@@ -42,17 +41,20 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store";
 import { logout } from "../../store/authenticationSlice";
 
+// Page interface
 interface PageItem {
   to: string;
   label: string;
 }
 
+// Setting item interface
 interface SettingItem {
   to: string;
   label: string;
   onClick?: () => void;
 }
 
+// Modified pages array - removed LOGIN_PATH
 const pages: PageItem[] = [
   { to: HOME_PATH, label: "ໜ້າຫຼັກ" },
   { to: SERVICE_PATH, label: "ການບໍລິການ" },
@@ -61,14 +63,17 @@ const pages: PageItem[] = [
 ];
 
 function ResponsiveAppBar() {
-  const navigate = useNavigate();
+  // Redux state and dispatch
   const dispatch = useDispatch();
   const { loggedIn } = useSelector((state: RootState) => state.auth);
 
   const [currentPath, setCurrentPath] = useState<string>(location.pathname);
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+  // State for login dialog
   const [loginDialogOpen, setLoginDialogOpen] = useState<boolean>(false);
+  
+  // Search states
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<{
     employees: any[];
@@ -82,6 +87,7 @@ function ResponsiveAppBar() {
   const [showResults, setShowResults] = useState<boolean>(false);
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
+  // Function for opening login dialog - defined before use
   const handleOpenLoginDialog = (): void => {
     setLoginDialogOpen(true);
   };
@@ -92,18 +98,18 @@ function ResponsiveAppBar() {
   };
 
   const settings: SettingItem[] = loggedIn
-    ? [
-        { to: SETTING_PATH, label: "ຂໍ້ມູນບັນຊີ" },
-        { to: SETTING_PATH, label: "ຕັ້ງຄ່າ" },
-        { 
-          to: "#", 
-          label: "ອອກຈາກລະບົບ",
-          onClick: handleLogout
-        }
-      ]
-    : [
-        { to: "#", label: "ເຂົ້າສູ່ລະບົບ", onClick: handleOpenLoginDialog }
-      ];
+  ? [
+      { to: SETTING_PATH, label: "ຂໍ້ມູນບັນຊີ" },
+      { to: SETTING_PATH, label: "ຕັ້ງຄ່າ" },
+      { 
+        to: "#", 
+        label: "ອອກຈາກລະບົບ",
+        onClick: handleLogout
+      }
+    ]
+  : [
+      { to: "#", label: "ເຂົ້າສູ່ລະບົບ", onClick: handleOpenLoginDialog }
+    ];
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorElNav(event.currentTarget);
@@ -121,10 +127,12 @@ function ResponsiveAppBar() {
     setAnchorElUser(null);
   };
 
+  // Login dialog handlers
   const handleCloseLoginDialog = (): void => {
     setLoginDialogOpen(false);
   };
 
+  // Search functionality
   const searchInObject = (obj: any, searchField: string, term: string): boolean => {
     const value = obj[searchField]?.toString().toLowerCase() || '';
     return value.includes(term.toLowerCase());
@@ -178,10 +186,11 @@ function ResponsiveAppBar() {
     }
   };
 
+  // Auto search as you type with debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       performSearch(searchQuery);
-    }, 300);
+    }, 300); // 300ms debounce
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
@@ -195,11 +204,6 @@ function ResponsiveAppBar() {
   useEffect(() => {
     setCurrentPath(location.pathname);
   }, [location.pathname]);
-
-  const handleViewDetails = (id: string | number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigate(`/service-detail/${id}`);
-  };
 
   return (
     <>
@@ -452,6 +456,7 @@ function ResponsiveAppBar() {
             </Box>
 
             <Box sx={{ flexGrow: 0, display: 'flex', gap: 3, alignItems: 'center' }}>
+              {/* Conditional rendering based on login status */}
               {!loggedIn ? (
                 <Button
                   onClick={handleOpenLoginDialog}
@@ -661,6 +666,7 @@ function ResponsiveAppBar() {
                 }}
               />
 
+              {/* Modern Search Results Dropdown */}
               {showResults && (
                 <Paper
                   elevation={16}
@@ -724,6 +730,7 @@ function ResponsiveAppBar() {
                     </Box>
                   ) : (
                     <>
+                      {/* Summary Header */}
                       <Box 
                         sx={{ 
                           p: 2, 
@@ -770,10 +777,9 @@ function ResponsiveAppBar() {
                               ພະນັກງານ ({searchResults.employees.length})
                             </Typography>
                           </Box>
-                          {searchResults.employees.map((employee: any) => (
+                          {searchResults.employees.map((employee: any, index: number) => (
                             <Box 
                               key={employee.emp_id}
-                              onClick={() => navigate(`/service-detail/${employee.emp_id}`)}
                               sx={{ 
                                 p: 2.5, 
                                 mx: 2,
@@ -785,8 +791,7 @@ function ResponsiveAppBar() {
                                 '&:hover': { 
                                   transform: 'translateY(-4px) translateX(8px)',
                                   boxShadow: '0 12px 24px rgba(97, 20, 99, 0.12), -5px 0 20px rgba(247, 147, 30, 0.08)',
-                                  borderColor: '#f7931e',
-                                  cursor: 'pointer'
+                                  borderColor: '#f7931e'
                                 },
                                 position: 'relative',
                                 overflow: 'hidden',
@@ -876,21 +881,6 @@ function ResponsiveAppBar() {
                                 <LocationOnIcon sx={{ fontSize: '16px', color: 'rgba(97, 20, 99, 0.5)' }} />
                                 {employee.address}
                               </Typography>
-                              <Button
-                                variant="contained"
-                                onClick={(e) => handleViewDetails(employee.emp_id, e)}
-                                fullWidth
-                                sx={{
-                                  mt: 2,
-                                  bgcolor: '#611463',
-                                  '&:hover': { bgcolor: '#4b1050' },
-                                  textTransform: 'none',
-                                  borderRadius: '10px',
-                                  fontSize: '14px'
-                                }}
-                              >
-                                ເບິ່ງລາຍລະອຽດ
-                              </Button>
                             </Box>
                           ))}
                         </Box>
@@ -921,7 +911,6 @@ function ResponsiveAppBar() {
                           {searchResults.cars.map((car: any) => (
                             <Box 
                               key={car.car_id}
-                              onClick={() => navigate(`/service-detail/${car.emp_id}`)}
                               sx={{ 
                                 p: 2.5, 
                                 mx: 2,
@@ -933,8 +922,7 @@ function ResponsiveAppBar() {
                                 '&:hover': { 
                                   transform: 'translateY(-4px) translateX(8px)',
                                   boxShadow: '0 12px 24px rgba(247, 147, 30, 0.12), -5px 0 20px rgba(97, 20, 99, 0.08)',
-                                  borderColor: '#611463',
-                                  cursor: 'pointer'
+                                  borderColor: '#611463'
                                 },
                                 position: 'relative',
                                 overflow: 'hidden',
@@ -1010,21 +998,6 @@ function ResponsiveAppBar() {
                                   }}
                                 />
                               </Box>
-                              <Button
-                                variant="contained"
-                                onClick={(e) => handleViewDetails(car.emp_id, e)}
-                                fullWidth
-                                sx={{
-                                  mt: 2,
-                                  bgcolor: '#f7931e',
-                                  '&:hover': { bgcolor: '#e07f1a' },
-                                  textTransform: 'none',
-                                  borderRadius: '10px',
-                                  fontSize: '14px'
-                                }}
-                              >
-                                ເບິ່ງລາຍລະອຽດ
-                              </Button>
                             </Box>
                           ))}
                         </Box>
@@ -1042,5 +1015,4 @@ function ResponsiveAppBar() {
     </>
   );
 }
-
 export default ResponsiveAppBar;
