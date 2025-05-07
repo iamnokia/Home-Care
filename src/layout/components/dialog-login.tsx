@@ -28,6 +28,7 @@ import { useDispatch } from "react-redux";
 // If not, replace with your actual logo path
 import LOGO_HOMECARE from "../../assets/icons/HomeCareLogo.png";
 import { loginFailed, loginSuccess } from "../../store/authenticationSlice";
+import { getUserByToken } from "../../services/Login";
 
 interface LoginDialogProps {
   open: boolean;
@@ -61,13 +62,12 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
     setShowPassword(!showPassword);
   };
 
+  
   const handleLogin = async () => {
-
-    onClose();
     // Get values from refs
     const email = emailRef.current?.value || "";
     const password = passwordRef.current?.value || "";
-    
+  
     // Validate inputs
     if (!email || !password) {
       Swal.fire({
@@ -79,7 +79,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
       });
       return;
     }
-
+  
     try {
       setIsLoading(true);
       
@@ -88,14 +88,22 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
         email,
         password
       });
-      
+  
       // Check if login was successful
-      if (response.data) {
+      if (response.data && response.data.token) {
         console.log("Login response:", response.data);
         
+        // Store token in localStorage (only access token)
+        localStorage.setItem("accessToken", response.data.token);
+        
+        // Set the authorization header for future requests
+        axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.accessToken}`;
+        
+        // Get user profile data using the token
+        const userData = await getUserByToken();
+        
         // Dispatch login success action with user data
-        // We're assuming the API returns the user data directly
-        dispatch(loginSuccess(response.data));
+        dispatch(loginSuccess(userData));
         
         // Show success message
         Swal.fire({
@@ -106,6 +114,8 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
           showConfirmButton: false
         });
         
+        // Close the dialog
+        onClose();
       } else {
         throw new Error("Invalid response from server");
       }

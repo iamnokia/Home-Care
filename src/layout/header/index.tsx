@@ -12,6 +12,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FreeIcon from "../../assets/icons/HomeCareLogo.png";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
+import LockIcon from "@mui/icons-material/Lock"; // Add this import
 import PersonIcon from "@mui/icons-material/Person";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -39,7 +40,9 @@ import {
 import LoginDialog from "../components/dialog-login";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store";
-import { logout } from "../../store/authenticationSlice";
+import { logout, loginSuccess, loginFailed } from "../../store/authenticationSlice";
+import axios from "axios";
+import { UserModel } from "../../models/user";
 
 // Page interface
 interface PageItem {
@@ -65,14 +68,17 @@ const pages: PageItem[] = [
 function ResponsiveAppBar() {
   // Redux state and dispatch
   const dispatch = useDispatch();
-  const { loggedIn } = useSelector((state: RootState) => state.auth);
+  const { loggedIn, data: userData } = useSelector((state: RootState) => state.auth);
 
   const [currentPath, setCurrentPath] = useState<string>(location.pathname);
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   // State for login dialog
   const [loginDialogOpen, setLoginDialogOpen] = useState<boolean>(false);
-  
+  // State for username display
+  const [username, setUsername] = useState<string>("");
+
+  const [userDataShow, setUser] = useState<UserModel[]>([])
   // Search states
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<{
@@ -98,23 +104,23 @@ function ResponsiveAppBar() {
   };
 
   const settings: SettingItem[] = loggedIn
-  ? [
+    ? [
       { to: SETTING_PATH, label: "ຂໍ້ມູນບັນຊີ" },
       { to: SETTING_PATH, label: "ຕັ້ງຄ່າ" },
-      { 
-        to: "#", 
+      {
+        to: "#",
         label: "ອອກຈາກລະບົບ",
         onClick: handleLogout
       }
     ]
-  : [
+    : [
       { to: "#", label: "ເຂົ້າສູ່ລະບົບ", onClick: handleOpenLoginDialog }
     ];
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorElNav(event.currentTarget);
   };
-  
+
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorElUser(event.currentTarget);
   };
@@ -132,6 +138,49 @@ function ResponsiveAppBar() {
     setLoginDialogOpen(false);
   };
 
+  // Effect to check for token and fetch user data on mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Check if there's a token in localStorage
+        const accessToken = localStorage.getItem("accessToken");
+
+        if (accessToken) {
+          // Set authorization header
+          axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+
+          // Fetch user data
+          const response = await axios.get("https://homecare-pro.onrender.com/users/get_user_profile");
+          setUser(response?.data)
+          console.log(response?.data)
+
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        // If token is invalid, clear it
+        localStorage.removeItem("accessToken");
+        dispatch(loginFailed());
+      }
+    };
+
+    // Check if we need to fetch user data
+    if (!loggedIn && localStorage.getItem("accessToken")) {
+      fetchUserData();
+    }
+  }, [dispatch, loggedIn]);
+
+  // Effect to update username when userData changes
+  useEffect(() => {
+    if (userData) {
+      // Format the username based on your actual user data structure
+      const firstName = userData.first_name || '';
+      const lastName = userData.last_name || '';
+      setUsername(firstName && lastName ? `${firstName} ${lastName}` : userData.email || userData.username || '');
+    } else {
+      setUsername("");
+    }
+  }, [userData]);
+
   // Search functionality
   const searchInObject = (obj: any, searchField: string, term: string): boolean => {
     const value = obj[searchField]?.toString().toLowerCase() || '';
@@ -140,20 +189,21 @@ function ResponsiveAppBar() {
 
   const filterEmployees = (employees: any[], term: string): any[] => {
     const searchFields = ['first_name', 'last_name', 'address', 'gender', 'city', 'cat_name'];
-    return employees.filter(employee => 
+    return employees.filter(employee =>
       searchFields.some(field => searchInObject(employee, field, term))
     );
   };
 
   const filterCars = (cars: any[], term: string): any[] => {
     const searchFields = ['car_brand', 'model', 'license_plate'];
-    return cars.filter(car => 
+    return cars.filter(car =>
       searchFields.some(field => searchInObject(car, field, term))
     );
   };
 
   const performSearch = async (query: string) => {
-    if (!query.trim()) {
+    // Only perform search if logged in
+    if (!loggedIn || !query.trim()) {
       setSearchResults({ employees: [], cars: [], totalFound: 0 });
       setShowResults(false);
       return;
@@ -186,14 +236,16 @@ function ResponsiveAppBar() {
     }
   };
 
-  // Auto search as you type with debounce
+  // Auto search as you type with debounce - only if logged in
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      performSearch(searchQuery);
-    }, 300); // 300ms debounce
+    if (loggedIn) {
+      const timeoutId = setTimeout(() => {
+        performSearch(searchQuery);
+      }, 300); // 300ms debounce
 
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [searchQuery, loggedIn]);
 
   const clearSearch = () => {
     setSearchQuery('');
@@ -207,19 +259,20 @@ function ResponsiveAppBar() {
 
   return (
     <>
-      <AppBar position="static" sx={{ 
+      <AppBar position="static" sx={{
         background: 'linear-gradient(135deg, #611463 0%, #7b1980 100%)',
         boxShadow: '0 6px 25px rgba(0, 0, 0, 0.4)',
       }}>
         <Container maxWidth="xl">
-          <Toolbar 
-            disableGutters 
-            sx={{ 
+          <Toolbar
+            disableGutters
+            sx={{
               minHeight: { xs: '85px', md: '100px' },
               py: 1.5,
               backdropFilter: 'blur(10px)'
             }}
           >
+            {/* Logo Box */}
             <Box
               sx={{
                 display: { xs: "none", md: "flex" },
@@ -244,15 +297,17 @@ function ResponsiveAppBar() {
               <img
                 src={FreeIcon}
                 alt=""
-                style={{ 
-                  width: "100px", 
-                  height: "100px", 
+                style={{
+                  width: "100px",
+                  height: "100px",
                   marginTop: -8,
                   filter: "drop-shadow(0 5px 10px rgba(0,0,0,0.3))",
                   transition: "all 0.5s ease",
                 }}
               />
             </Box>
+
+            {/* Mobile Menu */}
             <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
               <IconButton
                 size="large"
@@ -261,7 +316,7 @@ function ResponsiveAppBar() {
                 aria-haspopup="true"
                 onClick={handleOpenNavMenu}
                 color="inherit"
-                sx={{ 
+                sx={{
                   p: 1.5,
                   border: '2px solid rgba(255, 255, 255, 0.2)',
                   borderRadius: '16px',
@@ -275,7 +330,7 @@ function ResponsiveAppBar() {
                   }
                 }}
               >
-                <MenuIcon fontSize="large" sx={{ 
+                <MenuIcon fontSize="large" sx={{
                   filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.3))'
                 }} />
               </IconButton>
@@ -309,8 +364,8 @@ function ResponsiveAppBar() {
                 }}
               >
                 {pages.map((page) => (
-                  <MenuItem 
-                    key={page.to} 
+                  <MenuItem
+                    key={page.to}
                     onClick={handleCloseNavMenu}
                     component={Link}
                     to={page.to}
@@ -326,9 +381,9 @@ function ResponsiveAppBar() {
                       }
                     }}
                   >
-                    <Typography 
-                      textAlign="left" 
-                      fontSize="16px" 
+                    <Typography
+                      textAlign="left"
+                      fontSize="16px"
                       fontWeight={page.to === currentPath ? "bold" : "normal"}
                     >
                       {page.label}
@@ -352,9 +407,9 @@ function ResponsiveAppBar() {
                       }
                     }}
                   >
-                    <Typography 
-                      textAlign="center" 
-                      fontWeight="bold" 
+                    <Typography
+                      textAlign="center"
+                      fontWeight="bold"
                       color="white"
                       fontSize="16px"
                     >
@@ -364,6 +419,8 @@ function ResponsiveAppBar() {
                 )}
               </Menu>
             </Box>
+
+            {/* Mobile Logo */}
             <Typography
               variant="h5"
               noWrap
@@ -383,6 +440,8 @@ function ResponsiveAppBar() {
             >
               HomeCare
             </Typography>
+
+            {/* Desktop Navigation */}
             <Box
               sx={{
                 flexGrow: 1,
@@ -455,6 +514,7 @@ function ResponsiveAppBar() {
               ))}
             </Box>
 
+            {/* User Actions (Profile/Login) */}
             <Box sx={{ flexGrow: 0, display: 'flex', gap: 3, alignItems: 'center' }}>
               {/* Conditional rendering based on login status */}
               {!loggedIn ? (
@@ -496,12 +556,35 @@ function ResponsiveAppBar() {
                 >
                   ເຂົ້າສູ່ລະບົບ
                 </Button>
-              ) : null}
-              <Tooltip title="Open settings">
-                <IconButton 
-                  onClick={handleOpenUserMenu} 
-                  sx={{ 
-                    p: 1, 
+              ) : (
+                userDataShow && userDataShow.user && (
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: "white",
+                      fontWeight: "600",
+                      fontSize: "16px",
+                      textShadow: "0 1px 3px rgba(59, 24, 24, 0.2)",
+                      display: { xs: "none", sm: "block" },
+                      mr: -10.5,
+                      mt: 14,
+                      background: "rgba(255, 255, 255, 0.1)",
+                      padding: "6px 16px",
+                      borderRadius: "20px",
+                      border: "1px solid rgba(255, 255, 255, 0.2)",
+                      backdropFilter: "blur(5px)"
+                    }}
+                  >
+                    {userDataShow.user.username}
+                  </Typography>
+                )
+              )}
+
+              <Tooltip title={loggedIn ? "ຂໍ້ມູນບັນຊີ" : "ການຕັ້ງຄ່າ"}>
+                <IconButton
+                  onClick={handleOpenUserMenu}
+                  sx={{
+                    p: 1,
                     border: '2px solid rgba(255, 255, 255, 0.3)',
                     transition: 'all 0.4s ease',
                     '&:hover': {
@@ -514,17 +597,19 @@ function ResponsiveAppBar() {
                     background: 'rgba(255, 255, 255, 0.05)'
                   }}
                 >
-                  <Avatar 
-                    alt="" 
-                    src="" 
-                    sx={{ 
-                      width: 42, 
+                  <Avatar
+                    alt={username || ""}
+                    src=""
+                    sx={{
+                      width: 42,
                       height: 42,
                       boxShadow: '0 3px 10px rgba(0, 0, 0, 0.3)',
                       background: 'linear-gradient(135deg, #f7931e 0%, #ffb347 100%)',
                       border: '2px solid rgba(255, 255, 255, 0.7)'
-                    }} 
-                  />
+                    }}
+                  >
+                    {username ? username.charAt(0).toUpperCase() : null}
+                  </Avatar>
                 </IconButton>
               </Tooltip>
               <Menu
@@ -553,8 +638,8 @@ function ResponsiveAppBar() {
                 }}
               >
                 {settings.map((setting) => (
-                  <MenuItem 
-                    key={setting.to + setting.label} 
+                  <MenuItem
+                    key={setting.to + setting.label}
                     onClick={setting.onClick || handleCloseUserMenu}
                     component={Link}
                     to={setting.to}
@@ -574,6 +659,8 @@ function ResponsiveAppBar() {
             </Box>
           </Toolbar>
         </Container>
+
+        {/* Search Bar Section - MODIFIED FOR LOGIN RESTRICTION */}
         <Box
           sx={{
             background: 'linear-gradient(to right, #4e0e52 0%, #7b1980 50%, #4e0e52 100%)',
@@ -586,21 +673,31 @@ function ResponsiveAppBar() {
             position: "relative"
           }}
         >
-          <Grid sx={{ 
-            px: { xs: 2, md: 20 }, 
-            alignItems: "center", 
+          <Grid sx={{
+            px: { xs: 2, md: 20 },
+            alignItems: "center",
             display: "flex",
             width: { xs: '100%', md: 'auto' },
             justifyContent: { xs: 'center', md: 'flex-end' },
             py: 1.5,
             position: "relative"
           }}>
-            <Box sx={{ position: 'relative', width: { xs: '100%', sm: '320px' }, maxWidth: '450px' }}>
+            <Box sx={{ color:'#611463' ,position: 'relative', width: { xs: '100%', sm: '320px' }, maxWidth: '450px'  }}>
               <TextField
-                placeholder="ຄົ້ນຫາ ພະນັກງານ, ລົດ..."
+                placeholder={loggedIn ? "ຄົ້ນຫາ ພະນັກງານ, ລົດ..." : "ກະລຸນາເຂົ້າສູ່ລະບົບ"}
                 variant="standard"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  if (loggedIn) {
+                    setSearchQuery(e.target.value);
+                  }
+                }}
+                disabled={!loggedIn}
+                onClick={() => {
+                  if (!loggedIn) {
+                    handleOpenLoginDialog();
+                  }
+                }}
                 sx={{
                   bgcolor: "rgba(255, 255, 255, 0.97)",
                   borderRadius: "35px",
@@ -614,13 +711,15 @@ function ResponsiveAppBar() {
                   "& .MuiInput-underline:hover:not(.Mui-disabled):before": {
                     borderBottom: "none",
                   },
-                  boxShadow: searchQuery ? '0 8px 25px rgba(97, 20, 99, 0.2)' : '0 4px 15px rgba(0, 0, 0, 0.1)',
+                  boxShadow: searchQuery && loggedIn ? '0 8px 25px rgba(97, 20, 99, 0.2)' : '0 4px 15px rgba(0, 0, 0, 0.1)',
                   transition: 'all 0.4s ease',
                   '&:hover': {
-                    boxShadow: '0 12px 30px rgba(97, 20, 99, 0.3), 0 0 20px rgba(247, 147, 30, 0.2)',
-                    transform: 'translateY(-2px)'
+                    boxShadow: loggedIn ? '0 12px 30px rgba(97, 20, 99, 0.3), 0 0 20px rgba(247, 147, 30, 0.2)' : 'none',
+                    transform: loggedIn ? 'translateY(-2px)' : 'none',
+                    cursor: !loggedIn ? 'pointer' : 'text'
                   },
-                  border: `2px solid ${searchQuery ? '#f7931e' : 'rgba(255, 255, 255, 0.4)'}`,
+                  border: `2px solid ${searchQuery && loggedIn ? '#f7931e' : 'rgba(255, 255, 255, 0.4)'}`,
+                  opacity: loggedIn ? 1 : 0.7,
                 }}
                 InputProps={{
                   style: {
@@ -630,44 +729,75 @@ function ResponsiveAppBar() {
                     fontSize: '16px',
                     fontWeight: '500',
                     letterSpacing: '0.5px',
-                    fontFamily: '"Noto Sans Lao", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                    fontFamily: '"Noto Sans Lao", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                    color: loggedIn ? 'inherit' : 'rgba(0, 0, 0, 0.5)'
                   },
                   startAdornment: (
                     <InputAdornment position="start">
-                      <SearchIcon 
-                        sx={{ 
-                          color: searchQuery ? '#f7931e' : '#611463',
-                          fontSize: '24px',
-                          transition: 'all 0.3s ease',
-                        }}
-                      />
+                      {loggedIn ? (
+                        <SearchIcon
+                          sx={{
+                            color: searchQuery ? '#f7931e' : '#611463',
+                            fontSize: '24px',
+                            transition: 'all 0.3s ease',
+                          }}
+                        />
+                      ) : (
+                        <LockIcon
+                          sx={{
+                            color: '#611463',
+                            fontSize: '22px',
+                            opacity: 0.7
+                          }}
+                        />
+                      )}
                     </InputAdornment>
                   ),
                   endAdornment: (
                     <InputAdornment position="end">
-                      {isSearching ? (
-                        <CircularProgress size={20} sx={{ color: '#f7931e' }} />
-                      ) : searchQuery ? (
-                        <IconButton
+                      {loggedIn ? (
+                        isSearching ? (
+                          <CircularProgress size={20} sx={{ color: '#f7931e' }} />
+                        ) : searchQuery ? (
+                          <IconButton
+                            size="small"
+                            onClick={clearSearch}
+                            sx={{
+                              mr: 1,
+                              '&:hover': {
+                                backgroundColor: 'rgba(97, 20, 99, 0.1)'
+                              }
+                            }}
+                          >
+                            <CloseIcon sx={{ color: '#611463' }} />
+                          </IconButton>
+                        ) : null
+                      ) : (
+                        <Button
                           size="small"
-                          onClick={clearSearch}
-                          sx={{ 
+                          onClick={handleOpenLoginDialog}
+                          sx={{
                             mr: 1,
-                            '&:hover': { 
-                              backgroundColor: 'rgba(97, 20, 99, 0.1)' 
+                            color: '#f7931e',
+                            textTransform: 'none',
+                            fontWeight: 'bold',
+                            fontSize: '14px',
+                            '&:hover': {
+                              backgroundColor: 'rgba(247, 147, 30, 0.1)'
                             }
                           }}
                         >
-                          <CloseIcon sx={{ color: '#611463' }} />
-                        </IconButton>
-                      ) : null}
+                          ເຂົ້າສູ່ລະບົບ
+                        </Button>
+                      )}
                     </InputAdornment>
-                  )
+                  ),
+                  readOnly: !loggedIn
                 }}
               />
 
-              {/* Modern Search Results Dropdown */}
-              {showResults && (
+            {/* Search Results Dropdown - Only show if logged in */}
+            {loggedIn && showResults && (
                 <Paper
                   elevation={16}
                   sx={{
@@ -701,15 +831,15 @@ function ResponsiveAppBar() {
                   }}
                 >
                   {searchResults.totalFound === 0 ? (
-                    <Box sx={{ 
-                      p: 4, 
+                    <Box sx={{
+                      p: 4,
                       textAlign: 'center',
                       background: 'linear-gradient(145deg, rgba(97, 20, 99, 0.02), rgba(247, 147, 30, 0.02))',
                       borderRadius: 3,
                     }}>
-                      <Typography 
-                        variant="h6" 
-                        sx={{ 
+                      <Typography
+                        variant="h6"
+                        sx={{
                           color: '#611463',
                           fontWeight: '600',
                           mb: 1,
@@ -718,9 +848,9 @@ function ResponsiveAppBar() {
                       >
                         ບໍ່ພົບຜົນການຄົ້ນຫາ
                       </Typography>
-                      <Typography 
-                        variant="body1" 
-                        sx={{ 
+                      <Typography
+                        variant="body1"
+                        sx={{
                           color: 'rgba(97, 20, 99, 0.7)',
                           fontSize: '15px'
                         }}
@@ -731,9 +861,9 @@ function ResponsiveAppBar() {
                   ) : (
                     <>
                       {/* Summary Header */}
-                      <Box 
-                        sx={{ 
-                          p: 2, 
+                      <Box
+                        sx={{
+                          p: 2,
                           background: 'linear-gradient(135deg, rgba(97, 20, 99, 0.05), rgba(247, 147, 30, 0.05))',
                           borderBottom: '1px solid rgba(97, 20, 99, 0.1)',
                           display: 'flex',
@@ -742,9 +872,9 @@ function ResponsiveAppBar() {
                           gap: 2,
                         }}
                       >
-                        <Chip 
+                        <Chip
                           label={`${searchResults.totalFound} ຜົນການຄົ້ນຫາ`}
-                          sx={{ 
+                          sx={{
                             background: 'linear-gradient(45deg, #611463, #f7931e)',
                             color: 'white',
                             fontWeight: 'bold',
@@ -757,8 +887,8 @@ function ResponsiveAppBar() {
 
                       {searchResults.employees.length > 0 && (
                         <Box>
-                          <Box sx={{ 
-                            p: 2, 
+                          <Box sx={{
+                            p: 2,
                             background: 'linear-gradient(90deg, transparent, rgba(97, 20, 99, 0.03), transparent)',
                             borderTop: '1px solid rgba(97, 20, 99, 0.05)',
                             display: 'flex',
@@ -766,9 +896,9 @@ function ResponsiveAppBar() {
                             gap: 1.5
                           }}>
                             <PersonIcon sx={{ color: '#611463', fontSize: '24px' }} />
-                            <Typography 
-                              variant="h6" 
-                              sx={{ 
+                            <Typography
+                              variant="h6"
+                              sx={{
                                 color: '#611463',
                                 fontWeight: '700',
                                 fontSize: '18px'
@@ -778,17 +908,17 @@ function ResponsiveAppBar() {
                             </Typography>
                           </Box>
                           {searchResults.employees.map((employee: any, index: number) => (
-                            <Box 
+                            <Box
                               key={employee.emp_id}
-                              sx={{ 
-                                p: 2.5, 
+                              sx={{
+                                p: 2.5,
                                 mx: 2,
                                 mb: 1.5,
                                 borderRadius: 2,
                                 background: `linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95))`,
                                 border: '1px solid rgba(97, 20, 99, 0.08)',
                                 transition: 'all 0.3s ease',
-                                '&:hover': { 
+                                '&:hover': {
                                   transform: 'translateY(-4px) translateX(8px)',
                                   boxShadow: '0 12px 24px rgba(97, 20, 99, 0.12), -5px 0 20px rgba(247, 147, 30, 0.08)',
                                   borderColor: '#f7931e'
@@ -813,7 +943,7 @@ function ResponsiveAppBar() {
                             >
                               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                 <Avatar
-                                  sx={{ 
+                                  sx={{
                                     bgcolor: 'linear-gradient(45deg, #611463, #f7931e)',
                                     width: 40,
                                     height: 40,
@@ -824,19 +954,19 @@ function ResponsiveAppBar() {
                                   {employee.first_name[0]}{employee.last_name[0]}
                                 </Avatar>
                                 <Box>
-                                  <Typography 
-                                    variant="h6" 
+                                  <Typography
+                                    variant="h6"
                                     fontWeight="bold"
-                                    sx={{ 
+                                    sx={{
                                       fontSize: '17px',
                                       color: '#611463'
                                     }}
                                   >
                                     {employee.first_name} {employee.last_name}
                                   </Typography>
-                                  <Typography 
-                                    variant="body2" 
-                                    sx={{ 
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
                                       color: '#f7931e',
                                       fontWeight: '600',
                                       fontSize: '14px'
@@ -847,29 +977,29 @@ function ResponsiveAppBar() {
                                 </Box>
                               </Box>
                               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                                <Chip 
+                                <Chip
                                   size="small"
                                   label={`ເພດ: ${employee.gender}`}
-                                  sx={{ 
+                                  sx={{
                                     bgcolor: 'rgba(97, 20, 99, 0.08)',
                                     color: '#611463',
                                     '& .MuiChip-label': { px: 1.5 }
                                   }}
                                 />
-                                <Chip 
+                                <Chip
                                   size="small"
                                   icon={<LocationOnIcon sx={{ fontSize: '16px !important' }} />}
                                   label={`${employee.city}`}
-                                  sx={{ 
+                                  sx={{
                                     bgcolor: 'rgba(247, 147, 30, 0.08)',
                                     color: '#f7931e',
                                     '& .MuiChip-label': { px: 1.5 }
                                   }}
                                 />
                               </Box>
-                              <Typography 
-                                variant="body2" 
-                                sx={{ 
+                              <Typography
+                                variant="body2"
+                                sx={{
                                   color: 'rgba(97, 20, 99, 0.7)',
                                   mt: 1.5,
                                   fontSize: '14px',
@@ -885,11 +1015,11 @@ function ResponsiveAppBar() {
                           ))}
                         </Box>
                       )}
-                      
+
                       {searchResults.cars.length > 0 && (
                         <Box sx={{ mt: searchResults.employees.length > 0 ? 2 : 0 }}>
-                          <Box sx={{ 
-                            p: 2, 
+                          <Box sx={{
+                            p: 2,
                             background: 'linear-gradient(90deg, transparent, rgba(247, 147, 30, 0.03), transparent)',
                             borderTop: '1px solid rgba(247, 147, 30, 0.05)',
                             display: 'flex',
@@ -897,9 +1027,9 @@ function ResponsiveAppBar() {
                             gap: 1.5
                           }}>
                             <DirectionsCarIcon sx={{ color: '#f7931e', fontSize: '24px' }} />
-                            <Typography 
-                              variant="h6" 
-                              sx={{ 
+                            <Typography
+                              variant="h6"
+                              sx={{
                                 color: '#f7931e',
                                 fontWeight: '700',
                                 fontSize: '18px'
@@ -909,17 +1039,17 @@ function ResponsiveAppBar() {
                             </Typography>
                           </Box>
                           {searchResults.cars.map((car: any) => (
-                            <Box 
+                            <Box
                               key={car.car_id}
-                              sx={{ 
-                                p: 2.5, 
+                              sx={{
+                                p: 2.5,
                                 mx: 2,
                                 mb: 1.5,
                                 borderRadius: 2,
                                 background: `linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95))`,
                                 border: '1px solid rgba(247, 147, 30, 0.08)',
                                 transition: 'all 0.3s ease',
-                                '&:hover': { 
+                                '&:hover': {
                                   transform: 'translateY(-4px) translateX(8px)',
                                   boxShadow: '0 12px 24px rgba(247, 147, 30, 0.12), -5px 0 20px rgba(97, 20, 99, 0.08)',
                                   borderColor: '#611463'
@@ -944,7 +1074,7 @@ function ResponsiveAppBar() {
                             >
                               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                 <Avatar
-                                  sx={{ 
+                                  sx={{
                                     bgcolor: 'linear-gradient(45deg, #f7931e, #611463)',
                                     width: 40,
                                     height: 40,
@@ -955,19 +1085,19 @@ function ResponsiveAppBar() {
                                   <DirectionsCarIcon />
                                 </Avatar>
                                 <Box>
-                                  <Typography 
-                                    variant="h6" 
+                                  <Typography
+                                    variant="h6"
                                     fontWeight="bold"
-                                    sx={{ 
+                                    sx={{
                                       fontSize: '17px',
                                       color: '#f7931e'
                                     }}
                                   >
                                     {car.car_brand} {car.model}
                                   </Typography>
-                                  <Typography 
-                                    variant="body2" 
-                                    sx={{ 
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
                                       color: '#611463',
                                       fontWeight: '600',
                                       fontSize: '14px',
@@ -982,13 +1112,13 @@ function ResponsiveAppBar() {
                                 </Box>
                               </Box>
                               <Box sx={{ mt: 2 }}>
-                                <img 
-                                  src={car.car_image} 
+                                <img
+                                  src={car.car_image}
                                   alt={`${car.car_brand} ${car.model}`}
-                                  style={{ 
-                                    width: '100%', 
-                                    height: '120px', 
-                                    objectFit: 'cover', 
+                                  style={{
+                                    width: '100%',
+                                    height: '120px',
+                                    objectFit: 'cover',
                                     borderRadius: '8px',
                                     border: '1px solid rgba(0, 0, 0, 0.1)'
                                   }}
@@ -1015,4 +1145,5 @@ function ResponsiveAppBar() {
     </>
   );
 }
+
 export default ResponsiveAppBar;

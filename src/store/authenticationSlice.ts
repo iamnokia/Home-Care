@@ -19,7 +19,7 @@ export const authSlice = createSlice({
   reducers: {
     loginFailed: (state: UserInterface) => {
       state.data = null;
-      state.loggedIn = false;   
+      state.loggedIn = false;
     },
     loginSuccess: (state: UserInterface, action: PayloadAction<UserModel>) => {
       state.data = action.payload;

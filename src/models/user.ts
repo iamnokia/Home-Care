@@ -4,6 +4,8 @@ import { Status } from "../enums/status";
 export interface UserModel {
     id: string,
     first_name: string ,
+    username: string;
+    user: User;
     last_name: string,
     email: string,
     tel: string,
@@ -18,4 +20,9 @@ export interface UserModel {
     status: Status,
     created_at: string,
     updated_at: string 
+}
+
+export interface User {
+    id: string;
+    username: string
 }

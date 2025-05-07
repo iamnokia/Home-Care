@@ -1,3 +1,4 @@
+// src/routes/index.tsx
 import MainLayout from "../layout";
 import NotFoundPage from "../pages/404";
 import CommentPage from "../pages/comment/components/comment";
@@ -13,6 +14,7 @@ import LocationDetailPage from "../pages/loDetail/components/lomore";
 import PaymentPage from "../pages/payment/components/paymemt";
 import TermsAndPrivacyPage from "../pages/privacy/components";
 import SettingsPage from "../pages/setting/components/setting";
+import ProtectedRoute from "../components/ProtectRoute"; // Add this import
 
 import {
   BLOG_PROFILE_PATH,
@@ -36,22 +38,25 @@ const RoutesComponent = () => {
       path: "/",
       element: <MainLayout />,
       children: [
+        // Public routes - accessible to all users
         { path: HOME_PATH, element: <HomePage /> },
-        { path: SERVICE_PATH, element: <JobSearchPage /> },
-        { path: HISTORY_PATH, element: <Company_searchPage /> },
-        { path: BLOG_PROFILE_PATH, element: <BlogProfile /> },
         { path: CONTACT_US_PATH, element: <ContactUs /> },
-        { path: `${LOCATION_PATH}/:id`, element: <LocationPage /> },
-        { path: `${LOCATION_DETAIL_PATH}/:id`, element: <LocationDetailPage /> },
-        { path: `${PAYMENT_PATH}/:id`, element: <PaymentPage /> },
-        { path: `${SERVICE_STATUS_PATH}/:id`, element: <ServiceStatus /> },
-        // Updated to include ID parameter
-        { path: `${COMMENT_PATH}/:id`, element: <CommentPage /> },
-        // Keep the original route for backward compatibility
-        { path: COMMENT_PATH, element: <CommentPage /> },
-        { path: TERMS_PRIVACY_PATH, element: <TermsAndPrivacyPage /> },
-        { path: SETTING_PATH, element: <SettingsPage /> },
-        { path: "/service-detail/:id", element: <ServiceDetail /> },
+        { path: TERMS_PRIVACY_PATH, element:<TermsAndPrivacyPage /> },
+
+        
+        
+        // Protected routes - only accessible to logged-in users
+        { path: SERVICE_PATH, element: <ProtectedRoute><JobSearchPage /></ProtectedRoute> },
+        { path: HISTORY_PATH, element: <ProtectedRoute><Company_searchPage /></ProtectedRoute> },
+        { path: BLOG_PROFILE_PATH, element: <ProtectedRoute><BlogProfile /></ProtectedRoute> },
+        { path: `${LOCATION_PATH}/:id`, element: <ProtectedRoute><LocationPage /></ProtectedRoute> },
+        { path: `${LOCATION_DETAIL_PATH}/:id`, element: <ProtectedRoute><LocationDetailPage /></ProtectedRoute> },
+        { path: `${PAYMENT_PATH}/:id`, element: <ProtectedRoute><PaymentPage /></ProtectedRoute> },
+        { path: `${SERVICE_STATUS_PATH}/:id`, element: <ProtectedRoute><ServiceStatus /></ProtectedRoute> },
+        { path: `${COMMENT_PATH}/:id`, element: <ProtectedRoute><CommentPage /></ProtectedRoute> },
+        { path: COMMENT_PATH, element: <ProtectedRoute><CommentPage /></ProtectedRoute> },
+        { path: SETTING_PATH, element: <ProtectedRoute><SettingsPage /></ProtectedRoute> },
+        { path: "/service-detail/:id", element: <ProtectedRoute><ServiceDetail /></ProtectedRoute> },
       ],
     },
     {
