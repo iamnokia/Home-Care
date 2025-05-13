@@ -1,3 +1,5 @@
+// UI Component file: LocationDetailPage.tsx
+
 import {
   Autocomplete,
   Box,
@@ -22,6 +24,7 @@ import {
   Grid,
   Card,
   CardContent,
+  InputLabel,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -43,7 +46,6 @@ import { LocationCity } from "@mui/icons-material";
 import { LOCATION_PATH } from "../../../routes/path";
 import useMainController from "../controllers";
 import HomeIcon from "@mui/icons-material/Home";
-
 
 // Define districts with both English and Lao values
 const districts = [
@@ -72,10 +74,6 @@ const displayCity = (englishValue) => {
   return city ? city.lo : englishValue;
 };
 
-
-
-
-
 const LocationDetailPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -89,10 +87,6 @@ const LocationDetailPage: React.FC = () => {
         return <HomeIcon />;
     }
   };
-
-  const displayedAddresses = ctrl?.showAllAddresses
-    ? ctrl?.address
-    : ctrl?.address.slice(0, 3);
 
   return (
     <Box
@@ -116,7 +110,7 @@ const LocationDetailPage: React.FC = () => {
           },
         }}
       >
-        {/* First Box */}
+        {/* First Box - Saved Addresses */}
         <Paper
           elevation={6}
           sx={{
@@ -169,7 +163,7 @@ const LocationDetailPage: React.FC = () => {
               variant="subtitle1"
               color="#611463"
               sx={{
-                fontSize: "1rem",
+                fontSize: "1.1rem",
                 mb: 1.5,
                 fontWeight: 600,
                 display: "flex",
@@ -180,157 +174,145 @@ const LocationDetailPage: React.FC = () => {
               ທີ່ຢູ່ທີ່ບັນທຶກໄວ້
             </Typography>
            
-
-            <List
-              sx={{
-                p: 0,
-                backgroundColor: alpha("#f5f5f5", 0.5),
-                borderRadius: 2,
-                overflow: "hidden",
-              }}
-            >
-              {displayedAddresses.map((location) => (
-                <Fade in={true} key={location.user_id}>
-                  <ListItem
-                    button
-                    onClick={() => ctrl?.handleLocationSelect(location)}
+            {ctrl?.address.length > 0 ? (
+              <Box 
+                sx={{
+                  maxHeight: "500px", 
+                  overflowY: ctrl?.address.length > 6 ? "auto" : "visible",
+                  "&::-webkit-scrollbar": {
+                    width: "6px",
+                  },
+                  "&::-webkit-scrollbar-track": {
+                    backgroundColor: alpha("#f5f5f5", 0.8),
+                    borderRadius: "10px",
+                  },
+                  "&::-webkit-scrollbar-thumb": {
+                    backgroundColor: alpha("#611463", 0.4),
+                    borderRadius: "10px",
+                    "&:hover": {
+                      backgroundColor: alpha("#611463", 0.6),
+                    },
+                  },
+                }}
+              >
+                {ctrl?.address.map((location) => (
+                  <Paper
+                    key={location.id || location.user_id}
+                    elevation={0}
                     sx={{
-                      mb: 0.5,
-                      px: 2,
-                      py: 1.5,
-                      borderRadius: 1,
-                      backgroundColor:
-                        ctrl?.selectedLocation?.user_id === location.user_id
-                          ? alpha("#611463", 0.05)
-                          : "transparent",
-                      "&:hover": {
-                        backgroundColor: alpha("#611463", 0.08),
-                        transform: "translateY(-2px)",
-                        transition: "transform 0.2s ease-in-out",
-                      },
-                      transition: "all 0.2s ease-in-out",
-                      position: "relative",
+                      mb: 1.5,
+                      borderRadius: 2,
                       overflow: "hidden",
-                      "&::after":
-                        ctrl?.selectedLocation?.user_id === location.user_id
-                          ? {
-                            content: '""',
-                            position: "absolute",
-                            left: 0,
-                            top: 0,
-                            bottom: 0,
-                            width: "4px",
-                            backgroundColor: ctrl?.getLocationColor("home"),
-                          }
-                          : {},
+                      backgroundColor: alpha("#f9f5f9", 0.7),
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                      "&:hover": {
+                        backgroundColor: alpha("#f5ebf6", 0.9),
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 4px 8px rgba(97, 20, 99, 0.08)",
+                      },
+                      border: location.id === ctrl?.selectedLocation?.id ? `2px solid #f7931e` : "none",
+                      position: "relative",
                     }}
+                    onClick={() => ctrl?.handleLocationSelect(location)}
                   >
-                    <Box
-                      sx={{
-                        mr: 2,
-                        p: 1,
-                        borderRadius: 2,
-                        backgroundColor: alpha(
-                          ctrl?.getLocationColor("home"),
-                          0.1
-                        ),
+                    <Box 
+                      sx={{ 
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        p: 2,
+                        alignItems: "flex-start"
                       }}
                     >
-                      {getLocationIcon("home")}
-                    </Box>
-
-                    <ListItemText
-                      primary={
+                      <Box
+                        sx={{
+                          mr: 2,
+                          mt: 0.5,
+                          backgroundColor: alpha("#f5ebf6", 0.5),
+                          borderRadius: "50%",
+                          p: 1,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <HomeIcon sx={{ color: "#611463" }} />
+                      </Box>
+                      
+                      <Box sx={{ flex: 1 }}>
                         <Typography
                           sx={{
-                            fontSize: "0.95rem",
+                            fontSize: "1rem",
                             fontWeight: 600,
                             color: "#333",
+                            mb: 0.5
                           }}
                         >
                           {location.address_name}
                         </Typography>
-                      }
-                      secondary={
+                        
                         <Typography
-                          sx={{ fontSize: "0.85rem", color: "#666", mt: 0.5 }}
+                          sx={{ 
+                            fontSize: "0.85rem", 
+                            color: "#666",
+                            mb: 0.5
+                          }}
                         >
-                          {location.address_description}{" ,"}
-                          {location.village}{" ,"}
-                          {location.city}
+                          {location.address_description} , {location.village} , {location.city}
                         </Typography>
                         
-                      }
-                    />
-
-                    <Box sx={{ display: "flex", alignItems: "center", ml: 1 }}>
-                      {ctrl?.selectedLocation?.id === location.id && (
-                        <Chip
-                          color="primary"
-                          size="small"
-                          icon={<CheckCircleRoundedIcon sx={{ fontSize: "1rem" }} />}
-                          label="ເລືອກແລ້ວ"
-                          sx={{
-                            backgroundColor: ctrl?.getLocationColor("້ome"),
-                            mr: 1.5,
-                            fontSize: "0.75rem",
-                          }}
-                        />
-                      )}
-
+                        {location.tel && (
+                          <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <PhoneIcon sx={{ fontSize: "0.9rem", mr: 0.5, color: "#666" }} />
+                            <Typography sx={{ fontSize: "0.85rem", color: "#666" }}>
+                              {location.tel}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
+                      
                       <IconButton
                         size="small"
-                        onClick={() => ctrl?.handleDeleteLocation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          ctrl?.handleDeleteLocation();
+                        }}
                         sx={{
                           color: "#d32f2f",
                           p: 1,
-                          backgroundColor: alpha("#d32f2f", 0.05),
-                          "&:hover": {
-                            backgroundColor: alpha("#d32f2f", 0.1),
-                          },
                         }}
                       >
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </Box>
-                  </ListItem>
-                </Fade>
-              ))}
-            </List>
-            {ctrl?.address.length > 3 && (
-              <Button
-                onClick={() => ctrl?.setShowAllAddresses(!ctrl?.showAllAddresses)}
+                    
+                    {location.id === ctrl?.selectedLocation?.id && (
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: "4px",
+                          backgroundColor: "#f7931e",
+                        }}
+                      />
+                    )}
+                  </Paper>
+                ))}
+              </Box>
+            ) : (
+              <Box
                 sx={{
-                  mt: 2,
-                  fontWeight: "bold",
-                  fontSize: "0.9rem",
-                  color: "#611463",
-                  textTransform: "none",
-                  px: 3,
-                  py: 1,
-                  borderRadius: "24px",
-                  background: "linear-gradient(to right, #f3e7f3, #faf5fa)",
-                  transition: "all 0.3s ease",
-                  boxShadow: "0 2px 4px rgba(97, 20, 99, 0.1)",
-                  border: "1px solid #e0c9e1",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  "&:hover": {
-                    background: "linear-gradient(to right, #e9d6eb, #f5ebf6)",
-                    boxShadow: "0 4px 8px rgba(97, 20, 99, 0.15)",
-                    transform: "translateY(-2px)"
-                  }
+                  p: 3,
+                  textAlign: "center",
+                  bgcolor: alpha("#f5f5f5", 0.5),
+                  borderRadius: 2,
                 }}
               >
-                {ctrl?.showAllAddresses ? "ເບິ່ງໜ້ອຍລົງ" : "ເບິ່ງເພີ່ມເຕີມ"}
-                <span style={{ marginLeft: "5px", transition: "transform 0.3s" }}>
-                  {ctrl?.showAllAddresses}
-                </span>
-              </Button>
+                <Typography sx={{ color: "#666" }}>
+                  ທ່ານຍັງບໍ່ມີທີ່ຢູ່ທີ່ບັນທຶກໄວ້ເທື່ອ
+                </Typography>
+              </Box>
             )}
           </Box>
 
@@ -345,12 +327,10 @@ const LocationDetailPage: React.FC = () => {
                   py: 1.5,
                   fontWeight: 600,
                   borderRadius: 2,
-                  background:
-                    "linear-gradient(135deg, #611463 0%, #812e84 100%)",
+                  background: "#611463",
                   transition: "all 0.2s",
                   "&:hover": {
-                    background:
-                      "linear-gradient(135deg, #7a1980 0%, #974099 100%)",
+                    background: "#7a1980",
                     transform: "translateY(-2px)",
                     boxShadow: "0 4px 12px rgba(97, 20, 99, 0.2)",
                   },
@@ -362,7 +342,7 @@ const LocationDetailPage: React.FC = () => {
           </Grid>
         </Paper>
 
-        {/* Second Box */}
+        {/* Second Box - Add New Address */}
         <Paper
           elevation={6}
           sx={{
@@ -622,87 +602,147 @@ const LocationDetailPage: React.FC = () => {
               }}
               InputProps={{
                 sx: { fontSize: "0.95rem", py: 0.5 },
-                endAdornment: ctrl?.errors.placeName && (
+                endAdornment: ctrl?.errors.placeVillage && (
                   <InputAdornment position="end">
                     <ErrorIcon color="error" />
                   </InputAdornment>
                 ),
               }}
             />
-             <Typography
-    variant="subtitle1"
-    sx={{
-      fontSize: "1rem",
-      mb: 1.5,
-      fontWeight: 600,
-      display: "flex",
-      alignItems: "center",
-    }}
-  >
-    <LocationCityOutlinedIcon sx={{ mr: 1, color: "#611463" }} />{" "}
-    ເມືອງ *
-  </Typography>
-  
-  <Autocomplete
-    fullWidth
-    options={districts}
-    getOptionLabel={(option) => typeof option === 'string' ? displayCity(option) : option.lo}
-    value={ctrl?.placeCity ? findCityByEnglishValue(ctrl?.placeCity) : null}
-    onChange={(
-      event: React.SyntheticEvent,
-      newValue: { en: string, lo: string } | null
-    ) => {
-      ctrl?.setCity(newValue ? newValue.en : "");
-      if (newValue) {
-        ctrl?.setErrors({ ...ctrl?.errors, placeCity: undefined });
-      }
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        variant="outlined"
-        placeholder="ເລືອກເມືອງ"
-        error={!!ctrl?.errors.placeCity}
-        helperText={ctrl?.errors.placeCity}
-        required
-        sx={{
-          mb: 3,
-          backgroundColor: "#fff",
-          "& .MuiOutlinedInput-root": {
-            borderRadius: 2,
-            transition: "all 0.2s",
-            "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: alpha("#611463", 0.5),
-            },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#611463",
-              borderWidth: 2,
-            },
-          },
-        }}
-        InputProps={{
-          ...params.InputProps,
-          sx: { fontSize: "0.95rem", py: 0.5 },
-          endAdornment: (
-            <>
-              {ctrl?.errors.placeName && (
-                <InputAdornment position="end">
-                  <ErrorIcon color="error" />
-                </InputAdornment>
+
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontSize: "1rem",
+                mb: 1.5,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <LocationCityOutlinedIcon sx={{ mr: 1, color: "#611463" }} />{" "}
+              ເມືອງ *
+            </Typography>
+            
+            <Autocomplete
+              fullWidth
+              options={districts}
+              getOptionLabel={(option) => typeof option === 'string' ? displayCity(option) : option.lo}
+              value={ctrl?.placeCity ? findCityByEnglishValue(ctrl?.placeCity) : null}
+              onChange={(
+                event: React.SyntheticEvent,
+                newValue: { en: string, lo: string } | null
+              ) => {
+                ctrl?.setCity(newValue ? newValue.en : "");
+                if (newValue) {
+                  ctrl?.setErrors({ ...ctrl?.errors, placeCity: undefined });
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="outlined"
+                  placeholder="ເລືອກເມືອງ"
+                  error={!!ctrl?.errors.placeCity}
+                  helperText={ctrl?.errors.placeCity}
+                  required
+                  sx={{
+                    mb: 3,
+                    backgroundColor: "#fff",
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      transition: "all 0.2s",
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: alpha("#611463", 0.5),
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#611463",
+                        borderWidth: 2,
+                      },
+                    },
+                  }}
+                  InputProps={{
+                    ...params.InputProps,
+                    sx: { fontSize: "0.95rem", py: 0.5 },
+                    endAdornment: (
+                      <>
+                        {ctrl?.errors.placeCity && (
+                          <InputAdornment position="end">
+                            <ErrorIcon color="error" />
+                          </InputAdornment>
+                        )}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
               )}
-              {params.InputProps.endAdornment}
-            </>
-          ),
-        }}
-      />
-    )}
-    renderOption={(props, option) => (
-      <li {...props}>
-        {option.lo}
-      </li>
-    )}
-  />
-</Box>
+              renderOption={(props, option) => (
+                <li {...props}>
+                  {option.lo}
+                </li>
+              )}
+            />
+
+            {/* Phone number field - ADDED FIELD */}
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontSize: "1rem",
+                mb: 1.5,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <PhoneIcon sx={{ mr: 1, color: "#611463" }} />
+              ເບີໂທລະສັບ *
+            </Typography>
+
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="ເບີໂທລະສັບ (ເຊັ່ນ: 20XXXXXXX)"
+              value={ctrl?.phoneNumber ?? ""}
+              onChange={(e) => {
+                ctrl?.handlePhoneNumberChange(e);
+              }}
+              error={!!ctrl?.errors.phoneNumber}
+              helperText={ctrl?.errors.phoneNumber}
+              required
+              sx={{
+                mb: 3,
+                backgroundColor: "#fff",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  transition: "all 0.2s",
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: alpha("#611463", 0.5),
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#611463",
+                    borderWidth: 2,
+                  },
+                },
+              }}
+              InputProps={{
+                sx: { fontSize: "0.95rem", py: 0.5 },
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Typography variant="body2" sx={{ color: "#611463", fontWeight: 500 }}>
+                      +856
+                    </Typography>
+                  </InputAdornment>
+                ),
+                endAdornment: ctrl?.errors.phoneNumber && (
+                  <InputAdornment position="end">
+                    <ErrorIcon color="error" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+
           <Typography
             variant="subtitle1"
             sx={{
@@ -748,7 +788,7 @@ const LocationDetailPage: React.FC = () => {
                   <Box
                     sx={{
                       width: "100%",
-                      height: 220,
+                      height: 320,
                       mb: 2,
                       display: "flex",
                       justifyContent: "center",
@@ -767,6 +807,27 @@ const LocationDetailPage: React.FC = () => {
                         objectFit: "cover",
                       }}
                     />
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        zIndex: 2,
+                      }}
+                    >
+                      <IconButton
+                        onClick={() => ctrl.setImages([])}
+                        sx={{
+                          bgcolor: "rgba(255,255,255,0.9)",
+                          "&:hover": {
+                            bgcolor: "rgba(255,255,255,1)",
+                          },
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                        }}
+                      >
+                        <DeleteIcon sx={{ color: "#d32f2f" }} />
+                      </IconButton>
+                    </Box>
                   </Box>
                 ) : (
                   <Box
@@ -802,16 +863,14 @@ const LocationDetailPage: React.FC = () => {
                     component="span"
                     startIcon={<UploadIcon />}
                     sx={{
-                      background:
-                        "linear-gradient(135deg, #611463 0%, #812e84 100%)",
+                      background: "#611463",
                       borderRadius: 2,
                       boxShadow: "0 4px 12px rgba(97, 20, 99, 0.15)",
                       px: 3,
                       py: 1.2,
                       transition: "all 0.2s",
                       "&:hover": {
-                        background:
-                          "linear-gradient(135deg, #7a1980 0%, #974099 100%)",
+                        background: "#7a1980",
                         transform: "translateY(-2px)",
                         boxShadow: "0 6px 16px rgba(97, 20, 99, 0.25)",
                       },
@@ -822,6 +881,11 @@ const LocationDetailPage: React.FC = () => {
                     {ctrl.images[0]?.preview ? "ປ່ຽນຮູບພາບ" : "ອັບໂຫລດຮູບພາບ"}
                   </Button>
                 </label>
+                {ctrl.errors.image && (
+                  <Typography color="error" sx={{ mt: 1, fontSize: "0.85rem" }}>
+                    {ctrl.errors.image}
+                  </Typography>
+                )}
               </Box>
             </CardContent>
           </Card>
@@ -861,12 +925,10 @@ const LocationDetailPage: React.FC = () => {
                   py: 1.5,
                   fontWeight: 600,
                   borderRadius: 2,
-                  background:
-                    "linear-gradient(135deg, #611463 0%, #812e84 100%)",
+                  background: "#611463",
                   transition: "all 0.2s",
                   "&:hover": {
-                    background:
-                      "linear-gradient(135deg, #7a1980 0%, #974099 100%)",
+                    background: "#7a1980",
                     transform: "translateY(-2px)",
                     boxShadow: "0 4px 12px rgba(97, 20, 99, 0.2)",
                   },

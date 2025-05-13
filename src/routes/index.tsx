@@ -14,7 +14,8 @@ import LocationDetailPage from "../pages/loDetail/components/lomore";
 import PaymentPage from "../pages/payment/components/paymemt";
 import TermsAndPrivacyPage from "../pages/privacy/components";
 import SettingsPage from "../pages/setting/components/setting";
-import ProtectedRoute from "../components/ProtectRoute"; // Add this import
+import ProtectedRoute from "../components/ProtectRoute";
+import ServiceLockRoute from "../components/ServiceLockRoute"; // Add this import
 
 import {
   BLOG_PROFILE_PATH,
@@ -36,14 +37,17 @@ const RoutesComponent = () => {
   return useRoutes([
     {
       path: "/",
-      element: <MainLayout />,
+      element: (
+        <ServiceLockRoute>
+          <MainLayout />
+        </ServiceLockRoute>
+      ),
       children: [
+        // Rest of your routes stay the same
         // Public routes - accessible to all users
         { path: HOME_PATH, element: <HomePage /> },
         { path: CONTACT_US_PATH, element: <ContactUs /> },
         { path: TERMS_PRIVACY_PATH, element:<TermsAndPrivacyPage /> },
-
-        
         
         // Protected routes - only accessible to logged-in users
         { path: SERVICE_PATH, element: <ProtectedRoute><JobSearchPage /></ProtectedRoute> },

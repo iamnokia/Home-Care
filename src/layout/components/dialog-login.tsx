@@ -20,12 +20,11 @@ import {
   Email, 
 } from "@mui/icons-material";
 import RegisterDialog from "./dialog-signup";
-import axios from "axios";
+import axios from "../../configs/axios";
 import Swal from "sweetalert2";
 import { useDispatch } from "react-redux";
 
 // Assuming you have this logo image in your assets folder
-// If not, replace with your actual logo path
 import LOGO_HOMECARE from "../../assets/icons/HomeCareLogo.png";
 import { loginFailed, loginSuccess } from "../../store/authenticationSlice";
 import { getUserByToken } from "../../services/Login";
@@ -84,38 +83,71 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
       setIsLoading(true);
       
       // Make API call to login endpoint
-      const response = await axios.post("https://homecare-pro.onrender.com/users/sign_in", {
+      const response = await axios.post("/users/sign_in", {
         email,
         password
       });
   
-      // Check if login was successful
-      if (response.data && response.data.token) {
+      // Check if login was successful - NOTE: The API returns accessToken directly (not token)
+      if (response.data && response.data.accessToken) {
         console.log("Login response:", response.data);
         
-        // Store token in localStorage (only access token)
-        localStorage.setItem("accessToken", response.data.token);
+        // Format tokens with Bearer prefix
+        const accessToken = "Bearer " + response.data.accessToken;
+        const refreshToken = "Bearer " + response.data.refreshToken;
+        
+        // Store token in localStorage as a JSON string
+        localStorage.setItem("authToken", JSON.stringify({
+          accessToken,
+          refreshToken
+        }));
         
         // Set the authorization header for future requests
-        axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.accessToken}`;
+        axios.defaults.headers.common["Authorization"] = accessToken;
         
-        // Get user profile data using the token
-        const userData = await getUserByToken();
-        
-        // Dispatch login success action with user data
-        dispatch(loginSuccess(userData));
-        
-        // Show success message
-        Swal.fire({
-          title: "ສຳເລັດ!",
-          text: "ເຂົ້າສູ່ລະບົບສຳເລັດແລ້ວ",
-          icon: "success",
-          timer: 1500,
-          showConfirmButton: false
-        });
-        
-        // Close the dialog
-        onClose();
+        // Check if user data is already in the response
+        if (response.data.user) {
+          // Dispatch login success action with user data directly from the response
+          dispatch(loginSuccess(response.data.user));
+          
+          // Show success message
+          Swal.fire({
+            title: "ສຳເລັດ!",
+            text: "ເຂົ້າສູ່ລະບົບສຳເລັດແລ້ວ",
+            icon: "success",
+            timer: 1500,
+            showConfirmButton: false
+          });
+          
+          // Close the dialog
+          onClose();
+        } else {
+          // If no user data in response, fetch it
+          try {
+            const userData = await getUserByToken();
+            dispatch(loginSuccess(userData));
+            
+            Swal.fire({
+              title: "ສຳເລັດ!",
+              text: "ເຂົ້າສູ່ລະບົບສຳເລັດແລ້ວ",
+              icon: "success",
+              timer: 1500,
+              showConfirmButton: false
+            });
+            
+            onClose();
+          } catch (userError) {
+            console.error("Error fetching user data:", userError);
+            dispatch(loginFailed());
+            Swal.fire({
+              title: "ເກີດຂໍ້ຜິດພາດ",
+              text: "ບໍ່ສາມາດດຶງຂໍ້ມູນຜູ້ໃຊ້ໄດ້",
+              icon: "error",
+              confirmButtonText: "ລອງໃໝ່",
+              confirmButtonColor: "#611463"
+            });
+          }
+        }
       } else {
         throw new Error("Invalid response from server");
       }

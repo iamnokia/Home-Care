@@ -33,7 +33,7 @@ import {
   Transgender,
   Badge
 } from "@mui/icons-material";
-import axios from "axios";
+import axios from "../../configs/axios";
 import Swal from "sweetalert2";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../store/authenticationSlice";
@@ -149,7 +149,7 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
       console.log("Register payload:", payload);
 
       // Make API call to register endpoint
-      const response = await axios.post("https://homecare-pro.onrender.com/users/sign_up_user", payload);
+      const response = await axios.post("/users/sign_up_user", payload);
 
       console.log("Register response:", response.data);
 
@@ -158,28 +158,63 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
         // Show success message
         Swal.fire({
           title: "ສຳເລັດ!",
-          text: "ສ້າງບັນຊີສຳເລັດແລ້ວ",
+          text: "ສ້າງບັນຊີສຳເລັດແລ້ວ, ກຳລັງເຂົ້າສູ່ລະບົບອັດຕະໂນມັດ...",
           icon: "success",
-          timer: 1500,
+          timer: 2000,
           showConfirmButton: false
         });
 
         // Auto login after successful registration
         try {
-          const loginResponse = await axios.post("https://homecare-pro.onrender.com/user/sign_in", {
+          // Use the correct login endpoint (plural "users" not singular "user")
+          const loginResponse = await axios.post("/users/sign_in", {
             email: emailRef.current?.value,
             password: passwordRef.current?.value
           });
 
-          if (loginResponse.data && loginResponse.data.user) {
+          if (loginResponse.data && loginResponse.data.accessToken) {
+            console.log("Auto-login response:", loginResponse.data);
+            
+            // Format tokens with Bearer prefix
+            const accessToken = "Bearer " + loginResponse.data.accessToken;
+            const refreshToken = "Bearer " + loginResponse.data.refreshToken;
+            
+            // Store tokens in localStorage as a JSON string
+            localStorage.setItem("authToken", JSON.stringify({
+              accessToken,
+              refreshToken
+            }));
+            
+            // Set the authorization header for future requests
+            axios.defaults.headers.common["Authorization"] = accessToken;
+            
             // Dispatch login success with user data
             dispatch(loginSuccess(loginResponse.data.user));
+            
+            // Close the dialog
+            onClose();
           }
         } catch (loginError) {
           console.error("Auto-login error:", loginError);
-          // If auto-login fails, just close the dialog and let user try to login manually
+          
+          // If auto-login fails, suggest manual login
+          Swal.fire({
+            title: "ແຈ້ງເຕືອນ",
+            text: "ສ້າງບັນຊີສຳເລັດແລ້ວ ແຕ່ບໍ່ສາມາດເຂົ້າສູ່ລະບົບອັດຕະໂນມັດ. ກະລຸນາເຂົ້າສູ່ລະບົບດ້ວຍຕົນເອງ.",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "ເຂົ້າສູ່ລະບົບທັນທີ",
+            cancelButtonText: "ຍົກເລີກ",
+            confirmButtonColor: "#611463"
+          }).then((result) => {
+            if (result.isConfirmed && onSwitchToLogin) {
+              onClose();
+              onSwitchToLogin();
+            } else {
+              onClose();
+            }
+          });
         }
-
       } else {
         throw new Error("Invalid response from server");
       }

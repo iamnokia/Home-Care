@@ -4,28 +4,31 @@ import {
   Typography, 
   Paper, 
   Container,
-  useTheme,
-  useMediaQuery,
   Fade,
   Grow,
   Avatar,
-  Divider
+  Divider,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import FlagIcon from '@mui/icons-material/Flag';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import LockIcon from '@mui/icons-material/Lock';
 import Homecare from '../../../assets/icons/HomeCareLogo.png';
 import { useMainController } from '../controllers/index';
 import { useParams } from 'react-router-dom';
 
 interface ServiceStatusProps {
-  orderId: string;
+  orderId?: string;
 }
 
 const ServiceStatus: React.FC<ServiceStatusProps> = ({ orderId }) => {
   const [animate, setAnimate] = useState(false);
-  const {id} = useParams();
+  const [showLockMessage, setShowLockMessage] = useState(false);
+  const { id } = useParams();
+  const actualOrderId = orderId || id;
   
   const {
     showStartButton,
@@ -33,8 +36,23 @@ const ServiceStatus: React.FC<ServiceStatusProps> = ({ orderId }) => {
     handleStartClick,
     handleCompleteClick,
     getStepStatus,
-  } = useMainController(orderId);
+    isServiceActive
+  } = useMainController(actualOrderId);
 
+  // Show navigation lock message on component mount if service is active
+  useEffect(() => {
+    if (isServiceActive) {
+      setShowLockMessage(true);
+      // Hide message after 5 seconds
+      const timer = setTimeout(() => {
+        setShowLockMessage(false);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isServiceActive]);
+
+  // Animation on component mount
   useEffect(() => {
     setTimeout(() => {
       setAnimate(true);
@@ -90,6 +108,7 @@ const ServiceStatus: React.FC<ServiceStatusProps> = ({ orderId }) => {
         }
       }}
     >
+     
       <Container
         maxWidth="md"
         sx={{
@@ -187,10 +206,24 @@ const ServiceStatus: React.FC<ServiceStatusProps> = ({ orderId }) => {
                 color="text.secondary"
                 sx={{ 
                   fontSize: { xs: '0.9rem', md: '1rem' },
-                  opacity: 0.9
+                  opacity: 0.9,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
                 }}
               >
                 ຕິດຕາມຄວາມຄືບໜ້າຂອງການບໍລິການຂອງທ່ານ
+                {isServiceActive && (
+                  <Box component="span" sx={{ 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    color: '#00BFA6',
+                    fontWeight: 'bold',
+                    gap: 0.5
+                  }}>
+                    <LockIcon fontSize="small" /> ກຳລັງດຳເນີນ
+                  </Box>
+                )}
               </Typography>
             </Box>
           </Paper>
@@ -647,19 +680,30 @@ const ServiceStatus: React.FC<ServiceStatusProps> = ({ orderId }) => {
             );
           })()}
 
-          {/* Decorative elements */}
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: -50,
-              right: -50,
-              width: { xs: 180, md: 250 },
-              height: { xs: 180, md: 250 },
-              background: 'radial-gradient(circle, rgba(159, 122, 234, 0.15) 0%, rgba(159, 122, 234, 0) 70%)',
-              borderRadius: '50%',
-              zIndex: 0,
-            }}
-          />
+          {/* Permanent lock indicator when service is active */}
+          {isServiceActive && (
+            <Paper
+              elevation={3}
+              sx={{
+                position: 'fixed',
+                bottom: 20,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                py: 1.5,
+                px: 3,
+                borderRadius: 10,
+                background: 'rgba(97, 20, 99, 0.9)',
+                backdropFilter: 'blur(10px)',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                zIndex: 1000,
+                boxShadow: '0 10px 20px rgba(0, 0, 0, 0.15)',
+              }}
+            >
+            </Paper>
+          )}
         </Box>
       </Container>
     </Box>

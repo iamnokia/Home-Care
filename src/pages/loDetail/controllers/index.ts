@@ -1,3 +1,5 @@
+// Controller file: useMainController.ts
+
 import { useState, ChangeEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertColor, SelectChangeEvent } from "@mui/material";
@@ -60,8 +62,56 @@ const useMainController = () => {
     }
   };
 
+  // Validate form fields before submission
+  const validateForm = (): boolean => {
+    const newErrors: ErrorState = {};
+
+    if (!placeName?.trim()) {
+      newErrors.placeName = "ກະລຸນາປ້ອນຊື່ສະຖານທີ່";
+    }
+
+    if (!detailAddress?.trim()) {
+      newErrors.detailAddress = "ກະລຸນາປ້ອນລາຍລະອຽດທີ່ຢູ່";
+    }
+
+    if (!placeVillage?.trim()) {
+      newErrors.placeVillage = "ກະລຸນາປ້ອນຊື່ບ້ານ";
+    }
+
+    if (!placeCity) {
+      newErrors.placeCity = "ກະລຸນາເລືອກເມືອງ";
+    }
+
+    if (!phoneNumber?.trim()) {
+      newErrors.phoneNumber = "ກະລຸນາປ້ອນເບີໂທລະສັບ";
+    } else if (!/^\d+$/.test(phoneNumber)) {
+      newErrors.phoneNumber = "ເບີໂທລະສັບຕ້ອງເປັນຕົວເລກເທົ່ານັ້ນ";
+    } else if (phoneNumber.length < 8 || phoneNumber.length > 12) {
+      newErrors.phoneNumber = "ເບີໂທລະສັບບໍ່ຖືກຕ້ອງ";
+    }
+
+    if (!mapLink?.trim()) {
+      newErrors.mapLink = "ກະລຸນາປ້ອນລິ້ງ Google Maps";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   // Handle form submission
   const handleSubmit = async () => {
+    // Validate form first
+    if (!validateForm()) {
+      Swal.fire({
+        title: "ແຈ້ງເຕືອນ",
+        text: "ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບຖ້ວນ",
+        icon: "warning",
+        confirmButtonColor: "#611463",
+        confirmButtonText: "ຕົກລົງ",
+      });
+      return;
+    }
+
     const result = await Swal.fire({
       title: "ຢືນຢັນການບັນທຶກ?",
       text: "ກົດຕົກລົງເພື່ອບັນທຶກຂໍ້ມູນທີ່ຢູ່ໃໝ່.",
@@ -71,59 +121,36 @@ const useMainController = () => {
       cancelButtonColor: "#d33",
       confirmButtonText: "ຕົກລົງ",
       cancelButtonText: "ຍົກເລີກ",
-      
     });
 
     if (!result.isConfirmed) return;
 
     try {
-      // let houseImagePath = "";
+      // Create a single FormData for both address data and image
+      const formData = new FormData();
+      formData.append("gender_owner", "MALE");
+      formData.append("users_id", "21");
+      formData.append("address_name", placeName);
+      formData.append("google_link_map", mapLink);
+      formData.append("address_description", detailAddress);
+      formData.append("city", placeCity);
+      formData.append("village", placeVillage);
+      formData.append("tel", phoneNumber);
+      
+      // Append image if it exists
+      if (images.length > 0) {
+        formData.append("house_image", images[0].file);
+      }
 
-      // if (images) {
-      //   // Upload image first
-      //   const imageData = new FormData();
-      //   // imageData.append("user_id", id);
-      //   imageData.append("image", images);
-
-      //   const uploadRes = await axiosInstance.post(
-      //     "https://homecare-pro.onrender.com/address_users_details/upload",
-      //     imageData,
-      //     {
-      //       headers: {
-      //         "Content-Type": "multipart/form-data",
-      //       },
-      //     }
-      //   );
-
-      //   houseImagePath = uploadRes.data?.path || ""; // adjust depending on API response
-      // }
-
-      // Create form data to submit address
-      // const data = new FormData();
-      // data.append("gender_owner", "MALE");
-      // data.append("users_id", "21");
-      // data.append("address_name", placeName);
-      // // data.append("house_image", houseImagePath);
-      // data.append("google_link_map",mapLink );
-      // data.append("address_description", detailAddress );
-      // data.append("city", placeCity);
-      // data.append("tel", phoneNumber);
-      // data.append("village", placeVillage);
-
-      const newData = {
-        gender_owner: "MALE",
-        users_id: 21,
-        address_name: placeName,
-        google_link_map: mapLink,
-        address_description: detailAddress,
-        city: placeCity,
-        village: placeVillage,
-        tel: phoneNumber,
-      };
-
+      // Submit everything in a single request
       await axios.post(
         "https://homecare-pro.onrender.com/address_users_details/create",
-        newData
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
 
       Swal.fire({
@@ -135,9 +162,6 @@ const useMainController = () => {
 
       handleGetData();
       resetForm();
-
-      // Optionally clear form or refresh list
-      // ctrl.resetForm(); or setState({})
     } catch (error) {
       console.error("Error submitting address:", error);
       Swal.fire("ຜິດພາດ", "ບໍ່ສາມາດບັນທຶກຂໍ້ມູນໄດ້", "error");
@@ -147,7 +171,7 @@ const useMainController = () => {
   // Handle image upload
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const files = event.target.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
 
     const newFiles = Array.from(files);
 
@@ -180,6 +204,10 @@ const useMainController = () => {
     Promise.all(imagePromises)
       .then((newImageFiles) => {
         setImages((prev) => [...prev, ...newImageFiles]);
+        // Clear image error if it exists
+        if (errors.image) {
+          setErrors({ ...errors, image: undefined });
+        }
       })
       .catch((error) => {
         console.error("Error reading image files:", error);
@@ -187,35 +215,33 @@ const useMainController = () => {
   };
 
   // Handle location selection
-const handleLocationSelect = (location: Useraddress): void => {
-  setSelectedLocation(location);
-  
-  // Store each component separately
-  localStorage.setItem("addressName", location.address_name);
-  localStorage.setItem("addressVillage", location.village);
-  localStorage.setItem("addressCity", location.city);
-  
-  // Also store the combined string for backwards compatibility
-  const locationString = `${location.address_name}, ${location.village}, ${location.city}`;
-  localStorage.setItem("selectedLocationName", locationString);
+  const handleLocationSelect = (location: Useraddress): void => {
+    setSelectedLocation(location);
+    
+    // Store each component separately
+    localStorage.setItem("addressName", location.address_name);
+    localStorage.setItem("addressVillage", location.village);
+    localStorage.setItem("addressCity", location.city);
+    
+    // Also store the combined string for backwards compatibility
+    const locationString = `${location.address_name}, ${location.village}, ${location.city}`;
+    localStorage.setItem("selectedLocationName", locationString);
 
-      // If you want to save more location information, you can store it as JSON
-      localStorage.setItem(
-        "selectedLocation",
-        JSON.stringify({
-          id: location.id,
-          name: location.address_name,
-          description: location.address_description,
-        })
-      );
-    };
+    // If you want to save more location information, you can store it as JSON
+    localStorage.setItem(
+      "selectedLocation",
+      JSON.stringify({
+        id: location.id,
+        name: location.address_name,
+        description: location.address_description,
+      })
+    );
+  };
 
   // Handle delete location
   const handleDeleteLocation = async () => {
-    localStorage.getItem("selectedLocation");
-
     if (!selectedLocation?.id) {
-      console.error("No location ID found in localStorage.");
+      Swal.fire("ແຈ້ງເຕືອນ", "ກະລຸນາເລືອກທີ່ຢູ່ກ່ອນ", "warning");
       return;
     }
 
@@ -245,10 +271,18 @@ const handleLocationSelect = (location: Useraddress): void => {
           confirmButtonText: "ຕົກລົງ",
         });
 
-        // Optionally remove from localStorage
+        // Remove from localStorage
         localStorage.removeItem("selectedLocation");
+        localStorage.removeItem("selectedLocationName");
+        localStorage.removeItem("addressName");
+        localStorage.removeItem("addressVillage");
+        localStorage.removeItem("addressCity");
 
-        // You may also want to update the state or refresh the list here
+        // Reset selected location
+        setSelectedLocation(null);
+        
+        // Refresh address list
+        handleGetData();
       } catch (error) {
         console.error("Error deleting location:", error);
         Swal.fire("ຜິດພາດ", "ບໍ່ສາມາດລຶບທີ່ຢູ່ໄດ້", "error");
@@ -275,7 +309,6 @@ const handleLocationSelect = (location: Useraddress): void => {
     setCity("");
     setPhoneNumber("");
     setHasWhatsapp(false);
-
     setImages([]);
     setErrors({});
   };
@@ -330,8 +363,11 @@ const handleLocationSelect = (location: Useraddress): void => {
   const handlePhoneNumberChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ): void => {
-    setPhoneNumber(e.target.value);
-    if (e.target.value.trim()) {
+    // Only allow numeric input
+    const numericValue = e.target.value.replace(/\D/g, '');
+    setPhoneNumber(numericValue);
+    
+    if (numericValue.trim()) {
       setErrors({ ...errors, phoneNumber: undefined });
     }
   };
@@ -369,48 +405,9 @@ const handleLocationSelect = (location: Useraddress): void => {
   }, []);
 
   return {
+    // Methods
+    validateForm,
     handleSubmit,
-    showAllAddresses,
-    setShowAllAddresses,
-    address,
-
-    // State values
-    savedLocations,
-    selectedLocation,
-    detailAddress,
-    placeName,
-    placeVillage,
-    placeCity,
-    countryCode,
-    phoneNumber,
-    hasWhatsapp,
-    mapLink,
-    images,
-    errors,
-    openSnackbar,
-    snackbarMessage,
-    snackbarSeverity,
-
-    // State setters (including combined setters with validation)
-    setSavedLocations,
-    setSelectedLocation,
-    setDetailAddress,
-    setPlaceName,
-    setVillage,
-    setCity,
-    setCountryCode,
-    setPhoneNumber,
-    setHasWhatsapp,
-    setMapLink,
-    setImages,
-    setErrors,
-    setOpenSnackbar,
-    setSnackbarMessage,
-    setSnackbarSeverity,
-
-    // Functions
-    // validateForm,
-    // handleSubmit,
     handleImageChange,
     handleLocationSelect,
     handleDeleteLocation,
@@ -427,6 +424,42 @@ const handleLocationSelect = (location: Useraddress): void => {
     handleCloseSnackbar,
     handleCancel,
     getLocationColor,
+    handleGetData,
+    
+    // State values and setters
+    showAllAddresses,
+    setShowAllAddresses,
+    address,
+    savedLocations,
+    setSavedLocations,
+    selectedLocation,
+    setSelectedLocation,
+    detailAddress,
+    setDetailAddress,
+    placeName,
+    setPlaceName,
+    placeVillage,
+    setVillage,
+    placeCity,
+    setCity,
+    countryCode,
+    setCountryCode,
+    phoneNumber,
+    setPhoneNumber,
+    hasWhatsapp,
+    setHasWhatsapp,
+    mapLink,
+    setMapLink,
+    images,
+    setImages,
+    errors,
+    setErrors,
+    openSnackbar,
+    setOpenSnackbar,
+    snackbarMessage,
+    setSnackbarMessage,
+    snackbarSeverity,
+    setSnackbarSeverity,
   };
 };
 
