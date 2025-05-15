@@ -66,26 +66,46 @@ export const getUserByToken = async (): Promise<UserModel> => {
   }
 };
 
-/**
- * Refreshes the authentication token
- * @param refreshToken The refresh token to use
- * @returns New tokens if successful, null otherwise
- */
-export const refreshAuthToken = async (refreshToken: string) => {
+export const refreshAuthToken = async () => {
   try {
-    // Make sure we're using the correct endpoint
-    const response = await axios.post("/contact/refreshToken", {}, {
-      headers: {
-        "Authorization": refreshToken
+    // Get the stored auth information from localStorage
+    const authTokenString = localStorage.getItem("authToken");
+    
+    if (!authTokenString) {
+      throw new Error("No authentication token found");
+    }
+    
+    const authToken = JSON.parse(authTokenString);
+    
+    // Extract the actual refresh token (removing "Bearer " if present)
+    const refreshToken = authToken.refreshToken.startsWith("Bearer ") 
+      ? authToken.refreshToken.substring(7) 
+      : authToken.refreshToken;
+    
+    // Make the API call with the refresh token in the request body
+    const response = await axios.post(
+      "/users/refresh-token", 
+      { 
+        token: refreshToken 
+      },
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
       }
-    });
+    );
     
     if (response.data && response.data.access_token) {
-      return {
+      const newAuthData = {
         accessToken: "Bearer " + response.data.access_token,
         refreshToken: response.data.refresh_token ? 
-          "Bearer " + response.data.refresh_token : refreshToken,
+          "Bearer " + response.data.refresh_token : authToken.refreshToken,
       };
+      
+      // Update the token in localStorage
+      localStorage.setItem("authToken", JSON.stringify(newAuthData));
+      
+      return newAuthData;
     }
     return null;
   } catch (error) {

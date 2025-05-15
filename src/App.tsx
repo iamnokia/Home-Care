@@ -55,39 +55,45 @@ function App() {
   };
 
   const handleTokenRefresh = async () => {
-    try {
-      const authTokenString = localStorage.getItem("authToken");
-      if (!authTokenString) {
-        throw new Error("No auth token found for refresh");
-      }
-
-      const authToken: AuthToken = JSON.parse(authTokenString);
-      axios.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${authToken.refreshToken}`;
-
-      const res = await axios.post("/contact/refreshToken");
-      const newAccessToken = res.data.access_token;
-
-      const newAuthToken: AuthToken = {
-        accessToken: newAccessToken,
-        refreshToken: authToken.refreshToken,
-      };
-
-      localStorage.setItem("authToken", JSON.stringify(newAuthToken));
-      axios.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${newAccessToken}`;
-
-      // Retry the original request
-      const resGetData = await axios.get("/users/get_user_profile");
-      dispatch(loginSuccess(resGetData.data));
-    } catch (err) {
-      console.error("Token refresh failed:", err);
-      dispatch(loginFailed());
-      localStorage.removeItem("authToken");
+  try {
+    const authTokenString = localStorage.getItem("authToken");
+    if (!authTokenString) {
+      throw new Error("No auth token found for refresh");
     }
-  };
+
+    const authToken: AuthToken = JSON.parse(authTokenString);
+    
+    // The API expects the refresh token in the request body as { token: "your-refresh-token" }
+    // Not in the Authorization header
+    const refreshToken = authToken.refreshToken.startsWith("Bearer ")
+      ? authToken.refreshToken.substring(7)
+      : authToken.refreshToken;
+      
+    const res = await axios.post("/users/refresh-token", {
+      token: refreshToken
+    });
+    
+    const newAccessToken = res.data.access_token;
+    // Get the new refresh token if provided, otherwise keep the old one
+    const newRefreshToken = res.data.refresh_token || authToken.refreshToken;
+
+    const newAuthToken: AuthToken = {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    };
+
+    localStorage.setItem("authToken", JSON.stringify(newAuthToken));
+    axios.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
+
+    // Retry the original request
+    const resGetData = await axios.get("/users/get_user_profile");
+    dispatch(loginSuccess(resGetData.data));
+  } catch (err) {
+    console.error("Token refresh failed:", err);
+    dispatch(loginFailed());
+    localStorage.removeItem("authToken");
+  }
+};
 
   // Check for authentication on app load
   useEffect(() => {

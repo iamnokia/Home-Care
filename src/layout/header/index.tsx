@@ -12,7 +12,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FreeIcon from "../../assets/icons/HomeCareLogo.png";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
-import LockIcon from "@mui/icons-material/Lock"; // Add this import
+import LockIcon from "@mui/icons-material/Lock";
 import PersonIcon from "@mui/icons-material/Person";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -35,14 +35,12 @@ import {
   Paper,
   CircularProgress,
   Chip,
-  Divider,
 } from "@mui/material";
 import LoginDialog from "../components/dialog-login";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store";
 import { logout, loginSuccess, loginFailed } from "../../store/authenticationSlice";
 import axios from "axios";
-import { UserModel } from "../../models/user";
 
 // Page interface
 interface PageItem {
@@ -57,7 +55,7 @@ interface SettingItem {
   onClick?: () => void;
 }
 
-// Modified pages array - removed LOGIN_PATH
+// Pages array
 const pages: PageItem[] = [
   { to: HOME_PATH, label: "ໜ້າຫຼັກ" },
   { to: SERVICE_PATH, label: "ການບໍລິການ" },
@@ -70,15 +68,19 @@ function ResponsiveAppBar() {
   const dispatch = useDispatch();
   const { loggedIn, data: userData } = useSelector((state: RootState) => state.auth);
 
+  // State for current path
   const [currentPath, setCurrentPath] = useState<string>(location.pathname);
+  
+  // Menu states
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
-  // State for login dialog
+  
+  // Login dialog state
   const [loginDialogOpen, setLoginDialogOpen] = useState<boolean>(false);
-  // State for username display
-  const [username, setUsername] = useState<string>("");
-
-  const [userDataShow, setUser] = useState<UserModel[]>([])
+  
+  // Loading state
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  
   // Search states
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<{
@@ -92,17 +94,22 @@ function ResponsiveAppBar() {
   });
   const [showResults, setShowResults] = useState<boolean>(false);
   const [isSearching, setIsSearching] = useState<boolean>(false);
-
-  // Function for opening login dialog - defined before use
+  
+  // Function for opening login dialog
   const handleOpenLoginDialog = (): void => {
     setLoginDialogOpen(true);
   };
 
+  // Function to handle logout
   const handleLogout = (): void => {
     handleCloseUserMenu();
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user_email");
     dispatch(logout());
   };
 
+  // Settings menu items based on login status
   const settings: SettingItem[] = loggedIn
     ? [
       { to: SETTING_PATH, label: "ຂໍ້ມູນບັນຊີ" },
@@ -117,6 +124,7 @@ function ResponsiveAppBar() {
       { to: "#", label: "ເຂົ້າສູ່ລະບົບ", onClick: handleOpenLoginDialog }
     ];
 
+  // Menu handlers
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorElNav(event.currentTarget);
   };
@@ -138,48 +146,81 @@ function ResponsiveAppBar() {
     setLoginDialogOpen(false);
   };
 
-  // Effect to check for token and fetch user data on mount
+  // Effect to fetch user data on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         // Check if there's a token in localStorage
         const accessToken = localStorage.getItem("accessToken");
-
+        
         if (accessToken) {
           // Set authorization header
           axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-
+          
           // Fetch user data
           const response = await axios.get("https://homecare-pro.onrender.com/users/get_user_profile");
-          setUser(response?.data)
-          console.log(response?.data)
-
+          
+          if (response?.data && response.data.user) {
+            // Store email for persistence
+            const email = response.data.user.email || response.data.user.username;
+            if (email) {
+              localStorage.setItem("user_email", email);
+            }
+            
+            // Update Redux state
+            dispatch(loginSuccess(response.data.user));
+          }
+        } else {
+          dispatch(loginFailed());
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
-        // If token is invalid, clear it
-        localStorage.removeItem("accessToken");
-        dispatch(loginFailed());
+        
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          // Handle 401 Unauthorized
+          localStorage.removeItem("accessToken");
+          dispatch(loginFailed());
+        }
       }
     };
-
-    // Check if we need to fetch user data
-    if (!loggedIn && localStorage.getItem("accessToken")) {
+    
+    // Check if there's a token but no user data
+    if (localStorage.getItem("accessToken") && !userData) {
       fetchUserData();
     }
-  }, [dispatch, loggedIn]);
+  }, [dispatch, userData]);
 
-  // Effect to update username when userData changes
+  // Update path when location changes
   useEffect(() => {
-    if (userData) {
-      // Format the username based on your actual user data structure
-      const firstName = userData.first_name || '';
-      const lastName = userData.last_name || '';
-      setUsername(firstName && lastName ? `${firstName} ${lastName}` : userData.email || userData.username || '');
-    } else {
-      setUsername("");
+    setCurrentPath(location.pathname);
+  }, [location.pathname]);
+  
+  // Function to get the display name from stored user data
+  const getDisplayName = () => {
+    // Check localStorage first for email
+    const storedEmail = localStorage.getItem("user_email");
+    if (storedEmail) {
+      return storedEmail;
     }
-  }, [userData]);
+    
+    // Fallback to redux state
+    if (userData) {
+      if (userData.email) return userData.email;
+      if (userData.username) return userData.username;
+    }
+    
+    return "";
+  };
+  
+  // Function to get avatar letter
+  const getAvatarLetter = () => {
+    const name = getDisplayName();
+    return name ? name.charAt(0).toUpperCase() : "U";
+  };
+  
+  // Determine if we should show the user email
+  const showUserEmail = loggedIn || localStorage.getItem("accessToken");
+  const displayName = getDisplayName();
 
   // Search functionality
   const searchInObject = (obj: any, searchField: string, term: string): boolean => {
@@ -211,10 +252,21 @@ function ResponsiveAppBar() {
 
     setIsSearching(true);
     try {
+      const token = localStorage.getItem("accessToken");
+      const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+
       const [employeesResponse, carsResponse] = await Promise.all([
-        fetch('https://homecare-pro.onrender.com/employees/read_employees'),
-        fetch('https://homecare-pro.onrender.com/emp_car/read_emp_car')
+        fetch('https://homecare-pro.onrender.com/employees/read_employees', {
+          headers: authHeader
+        }),
+        fetch('https://homecare-pro.onrender.com/emp_car/read_emp_car', {
+          headers: authHeader
+        })
       ]);
+
+      if (!employeesResponse.ok || !carsResponse.ok) {
+        throw new Error("API request failed");
+      }
 
       const employeesData = await employeesResponse.json();
       const carsData = await carsResponse.json();
@@ -252,10 +304,6 @@ function ResponsiveAppBar() {
     setSearchResults({ employees: [], cars: [], totalFound: 0 });
     setShowResults(false);
   };
-
-  useEffect(() => {
-    setCurrentPath(location.pathname);
-  }, [location.pathname]);
 
   return (
     <>
@@ -515,9 +563,35 @@ function ResponsiveAppBar() {
             </Box>
 
             {/* User Actions (Profile/Login) */}
-            <Box sx={{ flexGrow: 0, display: 'flex', gap: 3, alignItems: 'center' }}>
-              {/* Conditional rendering based on login status */}
-              {!loggedIn ? (
+            <Box sx={{ 
+              flexGrow: 0, 
+              display: 'flex', 
+              alignItems: 'center',
+              gap: { xs: 2, md: 3 }
+            }}>
+              {/* User email display */}
+              {showUserEmail && displayName && (
+                <Typography
+                  sx={{
+                    color: 'white',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: '20px',
+                    padding: '6px 16px',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    fontWeight: '600',
+                    fontSize: '16px',
+                    display: { xs: 'none', sm: 'block' },
+                    whiteSpace: 'nowrap',
+                    backdropFilter: 'blur(5px)',
+                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  {displayName}
+                </Typography>
+              )}
+
+              {/* Login button or user menu */}
+              {!showUserEmail ? (
                 <Button
                   onClick={handleOpenLoginDialog}
                   variant="contained"
@@ -557,61 +631,40 @@ function ResponsiveAppBar() {
                   ເຂົ້າສູ່ລະບົບ
                 </Button>
               ) : (
-                userDataShow && userDataShow.user && (
-                  <Typography
-                    variant="body1"
+                <Tooltip title="ຂໍ້ມູນບັນຊີ">
+                  <IconButton
+                    onClick={handleOpenUserMenu}
                     sx={{
-                      color: "white",
-                      fontWeight: "600",
-                      fontSize: "16px",
-                      textShadow: "0 1px 3px rgba(59, 24, 24, 0.2)",
-                      display: { xs: "none", sm: "block" },
-                      mr: -10.5,
-                      mt: 14,
-                      background: "rgba(255, 255, 255, 0.1)",
-                      padding: "6px 16px",
-                      borderRadius: "20px",
-                      border: "1px solid rgba(255, 255, 255, 0.2)",
-                      backdropFilter: "blur(5px)"
+                      p: 1,
+                      border: '2px solid rgba(255, 255, 255, 0.3)',
+                      transition: 'all 0.4s ease',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                        transform: 'scale(1.1)',
+                        boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
+                        borderColor: '#f7931e'
+                      },
+                      backdropFilter: 'blur(5px)',
+                      background: 'rgba(255, 255, 255, 0.05)'
                     }}
                   >
-                    {userDataShow.user.username}
-                  </Typography>
-                )
+                    <Avatar
+                      alt={displayName || "User"}
+                      src=""
+                      sx={{
+                        width: 42,
+                        height: 42,
+                        boxShadow: '0 3px 10px rgba(0, 0, 0, 0.3)',
+                        background: 'linear-gradient(135deg, #f7931e 0%, #ffb347 100%)',
+                        border: '2px solid rgba(255, 255, 255, 0.7)'
+                      }}
+                    >
+                      {getAvatarLetter()}
+                    </Avatar>
+                  </IconButton>
+                </Tooltip>
               )}
 
-              <Tooltip title={loggedIn ? "ຂໍ້ມູນບັນຊີ" : "ການຕັ້ງຄ່າ"}>
-                <IconButton
-                  onClick={handleOpenUserMenu}
-                  sx={{
-                    p: 1,
-                    border: '2px solid rgba(255, 255, 255, 0.3)',
-                    transition: 'all 0.4s ease',
-                    '&:hover': {
-                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                      transform: 'scale(1.1)',
-                      boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
-                      borderColor: '#f7931e'
-                    },
-                    backdropFilter: 'blur(5px)',
-                    background: 'rgba(255, 255, 255, 0.05)'
-                  }}
-                >
-                  <Avatar
-                    alt={username || ""}
-                    src=""
-                    sx={{
-                      width: 42,
-                      height: 42,
-                      boxShadow: '0 3px 10px rgba(0, 0, 0, 0.3)',
-                      background: 'linear-gradient(135deg, #f7931e 0%, #ffb347 100%)',
-                      border: '2px solid rgba(255, 255, 255, 0.7)'
-                    }}
-                  >
-                    {username ? username.charAt(0).toUpperCase() : null}
-                  </Avatar>
-                </IconButton>
-              </Tooltip>
               <Menu
                 sx={{ mt: "45px" }}
                 id="menu-appbar"
@@ -642,7 +695,7 @@ function ResponsiveAppBar() {
                     key={setting.to + setting.label}
                     onClick={setting.onClick || handleCloseUserMenu}
                     component={Link}
-                    to={setting.to}
+                    to={setting.to === "#" ? undefined : setting.to}
                     sx={{
                       py: 1.5,
                       transition: 'all 0.2s ease',
@@ -660,7 +713,7 @@ function ResponsiveAppBar() {
           </Toolbar>
         </Container>
 
-        {/* Search Bar Section - MODIFIED FOR LOGIN RESTRICTION */}
+        {/* Search Bar Section */}
         <Box
           sx={{
             background: 'linear-gradient(to right, #4e0e52 0%, #7b1980 50%, #4e0e52 100%)',
@@ -682,7 +735,7 @@ function ResponsiveAppBar() {
             py: 1.5,
             position: "relative"
           }}>
-            <Box sx={{ color:'#611463' ,position: 'relative', width: { xs: '100%', sm: '320px' }, maxWidth: '450px'  }}>
+            <Box sx={{ color:'#611463', position: 'relative', width: { xs: '100%', sm: '320px' }, maxWidth: '450px' }}>
               <TextField
                 placeholder={loggedIn ? "ຄົ້ນຫາ ພະນັກງານ, ລົດ..." : "ກະລຸນາເຂົ້າສູ່ລະບົບ"}
                 variant="standard"
@@ -796,8 +849,8 @@ function ResponsiveAppBar() {
                 }}
               />
 
-            {/* Search Results Dropdown - Only show if logged in */}
-            {loggedIn && showResults && (
+              {/* Search Results Dropdown - Only show if logged in */}
+              {loggedIn && showResults && (
                 <Paper
                   elevation={16}
                   sx={{
@@ -1113,7 +1166,7 @@ function ResponsiveAppBar() {
                               </Box>
                               <Box sx={{ mt: 2 }}>
                                 <img
-                                  src={car.car_image}
+                                  src={car.car_image || ''}
                                   alt={`${car.car_brand} ${car.model}`}
                                   style={{
                                     width: '100%',

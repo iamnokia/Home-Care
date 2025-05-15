@@ -48,6 +48,8 @@ const RoutesComponent = () => {
         { path: HOME_PATH, element: <HomePage /> },
         { path: CONTACT_US_PATH, element: <ContactUs /> },
         { path: TERMS_PRIVACY_PATH, element:<TermsAndPrivacyPage /> },
+        { path: SERVICE_PATH, element: <JobSearchPage /> },
+
         
         // Protected routes - only accessible to logged-in users
         { path: SERVICE_PATH, element: <ProtectedRoute><JobSearchPage /></ProtectedRoute> },
