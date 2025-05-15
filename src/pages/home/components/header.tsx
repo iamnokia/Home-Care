@@ -10,7 +10,7 @@ import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 
 // Import images
 import ads from "../../../assets/icons/HomeCareAds.png";
-import ads2 from "../../../assets/icons/ads2.png";
+import ads2 from "../../../assets/icons/ads2.jpg";
 import ads3 from "../../../assets/icons/ads3.jpg";
 import ads4 from "../../../assets/icons/ads4.jpg";
 import ads5 from "../../../assets/icons/ads5.jpg";

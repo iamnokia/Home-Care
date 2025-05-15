@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Box,
   Container,
@@ -23,7 +23,6 @@ import LocationCityIcon from "@mui/icons-material/LocationCity";
 import DownloadIcon from "@mui/icons-material/Download";
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import LockIcon from '@mui/icons-material/Lock';
 import useCommentController from "../controllers/index";
 
 // Font size constants
@@ -34,10 +33,9 @@ const fontSize = {
   button: "1rem",
 };
 
-const CommentPage = () => {
+const CommentPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [showLockMessage, setShowLockMessage] = useState(true);
 
   // Get everything from the controller
   const {
@@ -58,69 +56,166 @@ const CommentPage = () => {
     handleDownloadReceipt
   } = useCommentController();
 
-  // Navigation lock effect - production safe implementation
-  useEffect(() => {
-    // Handle navigation attempts
-    const handleNavigation = (e) => {
-      const target = e.target;
-      
-      // Skip if click is on submit button or download button
-      if (target.closest('[data-comment-submit="true"]') || 
-          target.closest('[data-download-receipt="true"]')) {
-        return;
-      }
-      
-      // Check if this is a navigation element
-      const isNavElement = 
-        target.closest('a') ||
-        target.closest('button:not([data-comment-submit="true"]):not([data-download-receipt="true"])') ||
-        target.closest('.menu-item') ||
-        target.closest('[role="button"]') ||
-        target.closest('[onClick]') ||
-        (target.tagName === 'A');
-      
-      if (isNavElement) {
-        // Prevent navigation
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Show warning
-        window.alert('ກະລຸນາສົ່ງຄຳເຫັນຂອງທ່ານກ່ອນນຳທາງໄປໜ້າອື່ນ');
-        return false;
-      }
-    };
+  // Loading component with white background, #611463 and #f7931e accents
 
-    // Handle browser back button
-    const handlePopState = () => {
-      window.history.pushState(null, "", window.location.href);
-      window.alert('ກະລຸນາສົ່ງຄຳເຫັນຂອງທ່ານກ່ອນນຳທາງໄປໜ້າອື່ນ');
-    };
+  // Show enhanced loading state
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          background: "white",
+          overflow: "hidden",
+          position: "relative"
+        }}
+      >
+        {/* Background decorative elements */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: "10%",
+            left: "10%",
+            width: "200px",
+            height: "200px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(97,20,99,0.05) 0%, rgba(97,20,99,0) 70%)",
+            animation: "pulse 3s infinite ease-in-out",
+            "@keyframes pulse": {
+              "0%": { transform: "scale(1)", opacity: 0.3 },
+              "50%": { transform: "scale(1.1)", opacity: 0.1 },
+              "100%": { transform: "scale(1)", opacity: 0.3 }
+            }
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "15%",
+            right: "10%",
+            width: "180px",
+            height: "180px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(247,147,30,0.05) 0%, rgba(247,147,30,0) 70%)",
+            animation: "pulse 3s infinite ease-in-out 1s",
+          }}
+        />
 
-    // Set initial history state to enable popstate detection
-    window.history.pushState(null, "", window.location.href);
-    
-    // Add event listeners
-    document.addEventListener('click', handleNavigation, true);
-    window.addEventListener('popstate', handlePopState);
-    
-    // Cleanup
-    return () => {
-      document.removeEventListener('click', handleNavigation, true);
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, []);
+        {/* Main loading spinner with custom animation */}
+        <Box
+          sx={{
+            position: "relative",
+            width: "120px",
+            height: "120px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            mb: 2
+          }}
+        >
+          {/* Outer spinning circle - purple */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              border: "4px solid rgba(97,20,99,0.1)",
+              borderTop: "4px solid #611463",
+              borderRadius: "50%",
+              animation: "spin 1.5s linear infinite",
+              "@keyframes spin": {
+                "0%": { transform: "rotate(0deg)" },
+                "100%": { transform: "rotate(360deg)" }
+              }
+            }}
+          />
 
-  // Modify the handleCommentSubmit to also disable the lock when navigating
-  const handleSubmitComment = () => {
-    setShowLockMessage(false); // Hide the lock message
-    handleCommentSubmit(); // Call the original handler
-  };
+          {/* Inner spinning circle - orange */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "70%",
+              height: "70%",
+              border: "4px solid rgba(247,147,30,0.1)",
+              borderBottom: "4px solid #f7931e",
+              borderRadius: "50%",
+              animation: "spinReverse 1.2s linear infinite",
+              "@keyframes spinReverse": {
+                "0%": { transform: "rotate(0deg)" },
+                "100%": { transform: "rotate(-360deg)" }
+              }
+            }}
+          />
 
-  // Generate and download receipt as PNG
+          {/* Center pulsing dot - mix */}
+          <Box
+            sx={{
+              width: "20px",
+              height: "20px",
+              background: "linear-gradient(135deg, #611463, #f7931e)",
+              borderRadius: "50%",
+              animation: "pulse 1.5s infinite ease-in-out",
+            }}
+          />
+        </Box>
+
+        {/* Loading text with animation */}
+        <Typography
+          variant="h6"
+          sx={{
+            color: "#611463",
+            mt: 2,
+            fontSize: "1.1rem",
+            fontWeight: 500,
+            letterSpacing: "1px",
+            animation: "fadeInOut 1.5s infinite ease-in-out",
+            "@keyframes fadeInOut": {
+              "0%": { opacity: 0.5 },
+              "50%": { opacity: 1 },
+              "100%": { opacity: 0.5 }
+            }
+          }}
+        >
+          ກຳລັງໂຫຼດ...
+        </Typography>
+
+        {/* Animated progress dots - alternating colors */}
+        <Box
+          sx={{
+            display: "flex",
+            mt: 1,
+            gap: "8px",
+            alignItems: "center"
+          }}
+        >
+          {[0, 1, 2].map((i) => (
+            <Box
+              key={i}
+              sx={{
+                width: "8px",
+                height: "8px",
+                backgroundColor: i === 1 ? "#f7931e" : "#611463",
+                borderRadius: "50%",
+                opacity: 0.7,
+                animation: "bounce 1.4s infinite ease-in-out",
+                animationDelay: `${i * 0.2}s`,
+                "@keyframes bounce": {
+                  "0%, 100%": { transform: "scale(1)" },
+                  "50%": { transform: "scale(1.5)" }
+                }
+              }}
+            />
+          ))}
+        </Box>
+      </Box>
+    );
+  }
+
+  // Generate and download beautiful receipt as PNG
   const handleDownloadPDF = () => {
-    // Your existing receipt download code...
-    // [Keep your current implementation]
-    
     // Create a beautiful bill receipt element
     const createBillElement = () => {
       const billContainer = document.createElement('div');
@@ -239,8 +334,145 @@ const CommentPage = () => {
       customerCard.appendChild(customerDetails);
       content.appendChild(customerCard);
 
-      // Rest of your receipt code...
-      // [Keep all your existing receipt code]
+      // Create service info section
+      const serviceTitle = document.createElement('div');
+      serviceTitle.style.fontWeight = 'bold';
+      serviceTitle.style.fontSize = '16px';
+      serviceTitle.style.marginBottom = '15px';
+      serviceTitle.style.color = '#611463';
+      serviceTitle.style.display = 'flex';
+      serviceTitle.style.alignItems = 'center';
+      serviceTitle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#611463" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg> ການບໍລິການ';
+      content.appendChild(serviceTitle);
+
+      // Service table with modern styling
+      const serviceTable = document.createElement('table');
+      serviceTable.style.width = '100%';
+      serviceTable.style.borderCollapse = 'collapse';
+      serviceTable.style.marginBottom = '30px';
+
+      // Table header
+      const tableHeader = document.createElement('thead');
+      tableHeader.innerHTML = `
+        <tr style="background-color: #f2f2f2; color: #444;">
+          <th style="padding: 12px 15px; text-align: left; border-top-left-radius: 8px; border-bottom-left-radius: 8px;">ລາຍການ</th>
+          <th style="padding: 12px 15px; text-align: right; border-top-right-radius: 8px; border-bottom-right-radius: 8px;">ລາຄາ</th>
+        </tr>
+      `;
+      serviceTable.appendChild(tableHeader);
+
+      // Table body
+      const tableBody = document.createElement('tbody');
+      tableBody.innerHTML = `
+        <tr style="border-bottom: 1px solid #eee;">
+          <td style="padding: 15px 15px; text-align: left;">${service ? service.service : billingData.serviceType}</td>
+          <td style="padding: 15px 15px; text-align: right;">${service ? service.priceFormatted : billingData.servicePrice}</td>
+        </tr>
+      `;
+      serviceTable.appendChild(tableBody);
+      content.appendChild(serviceTable);
+
+      // Add price summary in a card-like box
+      const priceSummaryCard = document.createElement('div');
+      priceSummaryCard.style.backgroundColor = '#fff';
+      priceSummaryCard.style.borderRadius = '12px';
+      priceSummaryCard.style.padding = '20px';
+      priceSummaryCard.style.marginBottom = '20px';
+      priceSummaryCard.style.boxShadow = '0 4px 15px rgba(0,0,0,0.05)';
+      priceSummaryCard.style.border = '1px solid #eee';
+
+      // Summary title
+      const summaryTitle = document.createElement('div');
+      summaryTitle.style.fontWeight = 'bold';
+      summaryTitle.style.fontSize = '16px';
+      summaryTitle.style.marginBottom = '15px';
+      summaryTitle.style.color = '#611463';
+      summaryTitle.style.display = 'flex';
+      summaryTitle.style.alignItems = 'center';
+      summaryTitle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#611463" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> ສະຫຼຸບລາຄາ';
+      priceSummaryCard.appendChild(summaryTitle);
+
+      // Price rows
+      const priceRow1 = document.createElement('div');
+      priceRow1.style.display = 'flex';
+      priceRow1.style.justifyContent = 'space-between';
+      priceRow1.style.margin = '12px 0';
+      priceRow1.style.fontSize = '15px';
+
+      const priceLabel1 = document.createElement('div');
+      priceLabel1.textContent = 'ລາຄາ';
+      priceLabel1.style.color = '#666';
+
+      const priceValue1 = document.createElement('div');
+      priceValue1.textContent = service ? service.priceFormatted : billingData.servicePrice;
+
+      priceRow1.appendChild(priceLabel1);
+      priceRow1.appendChild(priceValue1);
+      priceSummaryCard.appendChild(priceRow1);
+
+      // Add divider
+      const divider = document.createElement('div');
+      divider.style.height = '1px';
+      divider.style.backgroundColor = '#eee';
+      divider.style.margin = '15px 0';
+      priceSummaryCard.appendChild(divider);
+
+      // Total row with emphasized styling
+      const totalRow = document.createElement('div');
+      totalRow.style.display = 'flex';
+      totalRow.style.justifyContent = 'space-between';
+      totalRow.style.margin = '15px 0 5px 0';
+      totalRow.style.fontSize = '18px';
+      totalRow.style.fontWeight = 'bold';
+
+      const totalLabel = document.createElement('div');
+      totalLabel.textContent = 'ລາຄາລວມ';
+
+      const totalValue = document.createElement('div');
+      totalValue.textContent = service ? service.priceFormatted : billingData.totalPrice;
+      totalValue.style.color = '#611463';
+
+      totalRow.appendChild(totalLabel);
+      totalRow.appendChild(totalValue);
+      priceSummaryCard.appendChild(totalRow);
+
+      content.appendChild(priceSummaryCard);
+
+      // Create thank you message
+      const thankYou = document.createElement('div');
+      thankYou.style.backgroundColor = '#f0f5ff';
+      thankYou.style.borderRadius = '12px';
+      thankYou.style.padding = '15px 20px';
+      thankYou.style.textAlign = 'center';
+      thankYou.style.color = '#611463';
+      thankYou.style.fontSize = '15px';
+      thankYou.style.marginBottom = '30px';
+      thankYou.style.border = '1px dashed #c5cae9';
+      thankYou.innerHTML = '<b>ຂອບໃຈ</b> ທີ່ໃຊ້ບໍລິການຂອງພວກເຮົາ!';
+
+      content.appendChild(thankYou);
+
+      billContainer.appendChild(content);
+
+      // Add footer
+      const footer = document.createElement('div');
+      footer.style.backgroundColor = '#f9f9f9';
+      footer.style.borderTop = '1px solid #eee';
+      footer.style.padding = '20px 40px';
+      footer.style.textAlign = 'center';
+      footer.style.fontSize = '14px';
+      footer.style.color = '#666';
+
+      const footerContent = document.createElement('div');
+      footerContent.innerHTML = `
+        <div style="font-weight: bold; margin-bottom: 8px; color: #444;">Contact Us</div>
+        <div style="margin-bottom: 5px;">020 54821624</div>
+        <div style="margin-bottom: 5px;">✉️ homecaredolaebn@gmail.com</div>
+        <div style="margin-top: 15px; font-size: 12px; color: #999;">© ${new Date().getFullYear()} HomeCare. All rights reserved.</div>
+      `;
+
+      footer.appendChild(footerContent);
+      billContainer.appendChild(footer);
 
       return billContainer;
     };
@@ -292,73 +524,6 @@ const CommentPage = () => {
     });
   };
 
-  // Show loading state
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-          background: "white",
-          overflow: "hidden",
-          position: "relative"
-        }}
-      >
-        {/* Your loading indicator components */}
-        <Box sx={{
-          position: "relative",
-          width: "120px",
-          height: "120px",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2
-        }}>
-          {/* Loading spinner animation */}
-          <Box sx={{
-            position: "absolute",
-            width: "100%",
-            height: "100%",
-            border: "4px solid rgba(97,20,99,0.1)",
-            borderTop: "4px solid #611463",
-            borderRadius: "50%",
-            animation: "spin 1.5s linear infinite",
-            "@keyframes spin": {
-              "0%": { transform: "rotate(0deg)" },
-              "100%": { transform: "rotate(360deg)" }
-            }
-          }} />
-          <Box sx={{
-            position: "absolute",
-            width: "70%",
-            height: "70%",
-            border: "4px solid rgba(247,147,30,0.1)",
-            borderBottom: "4px solid #f7931e",
-            borderRadius: "50%",
-            animation: "spinReverse 1.2s linear infinite",
-            "@keyframes spinReverse": {
-              "0%": { transform: "rotate(0deg)" },
-              "100%": { transform: "rotate(-360deg)" }
-            }
-          }} />
-          <Box sx={{
-            width: "20px",
-            height: "20px",
-            background: "linear-gradient(135deg, #611463, #f7931e)",
-            borderRadius: "50%",
-            animation: "pulse 1.5s infinite ease-in-out",
-          }} />
-        </Box>
-        <Typography variant="h6" sx={{ color: "#611463", mt: 2 }}>
-          ກຳລັງໂຫຼດ...
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
     <Box
       sx={{
@@ -401,7 +566,6 @@ const CommentPage = () => {
             },
           }}
         >
-          {/* Page Title */}
           <Typography
             variant="h5"
             textAlign={'center'}
@@ -430,9 +594,8 @@ const CommentPage = () => {
             ໃຫ້ຄະແນນ ແລະ ຄຳເຫັນ
           </Typography>
 
-          {/* Service Details Section */}
+          {/* Top Section - Service Details (Full Width) */}
           <Box sx={{ mb: 4.5 }}>
-            {/* Header with download button */}
             <Box sx={{
               display: "flex",
               justifyContent: "space-between",
@@ -461,7 +624,6 @@ const CommentPage = () => {
                 size="small"
                 startIcon={<DownloadIcon />}
                 onClick={handleDownloadPDF}
-                data-download-receipt="true"
                 sx={{
                   color: "#611463",
                   borderColor: "#611463",
@@ -484,7 +646,7 @@ const CommentPage = () => {
               </Button>
             </Box>
 
-            {/* Service Cards */}
+            {/* Service Items - Display actual data */}
             <Box sx={{ mb: 3.5 }}>
               {serviceDetails.map((item, index) => (
                 <Card
@@ -513,7 +675,7 @@ const CommentPage = () => {
                   }}
                 >
                   <CardContent sx={{ p: 2.5 }}>
-                    {/* Service card content */}
+                    {/* Main info row */}
                     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                       <Avatar
                         src={item.image}
@@ -567,7 +729,7 @@ const CommentPage = () => {
                       </Typography>
                     </Box>
 
-                    {/* Category info */}
+                    {/* Additional info row */}
                     <Box sx={{
                       display: "flex",
                       alignItems: "center",
@@ -592,7 +754,7 @@ const CommentPage = () => {
                       </Box>
                     </Box>
 
-                    {/* Location info */}
+                    {/* Location info row */}
                     <Box sx={{
                       display: "flex",
                       alignItems: "center",
@@ -706,9 +868,9 @@ const CommentPage = () => {
             </Box>
           </Box>
 
-          {/* Rating and Comment Section */}
+          {/* Bottom Section - Rating and Comment (Side by Side) */}
           <Grid container spacing={3.5}>
-            {/* Rating Box */}
+            {/* Left Box - Rating */}
             <Grid item xs={12} md={6}>
               <Box sx={{ mb: { xs: 3, md: 0 } }}>
                 <Typography
@@ -725,6 +887,7 @@ const CommentPage = () => {
                   ໃຫ້ຄະແນນ
                 </Typography>
 
+                {/* Rating Card */}
                 <Card
                   sx={{
                     borderRadius: 3,
@@ -802,11 +965,34 @@ const CommentPage = () => {
                               rating === 1 ? "ບໍ່ພໍໃຈ" : ""}
                     </Typography>
                   </CardContent>
+
+                  {/* Decorative elements */}
+                  <Box sx={{
+                    position: "absolute",
+                    top: "-15%",
+                    left: "-10%",
+                    width: "60%",
+                    height: "50%",
+                    borderRadius: "50%",
+                    background: "radial-gradient(circle, rgba(97,20,99,0.05) 0%, rgba(97,20,99,0) 70%)",
+                    zIndex: 0
+                  }} />
+
+                  <Box sx={{
+                    position: "absolute",
+                    bottom: "-15%",
+                    right: "-10%",
+                    width: "60%",
+                    height: "50%",
+                    borderRadius: "50%",
+                    background: "radial-gradient(circle, rgba(97,20,99,0.05) 0%, rgba(97,20,99,0) 70%)",
+                    zIndex: 0
+                  }} />
                 </Card>
               </Box>
             </Grid>
 
-            {/* Comment Box */}
+            {/* Right Box - Comment Input */}
             <Grid item xs={12} md={6}>
               <Box>
                 <Typography
@@ -884,7 +1070,7 @@ const CommentPage = () => {
             </Grid>
           </Grid>
 
-          {/* Submit Button */}
+          {/* Action Buttons */}
           <Box sx={{
             mt: 4.5,
             display: "flex",
@@ -911,47 +1097,37 @@ const CommentPage = () => {
                   background: "linear-gradient(135deg, #4a0d4c 0%, #7b1fa2 100%)",
                 },
               }}
-              onClick={handleSubmitComment}
-              data-comment-submit="true"
+              onClick={handleCommentSubmit}
             >
               ສົ່ງຄຳເຫັນ
             </Button>
+
+            {/* Decorative elements */}
+            <Box sx={{
+              position: "absolute",
+              width: "150px",
+              height: "8px",
+              bottom: "-15px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              borderRadius: "4px",
+              background: "linear-gradient(90deg, rgba(97,20,99,0) 0%, rgba(97,20,99,0.1) 50%, rgba(97,20,99,0) 100%)",
+            }} />
           </Box>
         </Paper>
 
-        {/* Navigation Lock Indicator */}
-        {showLockMessage && (
-          <Box
-            sx={{
-              position: 'fixed',
-              bottom: '20px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              bgcolor: 'rgba(97, 20, 99, 0.9)',
-              color: 'white',
-              py: 1.5,
-              px: 3,
-              borderRadius: '30px',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
-              zIndex: 9999,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1
-            }}
-          >
-            <LockIcon sx={{ fontSize: '1.2rem' }} />
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              ກະລຸນາສົ່ງຄຳເຫັນຂອງທ່ານກ່ອນນຳທາງໄປໜ້າອື່ນ
-            </Typography>
-          </Box>
-        )}
-
-        {/* Alerts */}
+        {/* Snackbar Alert */}
         <Snackbar
           open={alertOpen}
           autoHideDuration={6000}
           onClose={handleAlertClose}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          sx={{
+            "& .MuiAlert-root": {
+              borderRadius: "12px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            }
+          }}
         >
           <Alert
             onClose={handleAlertClose}
@@ -960,8 +1136,12 @@ const CommentPage = () => {
             sx={{
               width: "100%",
               fontSize: "0.95rem",
-              borderRadius: "12px",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              "& .MuiAlert-icon": {
+                fontSize: "1.5rem"
+              },
+              "& .MuiAlert-message": {
+                px: 1
+              }
             }}
           >
             {alertMessage}
