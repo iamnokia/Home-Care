@@ -24,7 +24,7 @@ import {
   CONTACT_US_PATH,
   SETTING_PATH
 } from "../../routes/path";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
   Button,
@@ -67,6 +67,9 @@ function ResponsiveAppBar() {
   // Redux state and dispatch
   const dispatch = useDispatch();
   const { loggedIn, data: userData } = useSelector((state: RootState) => state.auth);
+
+  // Get current location
+  const location = useLocation();
 
   // State for current path
   const [currentPath, setCurrentPath] = useState<string>(location.pathname);
@@ -149,6 +152,7 @@ function ResponsiveAppBar() {
   // Effect to fetch user data on component mount
   useEffect(() => {
     const fetchUserData = async () => {
+      setIsLoading(true);
       try {
         // Check if there's a token in localStorage
         const accessToken = localStorage.getItem("accessToken");
@@ -169,6 +173,8 @@ function ResponsiveAppBar() {
             
             // Update Redux state
             dispatch(loginSuccess(response.data.user));
+          } else {
+            dispatch(loginFailed());
           }
         } else {
           dispatch(loginFailed());
@@ -180,15 +186,21 @@ function ResponsiveAppBar() {
           // Handle 401 Unauthorized
           localStorage.removeItem("accessToken");
           dispatch(loginFailed());
+        } else {
+          dispatch(loginFailed());
         }
+      } finally {
+        setIsLoading(false);
       }
     };
     
-    // Check if there's a token but no user data
-    if (localStorage.getItem("accessToken") && !userData) {
+    // Call fetchUserData if there's a token but no user data in Redux
+    if (localStorage.getItem("accessToken")) {
       fetchUserData();
+    } else {
+      dispatch(loginFailed());
     }
-  }, [dispatch, userData]);
+  }, [dispatch]);
 
   // Update path when location changes
   useEffect(() => {
@@ -197,16 +209,15 @@ function ResponsiveAppBar() {
   
   // Function to get the display name from stored user data
   const getDisplayName = () => {
-    // Check localStorage first for email
-    const storedEmail = localStorage.getItem("user_email");
-    if (storedEmail) {
-      return storedEmail;
-    }
-    
-    // Fallback to redux state
     if (userData) {
       if (userData.email) return userData.email;
       if (userData.username) return userData.username;
+    }
+    
+    // Fallback to localStorage if Redux data isn't available
+    const storedEmail = localStorage.getItem("user_email");
+    if (storedEmail) {
+      return storedEmail;
     }
     
     return "";
@@ -214,13 +225,11 @@ function ResponsiveAppBar() {
   
   // Function to get avatar letter
   const getAvatarLetter = () => {
-    const name = getDisplayName();
-    return name ? name.charAt(0).toUpperCase() : "U";
+    if (userData && userData.username) {
+      return userData.username.charAt(0).toUpperCase();
+    }
+    
   };
-  
-  // Determine if we should show the user email
-  const showUserEmail = loggedIn || localStorage.getItem("accessToken");
-  const displayName = getDisplayName();
 
   // Search functionality
   const searchInObject = (obj: any, searchField: string, term: string): boolean => {
@@ -569,8 +578,8 @@ function ResponsiveAppBar() {
               alignItems: 'center',
               gap: { xs: 2, md: 3 }
             }}>
-              {/* User email display */}
-              {showUserEmail && displayName && (
+              {/* User email display - only show if logged in */}
+              {loggedIn && userData && (
                 <Typography
                   sx={{
                     color: 'white',
@@ -586,12 +595,12 @@ function ResponsiveAppBar() {
                     boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
                   }}
                 >
-                  {displayName}
+                  {getDisplayName()}
                 </Typography>
               )}
 
               {/* Login button or user menu */}
-              {!showUserEmail ? (
+              {!loggedIn ? (
                 <Button
                   onClick={handleOpenLoginDialog}
                   variant="contained"
@@ -649,7 +658,7 @@ function ResponsiveAppBar() {
                     }}
                   >
                     <Avatar
-                      alt={displayName || "User"}
+                      alt={getDisplayName()}
                       src=""
                       sx={{
                         width: 42,

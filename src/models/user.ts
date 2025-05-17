@@ -2,7 +2,7 @@ import { Gender } from "../enums/gender";
 import { Status } from "../enums/status";
 
 export interface UserModel {
-    id: string,
+    id: number,
     first_name: string ,
     username: string;
     user: User;

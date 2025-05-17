@@ -20,14 +20,13 @@ import {
   Email, 
 } from "@mui/icons-material";
 import RegisterDialog from "./dialog-signup";
-import axios from "../../configs/axios";
 import Swal from "sweetalert2";
 import { useDispatch } from "react-redux";
 
-// Assuming you have this logo image in your assets folder
+// Import logo
 import LOGO_HOMECARE from "../../assets/icons/HomeCareLogo.png";
 import { loginFailed, loginSuccess } from "../../store/authenticationSlice";
-import { getUserByToken } from "../../services/Login";
+import { login, getUserByToken } from "../../services/Login";
 
 interface LoginDialogProps {
   open: boolean;
@@ -61,114 +60,124 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
     setShowPassword(!showPassword);
   };
 
-  
-  const handleLogin = async () => {
-    // Get values from refs
-    const email = emailRef.current?.value || "";
-    const password = passwordRef.current?.value || "";
-  
-    // Validate inputs
-    if (!email || !password) {
-      Swal.fire({
-        title: "ກະລຸນາກວດສອບຂໍ້ມູນ",
-        text: "ກະລຸນາປ້ອນອີເມວ ແລະ ລະຫັດຜ່ານ",
-        icon: "warning",
-        confirmButtonText: "ຕົກລົງ",
-        confirmButtonColor: "#611463"
-      });
-      return;
-    }
-  
-    try {
-      setIsLoading(true);
+ const handleLogin = async () => {
+  // Get values from refs
+  const email = emailRef.current?.value || "";
+  const password = passwordRef.current?.value || "";
+
+  // Validate inputs
+  if (!email || !password) {
+    Swal.fire({
+      title: "ກະລຸນາກວດສອບຂໍ້ມູນ",
+      text: "ກະລຸນາປ້ອນອີເມວ ແລະ ລະຫັດຜ່ານ",
+      icon: "warning",
+      confirmButtonText: "ຕົກລົງ",
+      confirmButtonColor: "#611463"
+    });
+    return;
+  }
+
+  try {
+    setIsLoading(true);
+    
+    // Use the login service function
+    const loginResponse = await login(email, password);
+
+    // Check if login was successful
+    if (loginResponse && loginResponse.accessToken) {
+      console.log("Login successful:", loginResponse);
       
-      // Make API call to login endpoint
-      const response = await axios.post("/users/sign_in", {
-        email,
-        password
-      });
-  
-      // Check if login was successful - NOTE: The API returns accessToken directly (not token)
-      if (response.data && response.data.accessToken) {
-        console.log("Login response:", response.data);
+      // Format tokens with Bearer prefix if not already included
+      const accessToken = loginResponse.accessToken.startsWith("Bearer ") 
+        ? loginResponse.accessToken 
+        : "Bearer " + loginResponse.accessToken;
         
-        // Format tokens with Bearer prefix
-        const accessToken = "Bearer " + response.data.accessToken;
-        const refreshToken = "Bearer " + response.data.refreshToken;
-        
-        // Store token in localStorage as a JSON string
-        localStorage.setItem("authToken", JSON.stringify({
-          accessToken,
-          refreshToken
-        }));
-        
-        // Set the authorization header for future requests
-        axios.defaults.headers.common["Authorization"] = accessToken;
-        
-        // Check if user data is already in the response
-        if (response.data.user) {
-          // Dispatch login success action with user data directly from the response
-          dispatch(loginSuccess(response.data.user));
-          
-          // Show success message
-          Swal.fire({
-            title: "ສຳເລັດ!",
-            text: "ເຂົ້າສູ່ລະບົບສຳເລັດແລ້ວ",
-            icon: "success",
-            timer: 1500,
-            showConfirmButton: false
-          });
-          
-          // Close the dialog
-          onClose();
-        } else {
-          // If no user data in response, fetch it
-          try {
-            const userData = await getUserByToken();
-            dispatch(loginSuccess(userData));
-            
-            Swal.fire({
-              title: "ສຳເລັດ!",
-              text: "ເຂົ້າສູ່ລະບົບສຳເລັດແລ້ວ",
-              icon: "success",
-              timer: 1500,
-              showConfirmButton: false
-            });
-            
-            onClose();
-          } catch (userError) {
-            console.error("Error fetching user data:", userError);
-            dispatch(loginFailed());
-            Swal.fire({
-              title: "ເກີດຂໍ້ຜິດພາດ",
-              text: "ບໍ່ສາມາດດຶງຂໍ້ມູນຜູ້ໃຊ້ໄດ້",
-              icon: "error",
-              confirmButtonText: "ລອງໃໝ່",
-              confirmButtonColor: "#611463"
-            });
-          }
-        }
+      const refreshToken = loginResponse.refreshToken.startsWith("Bearer ")
+        ? loginResponse.refreshToken
+        : "Bearer " + loginResponse.refreshToken;
+      
+      // Prepare authToken object that will contain everything
+      let userData = null;
+      
+      // If user data is included in the response, use it
+      if (loginResponse.user) {
+        userData = loginResponse.user;
       } else {
-        throw new Error("Invalid response from server");
+        // If user data is not included, try to fetch it
+        try {
+          userData = await getUserByToken();
+        } catch (userError) {
+          console.error("Error fetching user data:", userError);
+          
+          // If we can't get user data, create a minimal user object
+          userData = { 
+            id: userData?.id,
+            email: email,
+            username: userData?.username // Create basic username from email
+          };
+        }
       }
-    } catch (error) {
-      console.error("Login error:", error);
       
-      // Dispatch login failed action
-      dispatch(loginFailed());
+      // Create a complete authToken object with all necessary data
+      const authToken = {
+        accessToken,
+        refreshToken,
+        user: userData,
+        timestamp: new Date().toISOString()
+      };
       
-      // Show error message
+      // Store the complete authToken object in localStorage
+      localStorage.setItem("authToken", JSON.stringify(authToken));
+      
+      // Also store individual values for backward compatibility
+      localStorage.setItem("accessToken", loginResponse.accessToken);
+      localStorage.setItem("refreshToken", loginResponse.refreshToken);
+      localStorage.setItem("userData", JSON.stringify(userData));
+      localStorage.setItem("user_email", userData.email || email);
+      
+      // Update Redux state
+      dispatch(loginSuccess(userData));
       Swal.fire({
-        title: "ເຂົ້າສູ່ລະບົບບໍ່ສຳເລັດ",
-        text: "ອີເມວ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ",
-        icon: "error",
-        confirmButtonText: "ລອງໃໝ່",
-        confirmButtonColor: "#611463"
+        title: "ສຳເລັດ!",
+        text: "ເຂົ້າສູ່ລະບົບສຳເລັດແລ້ວ",
+        icon: "success",
+        timer: 1000,
+        showConfirmButton: false
+      }).then(() => {
+        window.location.reload(); // Refresh the page after alert closes
       });
-    } finally {
-      setIsLoading(false);
+      
+      // Close dialog
+      onClose();
+    } else {
+      throw new Error("Invalid response from server");
     }
-  };
+  } catch (error) {
+    console.error("Login error:", error);
+    
+    // Clear any potentially partially stored data
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user_email");
+    localStorage.removeItem("userData");
+    
+    // Update Redux state
+    dispatch(loginFailed());
+    
+    // Show error message
+    Swal.fire({
+      title: "ເຂົ້າສູ່ລະບົບບໍ່ສຳເລັດ",
+      text: "ອີເມວ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ",
+      icon: "error",
+      confirmButtonText: "ລອງໃໝ່",
+      confirmButtonColor: "#611463"
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   // Handle Enter key press for login
   const handleKeyPress = (event: React.KeyboardEvent) => {

@@ -31,7 +31,7 @@ function App() {
 
   const handleLoginWithToken = async () => {
     try {
-      const authTokenString = localStorage.getItem("authToken");
+      const authTokenString = localStorage.getItem("accessToken");
       if (!authTokenString) {
         throw new Error("No auth token found");
       }

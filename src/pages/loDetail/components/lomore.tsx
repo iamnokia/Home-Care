@@ -25,6 +25,7 @@ import {
   Card,
   CardContent,
   InputLabel,
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -42,10 +43,11 @@ import LaunchIcon from "@mui/icons-material/Launch";
 import ErrorIcon from "@mui/icons-material/Error";
 import HouseOutlinedIcon from "@mui/icons-material/HouseOutlined";
 import LocationCityOutlinedIcon from "@mui/icons-material/LocationCityOutlined";
-import { LocationCity } from "@mui/icons-material";
+import { LocationCity, NoAccounts } from "@mui/icons-material";
 import { LOCATION_PATH } from "../../../routes/path";
 import useMainController from "../controllers";
 import HomeIcon from "@mui/icons-material/Home";
+import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 
 // Define districts with both English and Lao values
 const districts = [
@@ -86,6 +88,15 @@ const LocationDetailPage: React.FC = () => {
       default:
         return <HomeIcon />;
     }
+  };
+
+  // Function to handle the confirmation and navigation with selected address
+  const handleConfirmAddress = () => {
+    if (!ctrl?.selectedLocation) {
+      // Show warning if no location is selected
+      return;
+    }
+    navigate(`/Location/${id}`);
   };
 
   return (
@@ -174,7 +185,11 @@ const LocationDetailPage: React.FC = () => {
               ທີ່ຢູ່ທີ່ບັນທຶກໄວ້
             </Typography>
            
-            {ctrl?.address.length > 0 ? (
+            {ctrl?.loading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                <CircularProgress size={40} sx={{ color: '#611463' }} />
+              </Box>
+            ) : ctrl?.address && ctrl?.address.length > 0 ? (
               <Box 
                 sx={{
                   maxHeight: "500px", 
@@ -257,7 +272,7 @@ const LocationDetailPage: React.FC = () => {
                             mb: 0.5
                           }}
                         >
-                          {location.address_description} , {location.village} , {location.city}
+                          {location.address_description}, {location.village}, {displayCity(location.city)}
                         </Typography>
                         
                         {location.tel && (
@@ -274,7 +289,15 @@ const LocationDetailPage: React.FC = () => {
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation();
-                          ctrl?.handleDeleteLocation();
+                          if (location.id === ctrl?.selectedLocation?.id) {
+                            ctrl?.handleDeleteLocation();
+                          } else {
+                            // Set selected then delete
+                            ctrl?.setSelectedLocation(location);
+                            setTimeout(() => {
+                              ctrl?.handleDeleteLocation();
+                            }, 100);
+                          }
                         }}
                         sx={{
                           color: "#d32f2f",
@@ -307,10 +330,18 @@ const LocationDetailPage: React.FC = () => {
                   textAlign: "center",
                   bgcolor: alpha("#f5f5f5", 0.5),
                   borderRadius: 2,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 2
                 }}
               >
+                <AddLocationAltIcon sx={{ fontSize: 40, color: alpha("#611463", 0.7) }} />
                 <Typography sx={{ color: "#666" }}>
                   ທ່ານຍັງບໍ່ມີທີ່ຢູ່ທີ່ບັນທຶກໄວ້ເທື່ອ
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#888", fontStyle: "italic" }}>
+                  ກະລຸນາເພີ່ມທີ່ຢູ່ໃໝ່ຂອງທ່ານໃນຟອມຂ້າງລຸ່ມນີ້
                 </Typography>
               </Box>
             )}
@@ -323,11 +354,12 @@ const LocationDetailPage: React.FC = () => {
                 variant="contained"
                 fullWidth
                 onClick={() => navigate(`/Location/${id}`)}
+                disabled={!ctrl?.selectedLocation}
                 sx={{
                   py: 1.5,
                   fontWeight: 600,
                   borderRadius: 2,
-                  background: "#611463",
+                  background: ctrl?.selectedLocation ? "#611463" : alpha("#611463", 0.5),
                   transition: "all 0.2s",
                   "&:hover": {
                     background: "#7a1980",
@@ -921,6 +953,7 @@ const LocationDetailPage: React.FC = () => {
                 variant="contained"
                 fullWidth
                 onClick={ctrl?.handleSubmit}
+                disabled={ctrl?.loading}
                 sx={{
                   py: 1.5,
                   fontWeight: 600,
@@ -934,7 +967,11 @@ const LocationDetailPage: React.FC = () => {
                   },
                 }}
               >
-                ບັນທຶກ
+                {ctrl?.loading ? (
+                  <CircularProgress size={24} sx={{ color: '#fff' }} />
+                ) : (
+                  "ບັນທຶກ"
+                )}
               </Button>
             </Grid>
           </Grid>

@@ -41,7 +41,7 @@ export const login = async (
 export const getUserByToken = async (): Promise<UserModel> => {
   try {
     // Get the stored auth token
-    const authTokenString = localStorage.getItem("authToken");
+    const authTokenString = localStorage.getItem("accessToken");
     
     if (!authTokenString) {
       throw new Error("No authentication token found");
