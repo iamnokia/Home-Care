@@ -420,7 +420,7 @@ const ContactUs = () => {
         ref={containerRef}
         sx={{
           background: "linear-gradient(135deg, #611463 0%, #4a0d4c 100%)",
-          py: { xs: 8, md: 12 },
+          py: { xs: 8, md: 5 },
           position: "relative",
           mb: { xs: 12, md: 16 },
           overflow: "hidden",
@@ -460,7 +460,7 @@ const ContactUs = () => {
                   variant="h2"
                   fontWeight={800}
                   sx={{
-                    fontSize: { xs: "2.5rem", sm: "3rem", md: "3.5rem" },
+                    fontSize: { xs: "2rem", sm: "2rem", md: "3rem" },
                     textShadow: "0 2px 10px rgba(0,0,0,0.3)",
                     mb: 2,
                     position: "relative",
@@ -491,7 +491,7 @@ const ContactUs = () => {
                     textShadow: "0 1px 5px rgba(0,0,0,0.2)",
                   }}
                 >
-                  HomeCare - ດູແລບ້ານ, ຄົບທຸກບໍລິການ, ດູແລບ້ານທ່ານເຖິງທີ່
+                  HomeCare - ດູແລບ້ານ : "ຄົບທຸກບໍລິການ ດູແລບ້ານທ່ານເຖິງທີ່"
                 </Typography>
               </Box>
             </Grid>
@@ -536,14 +536,13 @@ const ContactUs = () => {
         <Container
           maxWidth="lg"
           sx={{
-            position: "relative",
             zIndex: 3,
-            mt: 8
+            mt: -2
           }}
         >
           <Box
             sx={{
-              transform: "translateY(50%)",
+              transform: "translateY(25%)",
               display: "flex",
               flexWrap: "wrap",
               gap: { xs: 2, md: 3 },
@@ -647,7 +646,7 @@ const ContactUs = () => {
       </Box>
 
       {/* Working Hours Section */}
-      <Box sx={{ bgcolor: "#f0f2f5", py: 8 }}>
+      <Box sx={{ bgcolor: "#f0f2f5", py: 6 ,mt:-16}}>
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={6}>
@@ -763,7 +762,7 @@ const ContactUs = () => {
         </Container>
       </Box>
       {/* Location */}
-      <Box sx={{ bgcolor: "#f0f2f5", py: 8 }}>
+      <Box sx={{ bgcolor: "#f0f2f5", py: 0 }}>
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={6}>
@@ -847,7 +846,7 @@ const ContactUs = () => {
                     <Button
                       variant="contained"
                       startIcon={<OpenInNewIcon />}
-                      href="https://www.google.com/maps/place/Phalome%E2%80%99s+Cafe/@17.9169089,102.6128964,3682m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3124650054f6f2ab:0x8b4719427d8c7e9a!8m2!3d17.9168888!4d102.6231961!16s%2Fg%2F11wqfwxzyx?authuser=0&entry=ttu&g_ep=EgoyMDI1MDMyMy4wIKXMDSoJLDEwMjExNDUzSAFQAw%3D%3D"
+                      href="https://maps.app.goo.gl/nB3ALGfxFYao7x2V6"
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
@@ -868,7 +867,7 @@ const ContactUs = () => {
       </Box>
 
       {/* Social Media Connect */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
+      <Container maxWidth="lg" sx={{ py: 5 }}>
         <Typography
           variant="h3"
           fontWeight={700}

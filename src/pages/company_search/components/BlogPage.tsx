@@ -91,6 +91,7 @@ const ServiceListing = () => {
       id: 1,
       name: "ພົງວິໄລ",
       surname: "ສີວິໄລ",
+      age: 25,
       gender: "ຊາຍ",
       village: "ບ້ານ ເສດຖີປ",
       city: "ວຽງຈັນ",
@@ -107,6 +108,7 @@ const ServiceListing = () => {
       id: 2,
       name: "ທອງສະຫວັນ",
       surname: "ໄຊຍະວົງ",
+      age: 31,
       gender: "ຊາຍ",
       village: "ບ້ານ ໂນນສະຫວ່າງ",
       city: "ວຽງຈັນ",
@@ -123,6 +125,7 @@ const ServiceListing = () => {
       id: 3,
       name: "ອຳມະລິນ",
       surname: "ອຸນາລົມ",
+      age: 23,
       gender: "ຍິງ",
       village: "ບ້ານ ທ່າຄຳ",
       city: "ວຽງຈັນ",
@@ -139,6 +142,7 @@ const ServiceListing = () => {
       id: 4,
       name: "ສົມພອນ",
       surname: "ພົມມະວົງ",
+      age: 35,
       gender: "ຊາຍ",
       village: "ບ້ານ ທ່າຄຳ",
       city: "ນະຄອນຫຼວງ",
@@ -155,6 +159,7 @@ const ServiceListing = () => {
       id: 5,
       name: "ພູວັງໄຊ",
       surname: "ບຸນຊົມ",
+      age: 28,
       gender: "ຊາຍ",
       village: "ບ້ານ ເສດຖີປ",
       city: "ວຽງຈັນ",
@@ -178,6 +183,7 @@ const ServiceListing = () => {
       id: 6,
       name: "ສົມຈິດ",
       surname: "ແກ້ວສະຫວັນ",
+      age: 45,
       gender: "ຊາຍ",
       village: "ບ້ານ ຂອນແກ່ນ",
       city: "ປາກເຊ",
@@ -481,7 +487,7 @@ const ServiceListing = () => {
                     }}>
                       <PersonIcon sx={{ fontSize: "0.9rem", color: "#611463", mr: 0.5 }} />
                       <Typography sx={{ fontSize: { xs: "0.8rem", sm: "0.85rem" }, color: "#611463" }}>
-                        {service.gender},
+                        {service.gender}, {service.age} ປີ
                       </Typography>
                     </Box>
                     

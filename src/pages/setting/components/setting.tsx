@@ -135,27 +135,7 @@ const SettingsPage = () => {
                                     </Button>
                                 </Box>
                             </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    fullWidth
-                                    label="ຊື່ຂອງທ່ານ"
-                                    variant="outlined"
-                                    InputProps={{
-                                        sx: { borderRadius: 2 }
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    fullWidth
-                                    label="ນາມສະກຸນ"
-                                    variant="outlined"
-                                    InputProps={{
-                                        sx: { borderRadius: 2 }
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid item xs={12} sm={12}>
                                 <TextField
                                     fullWidth
                                     label="ຊື່ບັນຊີ"
@@ -168,46 +148,17 @@ const SettingsPage = () => {
                             <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
-                                    label="ເບີໂທລະສັບ"
-                                    variant="outlined"
-                                    InputProps={{
-                                        sx: { borderRadius: 2 },
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <PhoneIcon sx={{ color: "text.secondary" }} />
-                                            </InputAdornment>
-                                        )
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    fullWidth
-                                    label="ທີ່ຢູ່ອີເມລ"
+                                    label="ຊື່"
                                     variant="outlined"
                                     InputProps={{
                                         sx: { borderRadius: 2 }
                                     }}
                                 />
                             </Grid>
-                            <Grid item xs={12}>
-                                <FormControl component="fieldset">
-                                    <Typography variant="subtitle1" sx={{ mb: 1 }}>ເພດ</Typography>
-                                    <RadioGroup
-                                        row
-                                        value={settings.gender}
-                                        onChange={handleRadioChange("gender")}
-                                    >
-                                        <FormControlLabel value="male" control={<Radio sx={{ color: "#611463", '&.Mui-checked': { color: "#611463" } }} />} label="Male" />
-                                        <FormControlLabel value="female" control={<Radio sx={{ color: "#611463", '&.Mui-checked': { color: "#611463" } }} />} label="Female" />
-                                        <FormControlLabel value="other" control={<Radio sx={{ color: "#611463", '&.Mui-checked': { color: "#611463" } }} />} label="Other" />
-                                    </RadioGroup>
-                                </FormControl>
-                            </Grid>
-                            <Grid item xs={12}>
+                            <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
-                                    label="ທີ່ຢູ່"
+                                    label="ນາມສະກຸນ"
                                     variant="outlined"
                                     InputProps={{
                                         sx: { borderRadius: 2 }

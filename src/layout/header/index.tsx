@@ -115,8 +115,7 @@ function ResponsiveAppBar() {
   // Settings menu items based on login status
   const settings: SettingItem[] = loggedIn
     ? [
-      { to: SETTING_PATH, label: "ຂໍ້ມູນບັນຊີ" },
-      { to: SETTING_PATH, label: "ຕັ້ງຄ່າ" },
+      { to: SETTING_PATH, label: "ຈັດການບັນຊີ" },
       {
         to: "#",
         label: "ອອກຈາກລະບົບ",
