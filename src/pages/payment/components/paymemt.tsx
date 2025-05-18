@@ -38,7 +38,7 @@ import TimeToLeaveIcon from "@mui/icons-material/TimeToLeave";
 import BadgeIcon from "@mui/icons-material/Badge";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { LOCATION_PATH } from "../../../routes/path";
+import { HOME_PATH, LOCATION_PATH, SERVICE_PATH } from "../../../routes/path";
 import useMainController from "../controllers/index";
 
 // Font size constants
@@ -858,7 +858,7 @@ const PaymentPage: React.FC = () => {
           >
             <Button
               variant="outlined"
-              onClick={() => navigate(LOCATION_PATH)}
+              onClick={() => navigate(SERVICE_PATH)}
               sx={{
                 fontSize: fontSize.button,
                 px: 4,

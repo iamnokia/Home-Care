@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { 
   Box, 
   Typography, 
@@ -15,7 +15,9 @@ import {
   Badge,
   Button,
   alpha,
-  Tooltip
+  Tooltip,
+  CircularProgress,
+  Stack
 } from "@mui/material";
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import ElectricalServicesIcon from '@mui/icons-material/ElectricalServices';
@@ -36,15 +38,23 @@ import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import BadgeIcon from '@mui/icons-material/Badge';
 import TimeToLeaveIcon from '@mui/icons-material/TimeToLeave';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import Icon from '../../../assets/icons/HomeCareLogo.png';
+import useMainController from "../controller/index";
 
-const ServiceListing = () => {
+const ServiceListing: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   
+  // Get controller
+  const ctrl = useMainController();
+  
   // Get service icon based on occupation
-  const getServiceIcon = (occupation) => {
+  const getServiceIcon = (occupation: string) => {
     switch(occupation.toLowerCase()) {
       case 'cleaner':
         return <CleaningServicesIcon fontSize="small" sx={{ color: '#611463' }} />;
@@ -66,11 +76,12 @@ const ServiceListing = () => {
   };
   
   // Status color mapping
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch(status.toLowerCase()) {
       case 'completed':
         return { bg: '#e8f5e9', color: '#2e7d32' };
       case 'pending':
+      case 'not start':
         return { bg: '#fff8e1', color: '#f57c00' };
       case 'cancelled':
         return { bg: '#ffebee', color: '#c62828' };
@@ -81,138 +92,21 @@ const ServiceListing = () => {
     }
   };
   
-  // Check if a service is a vehicle-based service
-  const isVehicleService = (service) => {
-    return service.occupation.toLowerCase() === 'transportation'   };
-  
-  // Enhanced sample data with vehicle information for certain services
-  const [services, setServices] = useState([
-    {
-      id: 1,
-      name: "ພົງວິໄລ",
-      surname: "ສີວິໄລ",
-      age: 25,
-      gender: "ຊາຍ",
-      village: "ບ້ານ ເສດຖີປ",
-      city: "ວຽງຈັນ",
-      occupation: "Cleaner",
-      category: "ແມ່ບ້ານ",
-      price: 200000,
-      avatar: "/api/placeholder/40/40",
-      rating: 5,
-      service: "ທຳຄວາມສະອາດທົ່ວໄປ",
-      date: "2025-02-15",
-      status: "Completed"
-    },
-    {
-      id: 2,
-      name: "ທອງສະຫວັນ",
-      surname: "ໄຊຍະວົງ",
-      age: 31,
-      gender: "ຊາຍ",
-      village: "ບ້ານ ໂນນສະຫວ່າງ",
-      city: "ວຽງຈັນ",
-      occupation: "Electrician", 
-      category: "ຊ່າງໄຟຟ້າ",
-      price: 100000,
-      avatar: "/api/placeholder/40/40",
-      rating: 4,
-      service: "ຕິດຕັ້ງອຸປະກອນໄຟຟ້າ",
-      date: "2025-02-20",
-      status: "Completed"
-    },
-    {
-      id: 3,
-      name: "ອຳມະລິນ",
-      surname: "ອຸນາລົມ",
-      age: 23,
-      gender: "ຍິງ",
-      village: "ບ້ານ ທ່າຄຳ",
-      city: "ວຽງຈັນ",
-      occupation: "AC Technician",
-      category: "ຊ່າງແອ",
-      price: 150000,
-      avatar: "/api/placeholder/40/40",
-      rating: 5,
-      service: "ສ້ອມແປງແອໃນບ້ານ",
-      date: "2025-03-05",
-      status: "Completed"
-    },
-    {
-      id: 4,
-      name: "ສົມພອນ",
-      surname: "ພົມມະວົງ",
-      age: 35,
-      gender: "ຊາຍ",
-      village: "ບ້ານ ທ່າຄຳ",
-      city: "ນະຄອນຫຼວງ",
-      occupation: "Plumber",
-      category: "ຊ່າງປະປາ",
-      price: 200000,
-      avatar: "/api/placeholder/40/40",
-      rating: 4,
-      service: "ແກ້ໄຂລະບົບນ້ຳປະປາ",
-      date: "2025-03-10",
-      status: "Completed"
-    },
-    {
-      id: 5,
-      name: "ພູວັງໄຊ",
-      surname: "ບຸນຊົມ",
-      age: 28,
-      gender: "ຊາຍ",
-      village: "ບ້ານ ເສດຖີປ",
-      city: "ວຽງຈັນ",
-      occupation: "Transportation",
-      category: "ຂົນສົ່ງ",
-      price: 300000,
-      avatar: "/api/placeholder/40/40",
-      carImage: "/api/placeholder/400/300",
-      rating: 5,
-      service: "ຂົນສົ່ງເຄື່ອງຫຍ້າຍບ້ານ",
-      date: "2025-03-15",
-      status: "Completed",
-      // Car details for transportation service
-      carId: "M001",
-      carBrand: "Toyota",
-      carModel: "Hiace",
-      licensePlate: "ກຂ 1234",
-      carYear: "2020"
-    },
-    {
-      id: 6,
-      name: "ສົມຈິດ",
-      surname: "ແກ້ວສະຫວັນ",
-      age: 45,
-      gender: "ຊາຍ",
-      village: "ບ້ານ ຂອນແກ່ນ",
-      city: "ປາກເຊ",
-      occupation: "Bathroom Specialist",
-      category: "ຊ່າງຫ້ອງນ້ຳ",
-      price: 250000,
-      avatar: "/api/placeholder/40/40",
-      carImage: "/api/placeholder/400/300",
-      rating: 4,
-      service: "ຕິດຕັ້ງສຸຂະພັນຫ້ອງນ້ຳ",
-      date: "2025-03-20",
-      status: "Completed",
-   
+  // Translate status to Lao
+  const translateStatus = (status: string): string => {
+    switch(status.toLowerCase()) {
+      case 'completed':
+        return 'ສຳເລັດແລ້ວ';
+      case 'pending':
+      case 'not start':
+        return 'ລໍຖ້າ';
+      case 'cancelled':
+        return 'ຍົກເລີກແລ້ວ';
+      case 'in progress':
+        return 'ກຳລັງດຳເນີນການ';
+      default:
+        return status;
     }
-  ]);
-
-  // Format price to have commas
-  const formatPrice = (price) => {
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " ກີບ";
-  };
-
-  // Function to format date
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
   };
 
   return (
@@ -307,12 +201,10 @@ const ServiceListing = () => {
                 fontSize: { xs: "0.85rem", sm: "1rem" },
               }}
             >
-              ທ່ານໄດ້ໃຊ້ບໍລິການທັງໝົດ {services.length} ຄັ້ງ
+              ທ່ານໄດ້ໃຊ້ບໍລິການທັງໝົດ {ctrl.allServices.length} ຄັ້ງ
             </Typography>
           </Box>
         </Box>
-
-      
       </Paper>
 
       {/* Service Cards Container */}
@@ -326,9 +218,88 @@ const ServiceListing = () => {
           maxWidth: "1200px"
         }}
       >
-        {services.map((service) => {
+        {/* Loading State */}
+        {ctrl.loading && (
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              flexDirection: 'column',
+              minHeight: '300px',
+              width: '100%'
+            }}
+          >
+            <CircularProgress size={60} sx={{ color: 'white', mb: 3 }} />
+            <Typography sx={{ color: 'white', fontSize: '1.1rem' }}>
+              ກໍາລັງໂຫລດຂໍ້ມູນ...
+            </Typography>
+          </Box>
+        )}
+        
+        {/* Error State */}
+        {!ctrl.loading && ctrl.error && (
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              flexDirection: 'column',
+              minHeight: '300px',
+              width: '100%',
+              bgcolor: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: 4,
+              p: 4
+            }}
+          >
+            <ErrorOutlineIcon sx={{ color: 'white', fontSize: 60, mb: 2 }} />
+            <Typography sx={{ color: 'white', fontSize: '1.1rem', textAlign: 'center', mb: 2 }}>
+              {ctrl.error}
+            </Typography>
+            <Button 
+              variant="contained" 
+              onClick={() => ctrl.fetchServiceOrders()}
+              startIcon={<RefreshIcon />}
+              sx={{
+                bgcolor: 'white',
+                color: '#611463',
+                '&:hover': {
+                  bgcolor: '#f7931e',
+                  color: 'white'
+                }
+              }}
+            >
+              ລອງໃໝ່ອີກຄັ້ງ
+            </Button>
+          </Box>
+        )}
+        
+        {/* Empty State */}
+        {!ctrl.loading && !ctrl.error && ctrl.services.length === 0 && (
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              flexDirection: 'column',
+              minHeight: '300px',
+              width: '100%',
+              bgcolor: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: 4,
+              p: 4
+            }}
+          >
+            <HistoryIcon sx={{ color: 'white', fontSize: 60, mb: 2 }} />
+            <Typography sx={{ color: 'white', fontSize: '1.1rem', textAlign: 'center' }}>
+              ທ່ານຍັງບໍ່ມີປະຫວັດການບໍລິການເທື່ອ
+            </Typography>
+          </Box>
+        )}
+        
+        {/* Service Cards */}
+        {!ctrl.loading && !ctrl.error && ctrl.services.map((service) => {
           // Check if this is a vehicle service
-          const vehicleService = isVehicleService(service);
+          const vehicleService = ctrl.isVehicleService(service.occupation === 'Transportation' ? 5 : 0);
           
           return (
             <Card
@@ -375,7 +346,7 @@ const ServiceListing = () => {
                       fontWeight: "600"
                     }}
                   >
-                    ເລກທີສັນຍາ: #10{service.id}M
+                    ເລກທີສັນຍາ: #{String(service.id).padStart(3, '0')}M
                   </Typography>
                 </Box>
                 
@@ -399,7 +370,7 @@ const ServiceListing = () => {
                       color: "#611463",
                     }}
                   >
-                    {formatDate(service.date)}
+                    {ctrl.formatDate(service.date)}
                   </Typography>
                 </Box>
               </Box>
@@ -436,8 +407,8 @@ const ServiceListing = () => {
                     }
                   >
                     <Avatar 
-                      src={vehicleService ? service.carImage : service.avatar} 
-                      alt={vehicleService ? `${service.carBrand} ${service.carModel}` : service.name}
+                      src={vehicleService && service.carImage ? service.carImage : service.avatar} 
+                      alt={vehicleService && service.carBrand ? `${service.carBrand} ${service.carModel}` : service.name}
                       sx={{ 
                         width: { xs: 70, sm: 80 }, 
                         height: { xs: 70, sm: 80 }, 
@@ -458,19 +429,25 @@ const ServiceListing = () => {
                         mb: 0.5,
                       }}
                     >
-                      {service.name} {service.surname}
+                      {service.first_name} {service.last_name}
                     </Typography>
                     
                     {/* Rating Stars */}
                     <Box sx={{ display: "flex", mb: 1.5 }}>
-                      {[...Array(5)].map((_, i) => (
+                      {Array.from({ length: 5 }).map((_, i) => (
                         <StarIcon 
                           key={i} 
                           sx={{ 
                             fontSize: 16, 
                             color: i < service.rating ? '#FFD700' : '#e0e0e0',
-                            mr: 0.3
-                          }} 
+                            mr: 0.3,
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s ease',
+                            '&:hover': {
+                              transform: 'scale(1.2)'
+                            }
+                          }}
+                          onClick={() => ctrl.updateRating(service.id, i + 1)}
                         />
                       ))}
                     </Box>
@@ -487,13 +464,13 @@ const ServiceListing = () => {
                     }}>
                       <PersonIcon sx={{ fontSize: "0.9rem", color: "#611463", mr: 0.5 }} />
                       <Typography sx={{ fontSize: { xs: "0.8rem", sm: "0.85rem" }, color: "#611463" }}>
-                        {service.gender}, {service.age} ປີ
+                        {service.gender}
                       </Typography>
                     </Box>
                     
-                    {/* Location with icons */}
+                    {/* Location with icons - Now including city */}
                     <Grid container spacing={1} sx={{ mt: 1 }}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid item xs={12}>
                         <Box sx={{ 
                           display: "flex", 
                           alignItems: "center",
@@ -503,28 +480,33 @@ const ServiceListing = () => {
                         }}>
                           <HomeIcon sx={{ fontSize: "0.9rem", color: "#f7931e", mr: 0.5 }} />
                           <Typography sx={{ fontSize: { xs: "0.8rem", sm: "0.85rem" }, color: "#666" }}>
-                            {service.village}
+                            {service.address}
                           </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Box sx={{ 
-                          display: "flex", 
-                          alignItems: "center",
-                          p: 1,
-                          borderRadius: "8px",
-                          bgcolor: alpha('#f7931e', 0.05),
-                        }}>
-                          <LocationCityIcon sx={{ fontSize: "0.9rem", color: "#f7931e", mr: 0.5 }} />
-                          <Typography sx={{ fontSize: { xs: "0.8rem", sm: "0.85rem" }, color: "#666" }}>
-                            {service.city}
-                          </Typography>
+                          
+                          {/* City information */}
+                          <Box 
+                            component="span" 
+                            sx={{ 
+                              display: "inline-flex", 
+                              alignItems: "center", 
+                              ml: 1,
+                              bgcolor: alpha('#f7931e', 0.1),
+                              px: 1,
+                              py: 0.5,
+                              borderRadius: "4px",
+                            }}
+                          >
+                            <LocationCityIcon sx={{ fontSize: "0.8rem", color: "#f7931e", mr: 0.5 }} />
+                            <Typography sx={{ fontSize: "0.75rem", color: "#666" }}>
+                              {ctrl.getLoCity(service.city)}
+                            </Typography>
+                          </Box>
                         </Box>
                       </Grid>
                     </Grid>
                     
                     {/* Vehicle Information - Only for vehicle-based services */}
-                    {vehicleService && (
+                    {vehicleService && service.carBrand && (
                       <Box sx={{
                         mt: 2,
                         p: 1.5,
@@ -602,7 +584,7 @@ const ServiceListing = () => {
                     mb: 2
                   }}>
                     <Chip 
-                      label={service.status} 
+                      label={translateStatus(service.status)} 
                       sx={{
                         bgcolor: getStatusColor(service.status).bg,
                         color: getStatusColor(service.status).color,
@@ -688,7 +670,9 @@ const ServiceListing = () => {
                         alignItems: "center"
                       }}
                     >
-                      {formatPrice(service.price)}
+                      {typeof service.price === 'number' && !isNaN(service.price) 
+                        ? ctrl.formatPrice(service.price) 
+                        : "ບໍ່ລະບຸ"}
                     </Typography>
                   </Box>
                 </Box>
@@ -698,28 +682,69 @@ const ServiceListing = () => {
         })}
       </Container>
       
-      {/* Load More Button */}
-      <Button
-        variant="contained"
-        sx={{
-          mt: 2,
-          mb: 4,
-          borderRadius: "12px",
-          bgcolor: "white",
-          color: "#611463",
-          px: 4,
-          py: 1.5,
-          fontWeight: 600,
-          textTransform: "none",
-          boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-          "&:hover": {
-            bgcolor: "#f7931e",
-            color: "white"
-          }
-        }}
-      >
-        ເບິ່ງເພີ່ມເຕີມ
-      </Button>
+      {/* Pagination Buttons */}
+      {!ctrl.loading && !ctrl.error && ctrl.allServices.length > 0 && (
+        <Stack 
+          direction="row"
+          spacing={2}
+          sx={{
+            mt: 2,
+            mb: 4,
+            justifyContent: "center",
+            width: "100%"
+          }}
+        >
+          {/* Show Less Button - Only visible when showing more than 5 items */}
+          {ctrl.showLessVisible && (
+            <Button
+              variant="contained"
+              onClick={() => ctrl.showLess()}
+              startIcon={<ExpandLessIcon />}
+              sx={{
+                borderRadius: "12px",
+                bgcolor: "white",
+                color: "#611463",
+                px: 3,
+                py: 1.5,
+                fontWeight: 600,
+                textTransform: "none",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+                "&:hover": {
+                  bgcolor: "#f7931e",
+                  color: "white"
+                }
+              }}
+            >
+              ເບິ່ງຫນ້ອຍລົງ
+            </Button>
+          )}
+          
+          {/* Show More Button - Only visible when there are more items to show */}
+          {ctrl.hasMoreToLoad() && (
+            <Button
+              variant="contained"
+              onClick={() => ctrl.loadMore()}
+              endIcon={<ExpandMoreIcon />}
+              sx={{
+                borderRadius: "12px",
+                bgcolor: "white",
+                color: "#611463",
+                px: 3,
+                py: 1.5,
+                fontWeight: 600,
+                textTransform: "none",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+                "&:hover": {
+                  bgcolor: "#f7931e",
+                  color: "white"
+                }
+              }}
+            >
+              ເບິ່ງເພີ່ມເຕີມ
+            </Button>
+          )}
+        </Stack>
+      )}
     </Box>
   );
 };

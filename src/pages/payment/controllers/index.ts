@@ -6,6 +6,7 @@ import axios from "axios";
 import { Gender } from "../../../enums/gender";
 import { SERVICE_STATUS_PATH } from "../../../routes/path";
 import { AlertColor } from "@mui/material/Alert";
+import { useSelector } from "react-redux"; // Import useSelector from react-redux
 
 // Interface for location data format
 export interface Location {
@@ -73,6 +74,9 @@ const useMainController = () => {
   
   const navigate = useNavigate();
   const { id } = useParams();
+
+  // Get the authenticated user from Redux store
+  const authUser = useSelector((state) => state.auth.data);
 
   // Create Web Audio Context when needed
   const createAudioContext = () => {
@@ -304,6 +308,14 @@ const useMainController = () => {
       return;
     }
 
+    // Check if user is authenticated
+    if (!authUser) {
+      setAlertMessage("ກະລຸນາເຂົ້າສູ່ລະບົບກ່ອນດຳເນີນການຊຳລະເງິນ");
+      setAlertSeverity("error");
+      setAlertOpen(true);
+      return;
+    }
+
     // Prepare data for API call
     try {
       setSuccessDialogOpen(true); // Show loading dialog while processing
@@ -312,8 +324,8 @@ const useMainController = () => {
       const employeeId = locations[0]?.id;
       const categoryId = locations[0]?.cat_id;
       
-      // Hard-coded user ID - in a real app, this would come from authentication
-      const userId = 5;
+      // FIXED: Use the authenticated user's ID instead of hardcoding user ID 5
+      const userId = authUser.id;
       
       // Get address ID from localStorage or use default
       const addressId = localStorage.getItem('selectedAddressId') || 7;

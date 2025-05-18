@@ -72,7 +72,7 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
   return (
     <Box
       sx={{
-        width: '100%',
+        width: '100n%',
         border: '1px solid #eee',
         borderRadius: 2,
         overflow: 'hidden',

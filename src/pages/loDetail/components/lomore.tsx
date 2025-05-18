@@ -272,17 +272,9 @@ const LocationDetailPage: React.FC = () => {
                             mb: 0.5
                           }}
                         >
-                          {location.address_description}, {location.village}, {displayCity(location.city)}
+                          {location.address_description}, {location.village} {displayCity(location.city)}
                         </Typography>
                         
-                        {location.tel && (
-                          <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <PhoneIcon sx={{ fontSize: "0.9rem", mr: 0.5, color: "#666" }} />
-                            <Typography sx={{ fontSize: "0.85rem", color: "#666" }}>
-                              {location.tel}
-                            </Typography>
-                          </Box>
-                        )}
                       </Box>
                       
                       <IconButton

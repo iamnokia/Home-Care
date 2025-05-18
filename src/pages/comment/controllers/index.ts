@@ -4,6 +4,7 @@ import axios from "axios";
 import { AlertColor } from "@mui/material/Alert";
 import { HOME_PATH, COMMENT_PATH } from "../../../routes/path";
 import { Gender } from "../../../enums/gender";
+import { useSelector } from "react-redux"; // Import useSelector from react-redux
 
 // Interface for service details
 export interface ServiceDetail {
@@ -72,6 +73,9 @@ const useCommentController = () => {
   // Get URL parameters and navigation
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  // Get the authenticated user from Redux store
+  const authUser = useSelector((state) => state.auth.data);
 
   // Data state
   const [data, setData] = useState<any[]>([]);
@@ -366,6 +370,14 @@ const useCommentController = () => {
       return;
     }
 
+    // Check if user is authenticated
+    if (!authUser) {
+      setAlertMessage("ກະລຸນາເຂົ້າສູ່ລະບົບກ່ອນສົ່ງຄຳເຫັນ");
+      setAlertSeverity("error");
+      setAlertOpen(true);
+      return;
+    }
+
     // Show loading indicator
     setLoading(true);
 
@@ -376,8 +388,8 @@ const useCommentController = () => {
                          localStorage.getItem('lastEmployeeId') || 
                          "0";
       
-      // Get user ID from localStorage or use default
-      const userId = parseInt(localStorage.getItem('userId') || "5");
+      // FIXED: Use the authenticated user's ID instead of hardcoding user ID 5
+      const userId = authUser.id;
       
       // Prepare comment data for API
       const commentData = {
