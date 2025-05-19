@@ -1,4 +1,3 @@
-// Enhanced useMainController.tsx with WhatsApp notification and employee status update
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EmployeeModel } from "../../../models/employee";
@@ -7,7 +6,7 @@ import axios from "axios";
 import { Gender } from "../../../enums/gender";
 import { SERVICE_STATUS_PATH } from "../../../routes/path";
 import { AlertColor } from "@mui/material/Alert";
-import { useSelector } from "react-redux";
+import { useSelector } from "react-redux"; // Import useSelector from react-redux
 
 // Interface for location data format
 export interface Location {
@@ -290,100 +289,7 @@ const useMainController = () => {
     setAlertOpen(false);
   };
 
-  // NEW FUNCTION: Update employee status to inactive
-  const handleUpdateEmployeeStatus = async (employeeId: string | number): Promise<void> => {
-    try {
-      console.log(`Updating employee ${employeeId} status to inactive`);
-      
-      // Convert string ID to number if needed
-      const numericId = typeof employeeId === 'string' ? parseInt(employeeId, 10) : employeeId;
-      
-      if (isNaN(numericId)) {
-        console.error("Invalid employee ID for status update:", employeeId);
-        return;
-      }
-      
-      await axios.put(
-        `https://homecare-pro.onrender.com/employees/update_employees/${numericId}`,
-        { status: 'inactive' },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      console.log(`Successfully updated employee ${employeeId} status to inactive`);
-    } catch (error) {
-      console.error(`Error updating employee ${employeeId} status:`, error);
-      // Don't throw error here to prevent disrupting the payment flow
-    }
-  };
-
-  // NEW FUNCTION: Send WhatsApp notification
-  const sendWhatsAppNotification = async (serviceOrderId: string | number, employeeData: Location): Promise<void> => {
-    try {
-      // Get user address details from localStorage or fallback to defaults
-      const addressName = localStorage.getItem("addressName") || "ບ້ານ ໂນນສະຫວ່າງ";
-      const village = localStorage.getItem("addressVillage") || "ບ້ານ ໂນນສະຫວ່າງ";
-      const city = localStorage.getItem("addressCity") || "ວຽງຈັນ";
-      const addressDetails = localStorage.getItem("addressDescription") || "ບໍ່ມີລາຍລະອຽດທີ່ຢູ່";
-      const mapLink = localStorage.getItem("addressMapLink") || "";
-      
-      // Get user phone number from auth or fallback to default
-      const userPhone = authUser?.tel || localStorage.getItem("userPhone") || "+8562099786675";
-      
-      // Get employee phone number from data or fallback to default
-      const employeePhone = data[0]?.tel || "+8562056570603";
-      
-      // Format service information for WhatsApp message
-      const serviceInfo = {
-        serviceId: serviceOrderId,
-        customerName: authUser?.first_name || "ລູກຄ້າ",
-        serviceName: employeeData.service || "ບໍລິການ",
-        amount: formatCurrency(totalAmount),
-        location: {
-          name: addressName,
-          village: village,
-          city: city,
-          details: addressDetails,
-          mapLink: mapLink
-        },
-        employeeName: `${employeeData.firstName} ${employeeData.surname}`,
-        date: new Date().toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })
-      };
-      
-      console.log("Preparing to send WhatsApp notification with data:", serviceInfo);
-      
-      // Format WhatsApp payload according to the API requirements
-      const whatsappPayload = {
-        from: "+8562099876432", // System phone number
-        to: employeePhone // Employee's phone number
-      };
-      
-      // Send the WhatsApp notification
-      const response = await axios.post(
-        "https://homecare-pro.onrender.com/sms/whatsapp",
-        whatsappPayload,
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      console.log("WhatsApp notification sent successfully:", response.data);
-    } catch (error) {
-      console.error("Error sending WhatsApp notification:", error);
-      // Don't throw error here to prevent disrupting the payment flow
-    }
-  };
-
-  // UPDATED: Handle payment submission with WhatsApp notifications and employee status update
+  // Handle payment submission
   const handlePaymentSubmit = async (): Promise<void> => {
     const enteredAmount = parseInt(paymentAmount) || 0;
 
@@ -418,7 +324,7 @@ const useMainController = () => {
       const employeeId = locations[0]?.id;
       const categoryId = locations[0]?.cat_id;
       
-      // Use the authenticated user's ID
+      // FIXED: Use the authenticated user's ID instead of hardcoding user ID 5
       const userId = authUser.id;
       
       // Get address ID from localStorage or use default
@@ -450,29 +356,16 @@ const useMainController = () => {
 
       console.log("Service order created successfully:", response.data);
       
-      // Get the service order ID
-      const serviceOrderId = response.data?.id;
-      
       // Play the payment success sound
       playPaymentSuccessSound();
-      
-      // Send WhatsApp notification with service details
-      if (serviceOrderId && locations[0]) {
-        await sendWhatsAppNotification(serviceOrderId, locations[0]);
-      }
-      
-      // Update employee status to inactive
-      if (employeeId) {
-        await handleUpdateEmployeeStatus(employeeId);
-      }
 
       // Keep the success dialog open for a moment
       setTimeout(() => {
         setSuccessDialogOpen(false);
         
         // Store order ID in localStorage for later reference
-        if (serviceOrderId) {
-          localStorage.setItem('lastOrderId', serviceOrderId);
+        if (response.data && response.data.id) {
+          localStorage.setItem('lastOrderId', response.data.id);
         }
         
         // Navigate to status page
@@ -662,8 +555,6 @@ const useMainController = () => {
     handleAlertClose,
     handlePaymentSubmit,
     playPaymentSuccessSound,
-    handleUpdateEmployeeStatus, // New function 
-    sendWhatsAppNotification, // New function
     id
   };
 };

@@ -223,40 +223,6 @@ const useCommentController = () => {
     }
   };
 
-  // NEW FUNCTION: Update employee status to active
-  const handleUpdateEmployeeStatus = async (employeeId: string | number): Promise<void> => {
-    try {
-      console.log(`Updating employee ${employeeId} status to active`);
-      
-      // Convert string ID to number if needed
-      const numericId = typeof employeeId === 'string' ? parseInt(employeeId, 10) : employeeId;
-      
-      if (isNaN(numericId)) {
-        console.error("Invalid employee ID for status update:", employeeId);
-        return;
-      }
-      
-      setLoading(true);
-      
-      await axios.put(
-        `https://homecare-pro.onrender.com/employees/update_employees/${numericId}`,
-        { status: 'active' },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      console.log(`Successfully updated employee ${employeeId} status to active`);
-    } catch (error) {
-      console.error(`Error updating employee ${employeeId} status:`, error);
-      // Don't throw error here to prevent disrupting the comment submission flow
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Format price with commas
   const formatCurrency = (value: number | string): string => {
     const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
@@ -395,7 +361,7 @@ const useCommentController = () => {
     }
   };
 
-  // UPDATED: Handle comment submission with employee status update
+  // Handle comment submission
   const handleCommentSubmit = async (): Promise<void> => {
     if (comment.trim() === "") {
       setAlertMessage("ກະລຸນາໃສ່ຄຳເຫັນຂອງທ່ານ!");
@@ -422,7 +388,7 @@ const useCommentController = () => {
                          localStorage.getItem('lastEmployeeId') || 
                          "0";
       
-      // Use the authenticated user's ID instead of hardcoding user ID
+      // FIXED: Use the authenticated user's ID instead of hardcoding user ID 5
       const userId = authUser.id;
       
       // Prepare comment data for API
@@ -449,11 +415,6 @@ const useCommentController = () => {
 
       console.log("Comment created successfully:", response.data);
 
-      // Update employee status to active
-      if (employeeId) {
-        await handleUpdateEmployeeStatus(employeeId);
-      }
-
       // Play success sound
       playSuccessSound();
 
@@ -470,19 +431,6 @@ const useCommentController = () => {
     } catch (error) {
       console.error("Error submitting comment:", error);
       setLoading(false);
-      
-      // Try to update employee status regardless of comment submission result
-      try {
-        const employeeId = id || 
-                          (serviceDetails.length > 0 ? serviceDetails[0].id : null) || 
-                          localStorage.getItem('lastEmployeeId');
-        
-        if (employeeId) {
-          await handleUpdateEmployeeStatus(employeeId);
-        }
-      } catch (statusError) {
-        console.error("Error updating employee status:", statusError);
-      }
       
       // Still let the user know it worked even if the API failed
       // This way the UI remains usable even with API issues
@@ -845,8 +793,7 @@ const useCommentController = () => {
     handleDownloadReceipt,
     formatCurrency,
     generateReceiptNumber,
-    navigate,
-    handleUpdateEmployeeStatus
+    navigate
   };
 };
 

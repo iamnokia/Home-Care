@@ -184,15 +184,15 @@ const LocationDetailPage: React.FC = () => {
               <BookmarkIcon sx={{ mr: 1, fontSize: "1.2rem" }} />
               ທີ່ຢູ່ທີ່ບັນທຶກໄວ້
             </Typography>
-
+           
             {ctrl?.loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
                 <CircularProgress size={40} sx={{ color: '#611463' }} />
               </Box>
             ) : ctrl?.address && ctrl?.address.length > 0 ? (
-              <Box
+              <Box 
                 sx={{
-                  maxHeight: "500px",
+                  maxHeight: "500px", 
                   overflowY: ctrl?.address.length > 6 ? "auto" : "visible",
                   "&::-webkit-scrollbar": {
                     width: "6px",
@@ -231,8 +231,8 @@ const LocationDetailPage: React.FC = () => {
                     }}
                     onClick={() => ctrl?.handleLocationSelect(location)}
                   >
-                    <Box
-                      sx={{
+                    <Box 
+                      sx={{ 
                         display: "flex",
                         p: 2,
                         alignItems: "flex-start"
@@ -252,7 +252,7 @@ const LocationDetailPage: React.FC = () => {
                       >
                         <HomeIcon sx={{ color: "#611463" }} />
                       </Box>
-
+                      
                       <Box sx={{ flex: 1 }}>
                         <Typography
                           sx={{
@@ -264,19 +264,19 @@ const LocationDetailPage: React.FC = () => {
                         >
                           {location.address_name}
                         </Typography>
-
+                        
                         <Typography
-                          sx={{
-                            fontSize: "0.85rem",
+                          sx={{ 
+                            fontSize: "0.85rem", 
                             color: "#666",
                             mb: 0.5
                           }}
                         >
                           {location.address_description}, {location.village} {displayCity(location.city)}
                         </Typography>
-
+                        
                       </Box>
-
+                      
                       <IconButton
                         size="small"
                         onClick={(e) => {
@@ -299,7 +299,7 @@ const LocationDetailPage: React.FC = () => {
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </Box>
-
+                    
                     {location.id === ctrl?.selectedLocation?.id && (
                       <Box
                         sx={{
@@ -462,7 +462,7 @@ const LocationDetailPage: React.FC = () => {
                 ),
               }}
             />
-            <FormHelperText sx={{ mb: 1, ml: 1, color: "#f7931e" }}>
+            <FormHelperText sx={{ mb: 1, ml: 1, color:"#f7931e" }}>
               ແນະນຳ: ສາມາດຄົ້ນຫາສະຖານທີ່ໃນ Google Maps ແລ້ວວາງລິ້ງຈາກນັ້ນບ່ອນນີ້
             </FormHelperText>
           </Box>
@@ -647,7 +647,7 @@ const LocationDetailPage: React.FC = () => {
               <LocationCityOutlinedIcon sx={{ mr: 1, color: "#611463" }} />{" "}
               ເມືອງ *
             </Typography>
-
+            
             <Autocomplete
               fullWidth
               options={districts}
@@ -708,7 +708,7 @@ const LocationDetailPage: React.FC = () => {
               )}
             />
 
-            {/* Phone number field */}
+            {/* Phone number field - ADDED FIELD */}
             <Typography
               variant="subtitle1"
               sx={{
@@ -726,7 +726,7 @@ const LocationDetailPage: React.FC = () => {
             <TextField
               fullWidth
               variant="outlined"
-              placeholder="ເບີໂທລະສັບ (ເຊັ່ນ: XXXXXXXX)"
+              placeholder="ເບີໂທລະສັບ (ເຊັ່ນ: 20XXXXXXX)"
               value={ctrl?.phoneNumber ?? ""}
               onChange={(e) => {
                 ctrl?.handlePhoneNumberChange(e);
@@ -750,27 +750,19 @@ const LocationDetailPage: React.FC = () => {
                 },
               }}
               InputProps={{
-                sx: {
-                  fontSize: "0.95rem",
-                  py: 0.5,
-                  color: "#611463",
-                  fontWeight: 500
-                },
+                sx: { fontSize: "0.95rem", py: 0.5 },
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Typography variant="body2" sx={{ color: "#611463", fontWeight: 500 }}>
+                      +856
+                    </Typography>
+                  </InputAdornment>
+                ),
                 endAdornment: ctrl?.errors.phoneNumber && (
                   <InputAdornment position="end">
                     <ErrorIcon color="error" />
                   </InputAdornment>
                 ),
-                onFocus: (e) => {
-                  if (!e.target.value || !e.target.value.startsWith("+85620")) {
-                    ctrl?.setPhoneNumber("+85620");
-                  }
-                  // Position cursor at the end
-                  setTimeout(() => {
-                    const len = e.target.value.length;
-                    e.target.setSelectionRange(len, len);
-                  }, 0);
-                }
               }}
             />
           </Box>
