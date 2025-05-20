@@ -328,7 +328,7 @@ const CommentPage: React.FC = () => {
       const customerDetails = document.createElement('div');
       customerDetails.style.fontSize = '14px';
       customerDetails.style.color = '#666';
-      customerDetails.textContent = service ? `${service.gender}, ${service.age}ປີ ${service.village} ${service.city}` : 'ອາຍຸ, 21ປີ ບ້ານ ໂນນສະຫວ່າງ ເມືອງ ໄຊເສດຖາ';
+      customerDetails.textContent = service ? `${service.gender}, ${service.village} ${service.city}` : 'ບ້ານ ໂນນສະຫວ່າງ ເມືອງ ໄຊເສດຖາ';
 
       customerCard.appendChild(customerName);
       customerCard.appendChild(customerDetails);
@@ -710,7 +710,7 @@ const CommentPage: React.FC = () => {
                               display: "inline-block"
                             }}
                           >
-                            {item.gender}, {item.age} ປີ
+                            {item.gender}
                           </Typography>
                         </Box>
                       </Box>

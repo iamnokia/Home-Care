@@ -1,4 +1,4 @@
-// Enhanced useMainController.tsx with WhatsApp notification and employee status update
+// Enhanced useMainController.tsx with correct WhatsApp notification implementation
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EmployeeModel } from "../../../models/employee";
@@ -290,7 +290,7 @@ const useMainController = () => {
     setAlertOpen(false);
   };
 
-  // NEW FUNCTION: Update employee status to inactive
+  // Update employee status to inactive
   const handleUpdateEmployeeStatus = async (employeeId: string | number): Promise<void> => {
     try {
       console.log(`Updating employee ${employeeId} status to inactive`);
@@ -320,54 +320,52 @@ const useMainController = () => {
     }
   };
 
-  // NEW FUNCTION: Send WhatsApp notification
-  const sendWhatsAppNotification = async (serviceOrderId: string | number, employeeData: Location): Promise<void> => {
+
+  // Get selected location from localStorage
+const getSelectedLocationId = () => {
+  try {
+    // Get the JSON string from localStorage
+    const selectedLocationStr = localStorage.getItem('selectedLocation');
+    
+    if (!selectedLocationStr) {
+      console.error("No selected location found in localStorage");
+      return null;
+    }
+    
+    // Parse the JSON string to an object
+    const selectedLocation = JSON.parse(selectedLocationStr);
+    
+    // Extract the ID
+    return selectedLocation.id;
+  } catch (error) {
+    console.error("Error retrieving selected location ID:", error);
+    return null;
+  }
+};
+
+// Usage example
+
+  // COMPLETELY REWRITTEN: Send WhatsApp notification and create service order
+  const sendWhatsAppNotification = async (): Promise<any> => {
     try {
-      // Get user address details from localStorage or fallback to defaults
-      const addressName = localStorage.getItem("addressName") || "ບ້ານ ໂນນສະຫວ່າງ";
-      const village = localStorage.getItem("addressVillage") || "ບ້ານ ໂນນສະຫວ່າງ";
-      const city = localStorage.getItem("addressCity") || "ວຽງຈັນ";
-      const addressDetails = localStorage.getItem("addressDescription") || "ບໍ່ມີລາຍລະອຽດທີ່ຢູ່";
-      const mapLink = localStorage.getItem("addressMapLink") || "";
+      const locationId = getSelectedLocationId();
       
-      // Get user phone number from auth or fallback to default
-      const userPhone = authUser?.tel || localStorage.getItem("userPhone") || "+8562099786675";
+      // Get employee phone number from data
+      const employeePhone = data[0]?.tel;
       
-      // Get employee phone number from data or fallback to default
-      const employeePhone = data[0]?.tel || "+8562056570603";
+      if (!employeePhone) {
+        console.error("Missing employee phone number for WhatsApp notification");
+        throw new Error("Employee phone number not found");
+      }
       
-      // Format service information for WhatsApp message
-      const serviceInfo = {
-        serviceId: serviceOrderId,
-        customerName: authUser?.first_name || "ລູກຄ້າ",
-        serviceName: employeeData.service || "ບໍລິການ",
-        amount: formatCurrency(totalAmount),
-        location: {
-          name: addressName,
-          village: village,
-          city: city,
-          details: addressDetails,
-          mapLink: mapLink
-        },
-        employeeName: `${employeeData.firstName} ${employeeData.surname}`,
-        date: new Date().toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })
-      };
-      
-      console.log("Preparing to send WhatsApp notification with data:", serviceInfo);
-      
-      // Format WhatsApp payload according to the API requirements
+      // The backend only expects the 'to' field with the employee's phone number
       const whatsappPayload = {
-        from: "+8562099876432", // System phone number
-        to: employeePhone // Employee's phone number
+        to: employeePhone
       };
       
-      // Send the WhatsApp notification
+      // Make the API call to send WhatsApp and create service order in one step
       const response = await axios.post(
-        "https://homecare-pro.onrender.com/sms/whatsapp",
+        `https://homecare-pro.onrender.com/service_order/whatsapp/${locationId}`,
         whatsappPayload,
         {
           headers: {
@@ -376,14 +374,20 @@ const useMainController = () => {
         }
       );
       
-      console.log("WhatsApp notification sent successfully:", response.data);
+      console.log("WhatsApp notification sent and service order created:", response.data);
+      
+      // Return the response data which should include the created service order
+      return response.data;
     } catch (error) {
       console.error("Error sending WhatsApp notification:", error);
-      // Don't throw error here to prevent disrupting the payment flow
+      if (error.response) {
+        console.error("Error response:", error.response.data);
+      }
+      throw error; // Re-throw to allow handling in the payment function
     }
   };
 
-  // UPDATED: Handle payment submission with WhatsApp notifications and employee status update
+  // COMPLETELY REWRITTEN: Handle payment submission
   const handlePaymentSubmit = async (): Promise<void> => {
     const enteredAmount = parseInt(paymentAmount) || 0;
 
@@ -410,79 +414,105 @@ const useMainController = () => {
       return;
     }
 
-    // Prepare data for API call
+    // Show loading dialog
+    setSuccessDialogOpen(true);
+
     try {
-      setSuccessDialogOpen(true); // Show loading dialog while processing
-
-      // Get employee data
+      // Get employee ID from locations
       const employeeId = locations[0]?.id;
-      const categoryId = locations[0]?.cat_id;
       
-      // Use the authenticated user's ID
-      const userId = authUser.id;
-      
-      // Get address ID from localStorage or use default
-      const addressId = localStorage.getItem('selectedAddressId') || 7;
-      
-      // Create the service order payload
-      const serviceOrderPayload = {
-        user_id: userId,
-        employees_id: employeeId,
-        cat_id: categoryId,
-        address_users_detail_id: addressId,
-        amount: totalAmount,
-        payment_status: "paid", // Can be "paid" since this is the payment page
-        service_status: "Not Start"
-      };
-
-      console.log("Creating service order with payload:", serviceOrderPayload);
-
-      // Make API call to create service order
-      const response = await axios.post(
-        "https://homecare-pro.onrender.com/service_order/create",
-        serviceOrderPayload,
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      console.log("Service order created successfully:", response.data);
-      
-      // Get the service order ID
-      const serviceOrderId = response.data?.id;
+      if (!employeeId) {
+        throw new Error("Employee ID not found");
+      }
       
       // Play the payment success sound
       playPaymentSuccessSound();
       
-      // Send WhatsApp notification with service details
-      if (serviceOrderId && locations[0]) {
-        await sendWhatsAppNotification(serviceOrderId, locations[0]);
-      }
+      // Call the WhatsApp notification API which also creates the service order
+      const orderResponse = await sendWhatsAppNotification();
+      
+      // Get the created service order ID from the response
+      const serviceOrderId = orderResponse?.service_order?.id;
       
       // Update employee status to inactive
       if (employeeId) {
         await handleUpdateEmployeeStatus(employeeId);
       }
-
-      // Keep the success dialog open for a moment
+      
+      // Store service order ID in localStorage for reference
+      if (serviceOrderId) {
+        localStorage.setItem('lastOrderId', serviceOrderId.toString());
+      }
+      
+      // Keep success dialog open briefly before navigating
       setTimeout(() => {
         setSuccessDialogOpen(false);
-        
-        // Store order ID in localStorage for later reference
-        if (serviceOrderId) {
-          localStorage.setItem('lastOrderId', serviceOrderId);
-        }
-        
-        // Navigate to status page
         navigate(`/service-status/${id}`);
       }, 3000);
     } catch (error) {
       // Close success dialog if there's an error
       setSuccessDialogOpen(false);
       
-      console.error("Error creating service order:", error);
+      console.error("Error processing payment:", error);
+      
+      // FALLBACK METHOD: If WhatsApp notification fails, try to create order directly
+      if (error.message?.includes("WhatsApp")) {
+        try {
+          setAlertMessage("ບໍ່ສາມາດສົ່ງແຈ້ງເຕືອນ WhatsApp ໄດ້, ກຳລັງສ້າງການບໍລິການໂດຍກົງ...");
+          setAlertSeverity("warning");
+          setAlertOpen(true);
+          
+          // Get necessary IDs
+          const employeeId = locations[0]?.id;
+          const categoryId = locations[0]?.cat_id;
+          const userId = authUser.id;
+          const addressId = localStorage.getItem('selectedAddressId') || "7";
+          
+          // Create service order directly
+          const serviceOrderPayload = {
+            user_id: userId,
+            employees_id: employeeId,
+            cat_id: categoryId,
+            address_users_detail_id: addressId,
+            amount: totalAmount,
+            payment_status: "paid",
+            service_status: "Not Start"
+          };
+          
+          console.log("Creating service order directly with payload:", serviceOrderPayload);
+          
+          const response = await axios.post(
+            "https://homecare-pro.onrender.com/service_order/create",
+            serviceOrderPayload,
+            {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+          
+          console.log("Service order created directly:", response.data);
+          
+          // Update employee status
+          if (employeeId) {
+            await handleUpdateEmployeeStatus(employeeId);
+          }
+          
+          // Store order ID
+          if (response.data?.id) {
+            localStorage.setItem('lastOrderId', response.data.id.toString());
+          }
+          
+          // Navigate to status page
+          setTimeout(() => {
+            navigate(`/service-status/${id}`);
+          }, 2000);
+          
+          return;
+        } catch (fallbackError) {
+          console.error("Error in fallback order creation:", fallbackError);
+        }
+      }
       
       // Show error message
       setAlertMessage("ເກີດຂໍ້ຜິດພາດໃນການສ້າງຄຳສັ່ງ. ກະລຸນາລອງໃໝ່ອີກຄັ້ງ.");
@@ -662,8 +692,8 @@ const useMainController = () => {
     handleAlertClose,
     handlePaymentSubmit,
     playPaymentSuccessSound,
-    handleUpdateEmployeeStatus, // New function 
-    sendWhatsAppNotification, // New function
+    handleUpdateEmployeeStatus, 
+    sendWhatsAppNotification,
     id
   };
 };
