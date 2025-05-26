@@ -263,23 +263,6 @@ const SettingsPage = () => {
                                     }}
                                 />
                             </Grid>
-
-                            <Grid item xs={12}>
-                                <Typography variant="subtitle1" fontWeight={500} sx={{ mt: 1, mb: 2 }}>
-                                    ການນຳໃຊ້
-                                </Typography>
-                                <Button
-                                    variant="outlined"
-                                    color="warning"
-                                    sx={{
-                                        borderRadius: 2,
-                                        px: 3,
-                                        mr: 2
-                                    }}
-                                >
-                                    ອອກຈາກລະບົບ
-                                </Button>
-                            </Grid>
                             <Grid item xs={12}>
                                 <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
                                     <Button
