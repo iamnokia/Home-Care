@@ -232,7 +232,7 @@ const ServiceListing: React.FC = () => {
           >
             <CircularProgress size={60} sx={{ color: 'white', mb: 3 }} />
             <Typography sx={{ color: 'white', fontSize: '1.1rem' }}>
-              ກໍາລັງໂຫລດຂໍ້ມູນ...
+              ກໍາລັງດາວໂຫຼດຂໍ້ມູນ...
             </Typography>
           </Box>
         )}

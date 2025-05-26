@@ -34,7 +34,7 @@ interface ServiceProvider {
   location: string;
   price: number;
   imageUrl: string;
-  rating: number;
+  rating: number; // This will now be dynamic
   category: string;
   gender: string;
   address: string;
@@ -54,7 +54,7 @@ const Services = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [allProviders, setAllProviders] = useState<ServiceProvider[]>([]);
   
-  // Get data from controller
+  // Get data from controller (now includes rating functions)
   const ctrl = useMainController();
 
   // Define service categories
@@ -149,6 +149,11 @@ const Services = () => {
       carData = findCarForEmployee(employee.id, ctrl.car);
     }
 
+    // Get the actual rating for this employee using the controller function
+    const actualRating = ctrl?.getEmployeeRating ? ctrl.getEmployeeRating(employee.id) : 5;
+    
+    console.log(`Employee ${employee.id} (${employee.first_name} ${employee.last_name}) rating: ${actualRating}`);
+
     const result: ServiceProvider = {
       id: employee.id,
       name: employee.first_name,
@@ -156,7 +161,7 @@ const Services = () => {
       location: employee.address,
       price: parseFloat(employee.price?.toString() || '0'),
       imageUrl: employee.avatar,
-      rating: 5,
+      rating: actualRating, // Use actual rating from comments
       category: employee.cat_name,
       gender: employee.gender,
       address: village, 
@@ -217,20 +222,21 @@ const Services = () => {
   useEffect(() => {
     if (!ctrl?.loading && ctrl?.data && ctrl?.data.length > 0) {
       console.log("Controller car data:", ctrl?.car);
+      console.log("Controller employee ratings:", ctrl?.employeeRatings);
       
       const mappedProviders = ctrl.data.map(employee => {
         console.log("Mapping employee with ID:", employee.id, "and cat_id:", employee.cat_id);
         return mapEmployeeToServiceProvider(employee);
       });
       
-      console.log("Mapped service providers:", mappedProviders);
+      console.log("Mapped service providers with ratings:", mappedProviders);
       setAllProviders(mappedProviders);
       
       // Apply filters on initial load
       const filtered = filterProviders(mappedProviders, searchQuery, activeCategory);
       setFilteredProviders(filtered);
     }
-  }, [ctrl?.loading, ctrl?.data, ctrl?.car]);
+  }, [ctrl?.loading, ctrl?.data, ctrl?.car, ctrl?.employeeRatings]); // Added employeeRatings dependency
 
   // Update filtered providers when search query or category changes
   useEffect(() => {
@@ -495,7 +501,7 @@ const Services = () => {
                       surname={provider.surname}
                       price={provider.price}
                       imageUrl={provider.imageUrl}
-                      rating={provider.rating}
+                      rating={provider.rating} // Now uses actual rating from comments
                       category={provider.category}
                       gender={provider.gender}
                       address={provider.address}

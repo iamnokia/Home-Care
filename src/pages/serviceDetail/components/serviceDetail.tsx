@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -16,9 +16,8 @@ import {
   useTheme,
   Card,
   CardContent,
-  CircularProgress,
 } from "@mui/material";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PersonIcon from "@mui/icons-material/Person";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -26,137 +25,42 @@ import WorkIcon from "@mui/icons-material/Work";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import StarIcon from "@mui/icons-material/Star";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
-import BadgeIcon from "@mui/icons-material/Badge";
-import SpeedIcon from "@mui/icons-material/Speed";
 import TimeToLeaveIcon from "@mui/icons-material/TimeToLeave";
+import BadgeIcon from "@mui/icons-material/Badge";
 import useMainController from "../controllers/index";
-import { Gender } from "../../../enums/gender";
 
 // Font size constants with responsive adjustments
-const getFontSize = (isSmallScreen) => ({
+const getFontSize = (isSmallScreen: boolean) => ({
   title: isSmallScreen ? "1.4rem" : "1.7rem",
   subtitle: isSmallScreen ? "1rem" : "1.2rem",
   text: isSmallScreen ? "0.9rem" : "1rem",
   button: isSmallScreen ? "0.95rem" : "1.05rem",
 });
 
-// Mock reviews data (this would ideally come from the API)
-const mockReviews = [
-  { id: 1, rating: 5, comment: "ດີຫຼາຍ", user: "ນາງ ກອນນະລີ", date: "15 ມີນາ 2025" },
-  { id: 2, rating: 4, comment: "ດີຫຼາຍ", user: "ທ້າວ ສົມສະໄໝ", date: "10 ມີນາ 2025" },
-  { id: 3, rating: 4, comment: "ດີຫຼາຍ", user: "ນາງ ວັນນິດາ", date: "28 ກຸມພາ 2025" },
-];
-
 const ServiceDetailsPage = () => {
-  const { data, car, loading, handleNaVigate } = useMainController();
-  const employee = data[0]; // Get the first employee from the data array
+  const { loading, handleNaVigate, navigate, id, getServiceData } = useMainController();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isMediumScreen = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"));
-  const navigate = useNavigate();
-  const { id } = useParams();
+
+  // Service data state
+  const [serviceData, setServiceData] = useState<any>(null);
 
   // Apply font sizes based on screen size
   const fontSize = getFontSize(isSmallScreen);
 
-  // Determine the service type based on category name
-  const getCategoryType = (categoryName) => {
-    const lowerCaseCategory = categoryName?.toLowerCase() || "";
-    if (lowerCaseCategory.includes("ຂົນສົ່ງ") || lowerCaseCategory.includes("moving")) {
-      return "moving";
-    } else if (lowerCaseCategory.includes("ຫ້ອງນ້ຳ") || lowerCaseCategory.includes("bathroom")) {
-      return "bathroom";
+  // Update service data when controller data changes
+  useEffect(() => {
+    const data = getServiceData();
+    if (data) {
+      setServiceData(data);
     }
-    return "cleaning"; // Default to cleaning
-  };
+  }, [getServiceData]);
 
   // Check if category ID is 5 to show car details
-  const showCarDetails = employee?.cat_id === 5;
-
-  // Service data from API
-  const [serviceData, setServiceData] = useState({
-    id: "",
-    name: "",
-    firstName: "",
-    surname: "",
-    price: 0,
-    priceFormatted: "",
-    image: "",
-    category: "",
-    categoryType: "cleaning",
-    gender: "",
-    village: "",
-    city: "",
-    skills: "",
-    rating: 4.5,
-    reviews: mockReviews,
-    // Car-related fields will be added conditionally
-  });
-
-  // Update service data when employee data is loaded
-  useEffect(() => {
-    if (employee) {
-      const categoryType = getCategoryType(employee.cat_name);
-
-      // Format the price with commas
-      const formatPrice = (price) => {
-        const numPrice = parseFloat(price);
-        return numPrice.toLocaleString() + " KIP";
-      };
-
-      const genderText = employee.gender === Gender.MALE ? "ຊາຍ" : "ຍິງ";
-
-      // Extract address components (this is a placeholder - adjust according to your data structure)
-      const addressParts = employee.address ? employee.address.split(',') : [];
-      const village = addressParts[0] || "ບ້ານ ໂນນສະຫວ່າງ"; // Default if not available
-
-      // Create the service data object
-      const newServiceData = {
-        id: employee.id,
-        name: employee.cat_name,
-        firstName: employee.first_name,
-        surname: employee.last_name,
-        price: parseFloat(employee.price),
-        priceFormatted: formatPrice(employee.price),
-        image: employee.avatar || "/api/placeholder/400/300",
-        category: employee.cat_name,
-        categoryType: categoryType,
-        gender: genderText,
-        cat_id: employee.cat_id, // Add category ID
-        village: village,
-        city: employee.city || "ວຽງຈັນ",
-        skills: employee.cv || "ຂ້ອຍມີປະສົບການ 3 ປີໃນການເປັນແມ່ບ້ານ. ຂ້ອຍສາມາດດູດຝຸ່ນ, ອະນາໄມເຮືອນ, ຊັກເຄື່ອງ, ແລະ ປຸງແຕ່ງອາຫານໄດ້. ຂ້ອຍເຮັດວຽກຢ່າງຂະຫຍັນຂັນແຂ່ງ ແລະ ຮັບຜິດຊອບສູງ.",
-        rating: 4.5,
-        reviews: mockReviews,
-      };
-
-      // Add car-related properties if the category ID is 5 and we have car data
-      if (showCarDetails && car && car.length > 0) {
-        // Filter car data to find the matching car for this employee
-        const employeeCar = car.find(c => c.emp_id === employee.id);
-
-        if (employeeCar) {
-          // Use the employee's specific car
-          Object.assign(newServiceData, {
-            carId: employeeCar.id || "N/A",
-            carBrand: employeeCar.car_brand || "N/A",
-            carModel: employeeCar.model || "N/A",
-            licensePlate: employeeCar.license_plate || "N/A",
-            carYear: employeeCar.created_at ? new Date(employeeCar.created_at).getFullYear().toString() : "N/A",
-            carImage: employeeCar.car_image,
-          });
-        } else {
-          // No matching car found for this employee
-          console.log("No car found for employee ID:", employee.id);
-        }
-      }
-
-      setServiceData(newServiceData);
-    }
-  }, [employee, car, showCarDetails]);
+  const showCarDetails = serviceData?.cat_id === 5;
 
   // Calculate container width based on screen size
   const getContainerWidth = () => {
@@ -170,162 +74,156 @@ const ServiceDetailsPage = () => {
     return isLargeScreen ? "850px" : "100%";
   };
 
-  // Loading component with white background, #611463 and #f7931e accents
+  // Enhanced loading component
+  const LoadingComponent = () => (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+        background: "white",
+        overflow: "hidden",
+        position: "relative"
+      }}
+    >
+      {/* Background decorative elements */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: "10%",
+          left: "10%",
+          width: "200px",
+          height: "200px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(97,20,99,0.05) 0%, rgba(97,20,99,0) 70%)",
+          animation: "pulse 3s infinite ease-in-out",
+          "@keyframes pulse": {
+            "0%": { transform: "scale(1)", opacity: 0.3 },
+            "50%": { transform: "scale(1.1)", opacity: 0.1 },
+            "100%": { transform: "scale(1)", opacity: 0.3 }
+          }
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: "15%",
+          right: "10%",
+          width: "180px",
+          height: "180px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(247,147,30,0.05) 0%, rgba(247,147,30,0) 70%)",
+          animation: "pulse 3s infinite ease-in-out 1s",
+        }}
+      />
 
-  // Show enhanced loading state
-  if (loading) {
-    return (
+      {/* Main loading spinner */}
+      <Box
+        sx={{
+          position: "relative",
+          width: "120px",
+          height: "120px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            border: "4px solid rgba(97,20,99,0.1)",
+            borderTop: "4px solid #611463",
+            borderRadius: "50%",
+            animation: "spin 1.5s linear infinite",
+            "@keyframes spin": {
+              "0%": { transform: "rotate(0deg)" },
+              "100%": { transform: "rotate(360deg)" }
+            }
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            width: "70%",
+            height: "70%",
+            border: "4px solid rgba(247,147,30,0.1)",
+            borderBottom: "4px solid #f7931e",
+            borderRadius: "50%",
+            animation: "spinReverse 1.2s linear infinite",
+            "@keyframes spinReverse": {
+              "0%": { transform: "rotate(0deg)" },
+              "100%": { transform: "rotate(-360deg)" }
+            }
+          }}
+        />
+        <Box
+          sx={{
+            width: "20px",
+            height: "20px",
+            background: "linear-gradient(135deg, #611463, #f7931e)",
+            borderRadius: "50%",
+            animation: "pulse 1.5s infinite ease-in-out",
+          }}
+        />
+      </Box>
+
+      <Typography
+        variant="h6"
+        sx={{
+          color: "#611463",
+          mt: 2,
+          fontSize: "1.1rem",
+          fontWeight: 500,
+          letterSpacing: "1px",
+          animation: "fadeInOut 1.5s infinite ease-in-out",
+          "@keyframes fadeInOut": {
+            "0%": { opacity: 0.5 },
+            "50%": { opacity: 1 },
+            "100%": { opacity: 0.5 }
+          }
+        }}
+      >
+        ກຳລັງໂຫຼດ...
+      </Typography>
+
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-          background: "white",
-          overflow: "hidden",
-          position: "relative"
+          mt: 1,
+          gap: "8px",
+          alignItems: "center"
         }}
       >
-        {/* Background decorative elements */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: "10%",
-            left: "10%",
-            width: "200px",
-            height: "200px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(97,20,99,0.05) 0%, rgba(97,20,99,0) 70%)",
-            animation: "pulse 3s infinite ease-in-out",
-            "@keyframes pulse": {
-              "0%": { transform: "scale(1)", opacity: 0.3 },
-              "50%": { transform: "scale(1.1)", opacity: 0.1 },
-              "100%": { transform: "scale(1)", opacity: 0.3 }
-            }
-          }}
-        />
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: "15%",
-            right: "10%",
-            width: "180px",
-            height: "180px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(247,147,30,0.05) 0%, rgba(247,147,30,0) 70%)",
-            animation: "pulse 3s infinite ease-in-out 1s",
-          }}
-        />
-
-        {/* Main loading spinner with custom animation */}
-        <Box
-          sx={{
-            position: "relative",
-            width: "120px",
-            height: "120px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            mb: 2
-          }}
-        >
-          {/* Outer spinning circle - purple */}
+        {[0, 1, 2].map((i) => (
           <Box
+            key={i}
             sx={{
-              position: "absolute",
-              width: "100%",
-              height: "100%",
-              border: "4px solid rgba(97,20,99,0.1)",
-              borderTop: "4px solid #611463",
+              width: "8px",
+              height: "8px",
+              backgroundColor: i === 1 ? "#f7931e" : "#611463",
               borderRadius: "50%",
-              animation: "spin 1.5s linear infinite",
-              "@keyframes spin": {
-                "0%": { transform: "rotate(0deg)" },
-                "100%": { transform: "rotate(360deg)" }
+              opacity: 0.7,
+              animation: "bounce 1.4s infinite ease-in-out",
+              animationDelay: `${i * 0.2}s`,
+              "@keyframes bounce": {
+                "0%, 100%": { transform: "scale(1)" },
+                "50%": { transform: "scale(1.5)" }
               }
             }}
           />
-
-          {/* Inner spinning circle - orange */}
-          <Box
-            sx={{
-              position: "absolute",
-              width: "70%",
-              height: "70%",
-              border: "4px solid rgba(247,147,30,0.1)",
-              borderBottom: "4px solid #f7931e",
-              borderRadius: "50%",
-              animation: "spinReverse 1.2s linear infinite",
-              "@keyframes spinReverse": {
-                "0%": { transform: "rotate(0deg)" },
-                "100%": { transform: "rotate(-360deg)" }
-              }
-            }}
-          />
-
-          {/* Center pulsing dot - mix */}
-          <Box
-            sx={{
-              width: "20px",
-              height: "20px",
-              background: "linear-gradient(135deg, #611463, #f7931e)",
-              borderRadius: "50%",
-              animation: "pulse 1.5s infinite ease-in-out",
-            }}
-          />
-        </Box>
-
-        {/* Loading text with animation */}
-        <Typography
-          variant="h6"
-          sx={{
-            color: "#611463",
-            mt: 2,
-            fontSize: "1.1rem",
-            fontWeight: 500,
-            letterSpacing: "1px",
-            animation: "fadeInOut 1.5s infinite ease-in-out",
-            "@keyframes fadeInOut": {
-              "0%": { opacity: 0.5 },
-              "50%": { opacity: 1 },
-              "100%": { opacity: 0.5 }
-            }
-          }}
-        >
-          ກຳລັງໂຫຼດ...
-        </Typography>
-
-        {/* Animated progress dots - alternating colors */}
-        <Box
-          sx={{
-            display: "flex",
-            mt: 1,
-            gap: "8px",
-            alignItems: "center"
-          }}
-        >
-          {[0, 1, 2].map((i) => (
-            <Box
-              key={i}
-              sx={{
-                width: "8px",
-                height: "8px",
-                backgroundColor: i === 1 ? "#f7931e" : "#611463",
-                borderRadius: "50%",
-                opacity: 0.7,
-                animation: "bounce 1.4s infinite ease-in-out",
-                animationDelay: `${i * 0.2}s`,
-                "@keyframes bounce": {
-                  "0%, 100%": { transform: "scale(1)" },
-                  "50%": { transform: "scale(1.5)" }
-                }
-              }}
-            />
-          ))}
-        </Box>
+        ))}
       </Box>
-    );
+    </Box>
+  );
+
+  // Show loading if data is still loading or serviceData is not ready
+  if (loading || !serviceData) {
+    return <LoadingComponent />;
   }
 
   return (
@@ -504,7 +402,7 @@ const ServiceDetailsPage = () => {
 
         <Box sx={{ px: { xs: 2, sm: 3 }, width: "100%" }}>
           {/* Car details section - Only shown for category ID 5 */}
-          {showCarDetails && (
+          {showCarDetails && serviceData.carBrand && (
             <>
               <Box sx={{
                 display: "flex",
@@ -513,7 +411,7 @@ const ServiceDetailsPage = () => {
                 gap: 3,
                 mb: 4
               }}>
-                {/* Left side: Car image with gradient overlay */}
+                {/* Left side: Car image */}
                 <Box sx={{
                   width: { xs: "100%", md: "40%" },
                   height: { xs: 200, md: 250 },
@@ -526,13 +424,13 @@ const ServiceDetailsPage = () => {
                 }}>
                   <img
                     src={serviceData.carImage}
+                    alt="Employee car"
                     style={{
                       width: "100%",
                       height: "100%",
                       objectFit: "cover",
                     }}
                   />
-                  {/* Overlay gradient for better text visibility */}
                 </Box>
 
                 {/* Right side: Vehicle information */}
@@ -561,7 +459,6 @@ const ServiceDetailsPage = () => {
                     }}
                   >
                     <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
-                      {/* Car details grid */}
                       <Grid container spacing={2} sx={{ mb: 2 }}>
                         <Grid item xs={6}>
                           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
@@ -596,7 +493,7 @@ const ServiceDetailsPage = () => {
             </>
           )}
 
-          {/* Skills section with improved card design */}
+          {/* Skills section */}
           <Typography sx={{
             fontSize: fontSize.subtitle,
             fontWeight: "600",
@@ -631,7 +528,7 @@ const ServiceDetailsPage = () => {
             </CardContent>
           </Card>
 
-          {/* Reviews section with enhanced cards */}
+          {/* Reviews section */}
           <Typography sx={{
             fontSize: fontSize.subtitle,
             fontWeight: "600",
@@ -644,79 +541,104 @@ const ServiceDetailsPage = () => {
             ລີວິວຈາກລູກຄ້າ
           </Typography>
 
-          <Stack spacing={2} sx={{ mb: 4 }}>
-            {serviceData.reviews.map((review) => (
-              <Card
-                key={review.id}
-                sx={{
-                  borderRadius: 4,
-                  boxShadow: "0 4px 15px rgba(0,0,0,0.06)",
-                  border: "1px solid rgba(0,0,0,0.03)",
-                  overflow: "hidden",
-                  transition: "transform 0.2s, box-shadow 0.2s",
-                  "&:hover": {
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
-                  }
-                }}
-              >
-                <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
-                  <Box sx={{ display: "flex", alignItems: "flex-start" }}>
-                    <Avatar
-                      sx={{
-                        width: 45,
-                        height: 45,
-                        mr: 2,
-                        bgcolor: "#611463"
-                      }}
-                    >
-                      {review.user.charAt(0)}
-                    </Avatar>
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Box sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 0.7
-                      }}>
+          {serviceData.reviews && serviceData.reviews.length > 0 ? (
+            <Stack spacing={2} sx={{ mb: 4 }}>
+              {serviceData.reviews.map((review: any) => (
+                <Card
+                  key={review.id}
+                  sx={{
+                    borderRadius: 4,
+                    boxShadow: "0 4px 15px rgba(0,0,0,0.06)",
+                    border: "1px solid rgba(0,0,0,0.03)",
+                    overflow: "hidden",
+                    transition: "transform 0.2s, box-shadow 0.2s",
+                    "&:hover": {
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
+                    }
+                  }}
+                >
+                  <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+                    <Box sx={{ display: "flex", alignItems: "flex-start" }}>
+                      <Avatar
+                        sx={{
+                          width: 45,
+                          height: 45,
+                          mr: 2,
+                          bgcolor: "#611463"
+                        }}
+                      >
+                        {review.user.charAt(review.user.indexOf(' ') + 1)}
+                      </Avatar>
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Box sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          mb: 0.7
+                        }}>
+                          <Typography sx={{
+                            fontSize: fontSize.text,
+                            fontWeight: "600"
+                          }}>
+                            {review.user}
+                          </Typography>
+                          <Typography sx={{
+                            fontSize: "0.75rem",
+                            color: "text.secondary"
+                          }}>
+                            {review.date}
+                          </Typography>
+                        </Box>
+                        <Rating
+                          value={review.rating}
+                          readOnly
+                          size="small"
+                          sx={{
+                            mb: 1,
+                            "& .MuiRating-iconFilled": {
+                              color: "#FFD700",
+                            },
+                          }}
+                        />
                         <Typography sx={{
                           fontSize: fontSize.text,
-                          fontWeight: "600"
+                          color: "#424242",
+                          fontStyle: "italic"
                         }}>
-                          {review.user}
-                        </Typography>
-                        <Typography sx={{
-                          fontSize: "0.75rem",
-                          color: "text.secondary"
-                        }}>
-                          {review.date}
+                          "{review.comment}"
                         </Typography>
                       </Box>
-                      <Rating
-                        value={review.rating}
-                        readOnly
-                        size="small"
-                        sx={{
-                          mb: 1,
-                          "& .MuiRating-iconFilled": {
-                            color: "#FFD700",
-                          },
-                        }}
-                      />
-                      <Typography sx={{
-                        fontSize: fontSize.text,
-                        color: "#424242",
-                        fontStyle: "italic"
-                      }}>
-                        "{review.comment}"
-                      </Typography>
                     </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </Stack>
-          {/* Button container with floating effect */}
+                  </CardContent>
+                </Card>
+              ))}
+            </Stack>
+          ) : (
+            <Card
+              elevation={2}
+              sx={{
+                p: { xs: 0, sm: 0 },
+                borderRadius: 4,
+                mb: 4,
+                boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
+                overflow: "hidden",
+                border: "1px solid rgba(0,0,0,0.05)",
+              }}
+            >
+              <CardContent sx={{ p: { xs: 2.5, sm: 3 }, textAlign: "center" }}>
+                <Typography sx={{
+                  fontSize: fontSize.text,
+                  color: "#757575",
+                  fontStyle: "italic"
+                }}>
+                  ຍັງບໍ່ມີລີວິວສຳລັບບໍລິການນີ້
+                </Typography>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Button container */}
           <Paper
             elevation={3}
             sx={{

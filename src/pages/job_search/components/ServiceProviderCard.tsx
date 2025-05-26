@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Button, Typography, Divider } from "@mui/material";
 import StarIcon from '@mui/icons-material/Star';
+import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import PersonIcon from '@mui/icons-material/Person';
 import HomeIcon from '@mui/icons-material/Home';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
@@ -52,7 +53,7 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
   const showCarDetails = cat_id === 5 && !!carId;
   
   // Debug info
-  console.log(`Card ${id}: cat_id=${cat_id}, showCarDetails=${showCarDetails}, carId=${carId}`);
+  console.log(`Card ${id}: cat_id=${cat_id}, showCarDetails=${showCarDetails}, carId=${carId}, rating=${rating}`);
   if (showCarDetails) {
     console.log(`Car details for ${id}: Brand=${carBrand}, Model=${carModel}, Plate=${licensePlate}`);
   }
@@ -67,12 +68,50 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
     navigate(`/service-detail/${id}`);
   };
 
-  const safeRating: number = (Number.isInteger(rating) && rating >= 0 && rating <= 5) ? rating : 5;
+  // Enhanced rating validation and processing
+  const safeRating: number = (() => {
+    // Convert rating to number if it's a string
+    const numRating = typeof rating === 'string' ? parseFloat(rating) : rating;
+    
+    // Validate rating is a valid number between 1 and 5
+    if (isNaN(numRating) || numRating < 1 || numRating > 5) {
+      console.warn(`Invalid rating ${rating} for employee ${id}, defaulting to 5`);
+      return 5;
+    }
+    
+    // Round to nearest integer for star display
+    return Math.round(numRating);
+  })();
+
+  // Helper function to render stars
+  const renderStars = () => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <Box key={i} sx={{ position: 'relative', display: 'inline-block' }}>
+          {i <= safeRating ? (
+            <StarIcon sx={{ 
+              fontSize: 16, 
+              color: '#FFD700',
+              filter: 'drop-shadow(0 1px 2px rgba(255, 215, 0, 0.3))'
+            }} />
+          ) : (
+            <StarOutlineIcon sx={{ 
+              fontSize: 16, 
+              color: '#E0E0E0',
+              opacity: 0.6
+            }} />
+          )}
+        </Box>
+      );
+    }
+    return stars;
+  };
 
   return (
     <Box
       sx={{
-        width: '100n%',
+        width: '100%',
         border: '1px solid #eee',
         borderRadius: 2,
         overflow: 'hidden',
@@ -97,10 +136,26 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
       <Box sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{name || 'N/A'} {surname || ''}</Typography>
-          <Box sx={{ display: 'flex' }}>
-            {[...Array(safeRating)].map((_, i) => (
-              <StarIcon key={i} sx={{ fontSize: 16, color: '#FFD700' }} />
-            ))}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            background: 'rgba(255, 215, 0, 0.1)',
+            borderRadius: '12px',
+            padding: '4px 8px',
+            border: '1px solid rgba(255, 215, 0, 0.3)'
+          }}>
+            {renderStars()}
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                ml: 0.5, 
+                fontWeight: 'bold', 
+                color: '#FF8C00',
+                fontSize: '0.75rem'
+              }}
+            >
+              {safeRating}/5
+            </Typography>
           </Box>
         </Box>
 
