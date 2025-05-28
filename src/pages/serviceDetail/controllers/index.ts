@@ -4,10 +4,12 @@ import { EmployeeModel } from "../../../models/employee";
 import axios from "axios";
 import { CarModel } from "../../../models/car";
 
-// Comment interface based on the API response structure
+// Updated Comment interface based on the API response structure
 interface CommentModel {
   id: number;
   users_id: number;
+  first_name: string;  // Real first name from API
+  last_name: string;   // Real last name from API
   employees_id: number;
   message: string;
   rating: number;
@@ -98,42 +100,72 @@ const useMainController = () => {
   // Process comments into review format for UI display
   const processCommentsToReviews = (commentsData: CommentModel[]): ProcessedReview[] => {
     return commentsData.map((comment) => {
-      // Format date to Lao format (you might want to adjust this)
+      // Format date to Lao format
       const formatDate = (dateString: string): string => {
-        const date = new Date(dateString);
-        const day = date.getDate();
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-        
-        // Lao month names
-        const laoMonths = [
-          'ມັງກອນ', 'ກຸມພາ', 'ມີນາ', 'ເມສາ', 'ພຶດສະພາ', 'ມິຖຸນາ',
-          'ກໍລະກົດ', 'ສິງຫາ', 'ກັນຍາ', 'ຕຸລາ', 'ພະຈິກ', 'ທັນວາ'
-        ];
-        
-        return `${day} ${laoMonths[month - 1]} ${year}`;
+        try {
+          // Parse the ISO date string
+          const date = new Date(dateString);
+          
+          // Check if date is valid
+          if (isNaN(date.getTime())) {
+            return 'ວັນທີບໍ່ຖືກຕ້ອງ';
+          }
+          
+          const day = date.getDate();
+          const month = date.getMonth() + 1;
+          const year = date.getFullYear();
+          
+          // Lao month names
+          const laoMonths = [
+            'ມັງກອນ', 'ກຸມພາ', 'ມີນາ', 'ເມສາ', 'ພຶດສະພາ', 'ມິຖຸນາ',
+            'ກໍລະກົດ', 'ສິງຫາ', 'ກັນຍາ', 'ຕຸລາ', 'ພະຈິກ', 'ທັນວາ'
+          ];
+          
+          return `${day} ${laoMonths[month - 1]} ${year}`;
+        } catch (error) {
+          console.error('Error formatting date:', error);
+          return 'ວັນທີບໍ່ຖືກຕ້ອງ';
+        }
       };
 
-      // Generate user display name (you might want to fetch actual user data)
-      const generateUserName = (userId: number): string => {
-        // This is a placeholder - you might want to fetch actual user names from a users API
-        const userPrefixes = ['ນາງ', 'ທ້າວ', 'ນາງສາວ'];
-        const userNames = [
-          'ກອນນະລີ', 'ສົມສະໄໝ', 'ວັນນິດາ', 'ສີສະຫວ່າງ', 'ພອນທິບ', 
-          'ມາລາວັນ', 'ສຸວັນນາ', 'ບົວລ້ຽວ', 'ເພັດດາວ', 'ອັນສອນ'
-        ];
+      // Use real first_name and last_name from API response
+      const getUserDisplayName = (firstName: string, lastName: string): string => {
+        // Clean and capitalize the names
+        const cleanFirstName = firstName?.trim() || '';
+        const cleanLastName = lastName?.trim() || '';
         
-        const prefixIndex = userId % userPrefixes.length;
-        const nameIndex = userId % userNames.length;
+        // Capitalize first letter of each name
+        const capitalizeFirstLetter = (str: string): string => {
+          return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+        };
+
+        const formattedFirstName = capitalizeFirstLetter(cleanFirstName);
+        const formattedLastName = capitalizeFirstLetter(cleanLastName);
         
-        return `${userPrefixes[prefixIndex]} ${userNames[nameIndex]}`;
+        // If both names exist, combine them
+        if (formattedFirstName && formattedLastName) {
+          return `${formattedFirstName} ${formattedLastName}`;
+        }
+        
+        // If only first name exists
+        if (formattedFirstName) {
+          return formattedFirstName;
+        }
+        
+        // If only last name exists
+        if (formattedLastName) {
+          return formattedLastName;
+        }
+        
+        // Fallback if no names are provided
+        return `ຜູ້ໃຊ້ງານ ${comment.users_id}`;
       };
 
       return {
         id: comment.id,
         rating: comment.rating,
         comment: comment.message,
-        user: generateUserName(comment.users_id),
+        user: getUserDisplayName(comment.first_name, comment.last_name),
         date: formatDate(comment.created_at),
         userId: comment.users_id
       };
