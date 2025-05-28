@@ -1,4 +1,4 @@
-// controller.ts
+// controller.ts - Fixed version with deduplication
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -212,6 +212,21 @@ const useMainController = () => {
     return userId;
   };
   
+  // Helper function to deduplicate services by ID
+  const deduplicateServices = (services: Service[]): Service[] => {
+    const seen = new Set<number>();
+    const deduped: Service[] = [];
+    
+    for (const service of services) {
+      if (!seen.has(service.id)) {
+        seen.add(service.id);
+        deduped.push(service);
+      }
+    }
+    
+    return deduped;
+  };
+  
   // Transform API response to Service objects
   const transformServiceData = async (serviceOrders: ServiceOrder[]): Promise<Service[]> => {
     const accessToken = getAccessToken();
@@ -368,19 +383,38 @@ const useMainController = () => {
       
       console.log("API Response:", response.data); // Debug log
       
-      // Process API response
+      // Process API response - SIMPLIFIED LOGIC
       if (response.data) {
-        // Check if the data is wrapped in a 'data' property
-        const serviceData = response.data.data 
-          ? (Array.isArray(response.data.data) ? response.data.data : [response.data.data])
-          : (Array.isArray(response.data) ? response.data : [response.data]);
+        let serviceData: any[] = [];
+        
+        // Handle different response structures more cleanly
+        if (Array.isArray(response.data)) {
+          // If response.data is directly an array
+          serviceData = response.data;
+        } else if (response.data.data && Array.isArray(response.data.data)) {
+          // If data is nested in response.data.data
+          serviceData = response.data.data;
+        } else if (response.data.data) {
+          // If data is a single object nested in response.data.data
+          serviceData = [response.data.data];
+        } else {
+          // If response.data is a single object
+          serviceData = [response.data];
+        }
+        
+        console.log("Processed service data:", serviceData); // Debug log
         
         if (serviceData.length > 0) {
           // Transform API data to our service format
           const transformedServices = await transformServiceData(serviceData);
           
+          // CRITICAL: Deduplicate services by ID before sorting
+          const uniqueServices = deduplicateServices(transformedServices);
+          
+          console.log("Unique services after deduplication:", uniqueServices.length); // Debug log
+          
           // Sort services by date (latest first)
-          const sortedServices = transformedServices.sort((a, b) => {
+          const sortedServices = uniqueServices.sort((a, b) => {
             return new Date(b.date).getTime() - new Date(a.date).getTime();
           });
           

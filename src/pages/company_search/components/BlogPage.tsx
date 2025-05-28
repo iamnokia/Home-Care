@@ -576,26 +576,7 @@ const ServiceListing: React.FC = () => {
                     position: "relative",
                   }}
                 >
-                  {/* Status Chip */}
-                  <Box sx={{ 
-                    display: "flex", 
-                    justifyContent: isMobile ? "flex-start" : "flex-end",
-                    width: "100%",
-                    mb: 2
-                  }}>
-                    <Chip 
-                      label={translateStatus(service.status)} 
-                      sx={{
-                        bgcolor: getStatusColor(service.status).bg,
-                        color: getStatusColor(service.status).color,
-                        fontWeight: "600",
-                        fontSize: "0.75rem",
-                        height: 28,
-                        px: 1,
-                        borderRadius: "8px"
-                      }}
-                    />
-                  </Box>
+             
                   
                   {/* Service Card */}
                   <Paper

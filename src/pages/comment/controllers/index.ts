@@ -4,7 +4,7 @@ import axios from "axios";
 import { AlertColor } from "@mui/material/Alert";
 import { HOME_PATH, COMMENT_PATH } from "../../../routes/path";
 import { Gender } from "../../../enums/gender";
-import { useSelector } from "react-redux"; // Import useSelector from react-redux
+import { useSelector } from "react-redux";
 
 // Interface for service details
 export interface ServiceDetail {
@@ -60,7 +60,6 @@ export const placeholderData: ServiceDetail[] = [
     priceFormatted: "150,000 KIP",
     service: "ທຳຄວາມສະອາດ",
     cat_id: 3,
-    // Order details from sample data
     orderId: "13",
     orderDate: new Date("2025-04-10T14:45:31.000Z").toLocaleDateString('en-US', { 
       year: 'numeric', month: 'short', day: 'numeric' 
@@ -193,7 +192,7 @@ const useCommentController = () => {
       });
       
       // Process response data
-      setData(Array.isArray(res.data) ? res.data : [res.data]); // Handle both array and single object responses
+      setData(Array.isArray(res.data) ? res.data : [res.data]);
       setError(null);
       
       return res.data;
@@ -214,16 +213,15 @@ const useCommentController = () => {
           'Content-Type': 'application/json'
         }
       });
-      setCar(Array.isArray(res.data) ? res.data : [res.data]); // Handle both array and single object responses
+      setCar(Array.isArray(res.data) ? res.data : [res.data]);
       return res.data;
     } catch (error) {
       console.error("Error fetching car data:", error);
-      // Don't set error state here as car data might be optional
       return Promise.reject(error);
     }
   };
 
-  // NEW FUNCTION: Update employee status to active
+  // Update employee status to active
   const handleUpdateEmployeeStatus = async (employeeId: string | number): Promise<void> => {
     try {
       console.log(`Updating employee ${employeeId} status to active`);
@@ -235,8 +233,6 @@ const useCommentController = () => {
         console.error("Invalid employee ID for status update:", employeeId);
         return;
       }
-      
-      setLoading(true);
       
       await axios.put(
         `https://homecare-pro.onrender.com/employees/update_employees/${numericId}`,
@@ -251,9 +247,94 @@ const useCommentController = () => {
       console.log(`Successfully updated employee ${employeeId} status to active`);
     } catch (error) {
       console.error(`Error updating employee ${employeeId} status:`, error);
+    }
+  };
+
+  // NEW: Create service order directly (backup method from comment page)
+  const createServiceOrderDirect = async (): Promise<any> => {
+    try {
+      console.log("=== Creating Service Order from Comment Page ===");
+      
+      // Get necessary data
+      const employeeId = id || 
+                         (serviceDetails.length > 0 ? serviceDetails[0].id : null) || 
+                         localStorage.getItem('lastEmployeeId');
+      const categoryId = serviceDetails.length > 0 ? serviceDetails[0].cat_id : null;
+      const userId = authUser?.id;
+      const addressId = localStorage.getItem('selectedAddressId') || "7";
+      const amount = totalAmount || (serviceDetails.length > 0 ? serviceDetails[0].price : 0);
+      
+      console.log("Service order data from comment page:", {
+        employeeId,
+        categoryId,
+        userId,
+        addressId,
+        amount
+      });
+      
+      // Validate required data - if any is missing, skip service order creation
+      if (!userId) {
+        console.log("User ID not found - skipping service order creation");
+        return null;
+      }
+      
+      if (!employeeId) {
+        console.log("Employee ID not found - skipping service order creation");
+        return null;
+      }
+      
+      if (!categoryId) {
+        console.log("Category ID not found - skipping service order creation");
+        return null;
+      }
+
+      if (!amount || amount <= 0) {
+        console.log("Invalid amount - skipping service order creation");
+        return null;
+      }
+      
+      // Create service order payload
+      const serviceOrderPayload = {
+        user_id: parseInt(userId.toString()),
+        employees_id: parseInt(employeeId.toString()),
+        cat_id: parseInt(categoryId.toString()),
+        address_users_detail_id: parseInt(addressId.toString()),
+        amount: amount,
+        payment_status: "paid",
+        service_status: "Not Start"
+      };
+      
+      console.log("Creating service order from comment page with payload:", serviceOrderPayload);
+      
+      // Make API call to create service order
+      const response = await axios.post(
+        "https://homecare-pro.onrender.com/service_order/create",
+        serviceOrderPayload,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      console.log("Service order created successfully from comment page:", response.data);
+      
+      // Store service order ID in localStorage for reference
+      if (response.data?.id) {
+        localStorage.setItem('lastOrderId', response.data.id.toString());
+        console.log("Stored service order ID from comment page:", response.data.id);
+      }
+      
+      return response.data;
+      
+    } catch (error) {
+      console.error("Error creating service order from comment page:", error);
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+      }
       // Don't throw error here to prevent disrupting the comment submission flow
-    } finally {
-      setLoading(false);
+      return null;
     }
   };
 
@@ -301,7 +382,7 @@ const useCommentController = () => {
     setAlertOpen(true);
   };
 
-  // Get service order if available (with optional orderId parameter)
+  // Get service order if available
   const getServiceOrder = async (orderId?: string): Promise<any> => {
     try {
       // Get the last order ID from localStorage or use the provided orderId
@@ -370,11 +451,9 @@ const useCommentController = () => {
       return null;
     } catch (error) {
       console.error("Error fetching service order:", error);
-      // Don't set error state here as order data might be optional
       
       // Use fallback order if no real order is available and we have no service details yet
       if (serviceDetails.length === 0) {
-        // This will ensure we at least have the fallback data
         setServiceDetails(placeholderData);
         
         // Set billing data based on fallback
@@ -395,7 +474,7 @@ const useCommentController = () => {
     }
   };
 
-  // UPDATED: Handle comment submission with employee status update
+  // UPDATED: Handle comment submission with employee status update AND service order creation
   const handleCommentSubmit = async (): Promise<void> => {
     if (comment.trim() === "") {
       setAlertMessage("ກະລຸນາໃສ່ຄຳເຫັນຂອງທ່ານ!");
@@ -422,7 +501,7 @@ const useCommentController = () => {
                          localStorage.getItem('lastEmployeeId') || 
                          "0";
       
-      // Use the authenticated user's ID instead of hardcoding user ID
+      // Use the authenticated user's ID
       const userId = authUser.id;
       
       // Prepare comment data for API
@@ -448,6 +527,15 @@ const useCommentController = () => {
       );
 
       console.log("Comment created successfully:", response.data);
+
+      // NEW: Try to create service order as additional step (won't interrupt existing flow)
+      try {
+        console.log("=== ATTEMPTING SERVICE ORDER CREATION FROM COMMENT PAGE ===");
+        await createServiceOrderDirect();
+      } catch (serviceOrderError) {
+        console.error("Service order creation from comment page failed (this is okay):", serviceOrderError);
+        // Don't let this error affect the comment submission process
+      }
 
       // Update employee status to active
       if (employeeId) {
@@ -484,8 +572,15 @@ const useCommentController = () => {
         console.error("Error updating employee status:", statusError);
       }
       
+      // NEW: Try to create service order as backup even if comment failed
+      try {
+        console.log("=== ATTEMPTING SERVICE ORDER CREATION FROM COMMENT PAGE (FALLBACK) ===");
+        await createServiceOrderDirect();
+      } catch (serviceOrderError) {
+        console.error("Fallback service order creation from comment page failed (this is okay):", serviceOrderError);
+      }
+      
       // Still let the user know it worked even if the API failed
-      // This way the UI remains usable even with API issues
       setAlertMessage("ສົ່ງຄຳເຫັນສຳເລັດແລ້ວ!");
       setAlertSeverity("success");
       setAlertOpen(true);
@@ -516,7 +611,7 @@ const useCommentController = () => {
           if (employee.address && typeof employee.address === 'string' && employee.address.trim() !== '') {
             village = employee.address.split(',')[0]?.trim() || employee.address;
           }
-  
+
           // Format price with commas
           const formatPrice = (price): string => {
             try {
@@ -527,20 +622,20 @@ const useCommentController = () => {
               return "0 KIP";
             }
           };
-  
+
           // Calculate age (placeholder)
           const calculateAge = (): number => {
             try {
               const createdDate = new Date(employee.created_at);
               const today = new Date();
               const age = today.getFullYear() - createdDate.getFullYear();
-              return age > 0 ? age : 21; // Default to 21 if calculation fails
+              return age > 0 ? age : 21;
             } catch (error) {
               console.warn("Error calculating age:", error);
-              return 21; // Default age
+              return 21;
             }
           };
-  
+
           // Map gender enum to display text
           let genderText = "ຍິງ"; // Default to female
           try {
@@ -550,7 +645,7 @@ const useCommentController = () => {
           } catch (error) {
             console.warn("Error processing gender:", error);
           }
-  
+
           // Safely extract the numeric category ID
           let categoryId: number | undefined;
           try {
@@ -559,7 +654,6 @@ const useCommentController = () => {
                 ? parseInt(employee.cat_id, 10) 
                 : employee.cat_id;
               
-              // Check if parsing resulted in NaN
               if (isNaN(categoryId)) {
                 categoryId = undefined;
               }
@@ -568,7 +662,7 @@ const useCommentController = () => {
             console.error(`Error parsing cat_id for employee ${employee.id}:`, error);
             categoryId = undefined;
           }
-  
+
           // Initialize service object with basic information
           const serviceObject: ServiceDetail = {
             id: employee.id || "unknown",
@@ -584,20 +678,17 @@ const useCommentController = () => {
             priceFormatted: formatPrice(employee.price),
             service: employee.cat_name || "ບໍລິການ",
             cat_id: categoryId,
-            // Basic car details from employee (these might be null/undefined)
             carId: employee?.car_id,
             carBrand: employee?.car_brand,
             carModel: employee?.car_model,
             licensePlate: employee?.license_plate,
           };
-  
+
           // For category ID 5 (moving service), try to find matching car data
           if (categoryId === 5 && car && car.length > 0) {
-            // Find car that belongs to this employee
             const employeeCar = car.find(c => c.emp_id === employee.id);
             
             if (employeeCar) {
-              // Update with detailed car information
               serviceObject.carId = employeeCar.id || serviceObject.carId;
               serviceObject.carBrand = employeeCar.car_brand || serviceObject.carBrand;
               serviceObject.carModel = employeeCar.model || serviceObject.carModel;
@@ -607,7 +698,7 @@ const useCommentController = () => {
               serviceObject.carImage = employeeCar.car_image || "/api/placeholder/400/300";
             }
           }
-  
+
           return serviceObject;
         });
         
@@ -629,7 +720,6 @@ const useCommentController = () => {
     }
     
     if (shouldUsePlaceholder || error || (!loading && (!data || data.length === 0))) {
-      // Use placeholder data when there's an error or invalid data
       console.log("Using placeholder data due to error or invalid data");
       mappedServices = placeholderData;
     }
@@ -846,7 +936,8 @@ const useCommentController = () => {
     formatCurrency,
     generateReceiptNumber,
     navigate,
-    handleUpdateEmployeeStatus
+    handleUpdateEmployeeStatus,
+    createServiceOrderDirect // Export the service order creation function
   };
 };
 
