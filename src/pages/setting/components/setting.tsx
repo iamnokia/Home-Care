@@ -1,4 +1,4 @@
-// SettingsPage.tsx - UI Component
+// SettingsPage.tsx - Updated with Theme Settings
 import React, { useState, useEffect, useRef } from "react";
 import {
     Box,
@@ -30,7 +30,14 @@ import {
     DialogActions,
     DialogContentText,
     Chip,
-    Badge
+    Badge,
+    Switch,
+    FormControlLabel,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    ListItemSecondaryAction
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -45,11 +52,15 @@ import ImageIcon from "@mui/icons-material/Image";
 import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import PaletteIcon from "@mui/icons-material/Palette";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
 import LOGO_HOMECARE from "../../../assets/icons/HomeCareLogo.png";
 import { CONTACT_US_PATH } from "../../../routes/path";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../../store";
+import { useThemeMode } from "../../../context/ThemeContext"; // Import the theme context
 import {
     ProfileFormData,
     PasswordFormData,
@@ -80,6 +91,7 @@ const SettingsPage = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { isDarkMode, toggleTheme, themeName } = useThemeMode(); // Use theme context
     
     // Get user data from Redux
     const { loggedIn, data: userData } = useSelector((state: RootState) => state.auth);
@@ -242,7 +254,15 @@ const SettingsPage = () => {
         setNotification(prev => ({ ...prev, open: false }));
     };
 
-    // Avatar Component with Enhanced Beauty
+    const handleThemeToggle = () => {
+        toggleTheme();
+        setNotification(createNotification(
+            `ປ່ຽນເປັນ${!isDarkMode ? 'ໂໝດມືດ' : 'ໂໝດແຈ້ງ'}ສຳເລັດແລ້ວ!`, 
+            "success"
+        ));
+    };
+
+    // Avatar Component with Enhanced Beauty (same as before)
     const AvatarSection = () => {
         const hasAvatar = userData?.avatar || avatarState.preview;
         const avatarSrc = getAvatarSource(userData, avatarState.preview);
@@ -255,15 +275,21 @@ const SettingsPage = () => {
                 flexDirection: "column", 
                 alignItems: "center",
                 p: 4,
-                background: "linear-gradient(145deg, rgba(97, 20, 99, 0.05) 0%, rgba(247, 147, 30, 0.05) 100%)",
+                background: isDarkMode 
+                    ? "linear-gradient(145deg, rgba(142, 36, 170, 0.1) 0%, rgba(255, 167, 38, 0.1) 100%)"
+                    : "linear-gradient(145deg, rgba(97, 20, 99, 0.05) 0%, rgba(247, 147, 30, 0.05) 100%)",
                 borderRadius: 6,
-                border: "2px solid rgba(97, 20, 99, 0.1)",
+                border: `2px solid ${isDarkMode ? 'rgba(142, 36, 170, 0.2)' : 'rgba(97, 20, 99, 0.1)'}`,
                 backdropFilter: "blur(10px)",
-                boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)",
+                boxShadow: isDarkMode 
+                    ? "0 20px 40px rgba(0, 0, 0, 0.3)" 
+                    : "0 20px 40px rgba(0, 0, 0, 0.1)",
                 "&:hover": {
                     transform: "translateY(-5px)",
-                    boxShadow: "0 30px 60px rgba(0, 0, 0, 0.15)",
-                    border: "2px solid rgba(247, 147, 30, 0.3)"
+                    boxShadow: isDarkMode 
+                        ? "0 30px 60px rgba(0, 0, 0, 0.4)" 
+                        : "0 30px 60px rgba(0, 0, 0, 0.15)",
+                    border: `2px solid ${isDarkMode ? 'rgba(255, 167, 38, 0.4)' : 'rgba(247, 147, 30, 0.3)'}`
                 },
                 transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
             }}>
@@ -275,19 +301,9 @@ const SettingsPage = () => {
                         right: 10,
                         width: 60,
                         height: 60,
-                        background: "linear-gradient(135deg, rgba(97, 20, 99, 0.1), rgba(247, 147, 30, 0.1))",
-                        borderRadius: "50%",
-                        zIndex: 0
-                    }}
-                />
-                <Box
-                    sx={{
-                        position: "absolute",
-                        bottom: 10,
-                        left: 10,
-                        width: 40,
-                        height: 40,
-                        background: "linear-gradient(135deg, rgba(247, 147, 30, 0.1), rgba(97, 20, 99, 0.1))",
+                        background: isDarkMode 
+                            ? "linear-gradient(135deg, rgba(142, 36, 170, 0.2), rgba(255, 167, 38, 0.2))"
+                            : "linear-gradient(135deg, rgba(97, 20, 99, 0.1), rgba(247, 147, 30, 0.1))",
                         borderRadius: "50%",
                         zIndex: 0
                     }}
@@ -327,35 +343,6 @@ const SettingsPage = () => {
                         }
                     >
                         <Box sx={{ position: "relative" }}>
-                            {/* Outer Glow Ring */}
-                            <Box
-                                sx={{
-                                    position: "absolute",
-                                    top: -8,
-                                    left: -8,
-                                    width: 180,
-                                    height: 180,
-                                    background: "linear-gradient(45deg, #611463, #f7931e, #611463)",
-                                    borderRadius: "50%",
-                                    opacity: 0.3,
-                                    animation: "pulse 2s infinite",
-                                    "@keyframes pulse": {
-                                        "0%": {
-                                            transform: "scale(1)",
-                                            opacity: 0.3
-                                        },
-                                        "50%": {
-                                            transform: "scale(1.05)",
-                                            opacity: 0.5
-                                        },
-                                        "100%": {
-                                            transform: "scale(1)",
-                                            opacity: 0.3
-                                        }
-                                    }
-                                }}
-                            />
-                            
                             {/* Avatar with Enhanced Design */}
                             <Avatar
                                 src={avatarSrc}
@@ -363,7 +350,9 @@ const SettingsPage = () => {
                                     width: 164,
                                     height: 164,
                                     border: "6px solid #ffffff",
-                                    boxShadow: "0 20px 40px rgba(0,0,0,0.2), inset 0 0 20px rgba(255,255,255,0.2)",
+                                    boxShadow: isDarkMode 
+                                        ? "0 20px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.1)"
+                                        : "0 20px 40px rgba(0,0,0,0.2), inset 0 0 20px rgba(255,255,255,0.2)",
                                     background: userData 
                                         ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" 
                                         : "linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%)",
@@ -372,27 +361,13 @@ const SettingsPage = () => {
                                     color: "white",
                                     position: "relative",
                                     overflow: "hidden",
-                                    "&::before": {
-                                        content: '""',
-                                        position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        background: "linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%, rgba(0,0,0,0.1) 100%)",
-                                        borderRadius: "inherit"
-                                    },
-                                    "&:hover": {
-                                        transform: "scale(1.02)",
-                                        boxShadow: "0 25px 50px rgba(0,0,0,0.25), inset 0 0 25px rgba(255,255,255,0.3)"
-                                    },
                                     transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
                                 }}
                             >
                                 {!avatarSrc && (userData ? displayName : <PersonIcon sx={{ fontSize: 80 }} />)}
                             </Avatar>
 
-                            {/* Upload Overlay with Beautiful Design */}
+                            {/* Upload Overlay */}
                             <Box
                                 sx={{
                                     position: "absolute",
@@ -400,7 +375,9 @@ const SettingsPage = () => {
                                     left: 12,
                                     right: 12,
                                     height: 40,
-                                    background: "linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6))",
+                                    background: isDarkMode 
+                                        ? "linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7))"
+                                        : "linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6))",
                                     backdropFilter: "blur(10px)",
                                     borderRadius: "20px",
                                     display: "flex",
@@ -429,14 +406,16 @@ const SettingsPage = () => {
                 {/* User Info Display */}
                 {userData && (
                     <Box sx={{ textAlign: "center", mb: 2, zIndex: 1 }}>
-                        <Typography variant="h6" fontWeight={700} color="#611463" gutterBottom>
+                        <Typography variant="h6" fontWeight={700} color="primary.main" gutterBottom>
                             {userData.first_name} {userData.last_name}
                         </Typography>
                         <Chip
                             label={userData.email}
                             sx={{
-                                background: "linear-gradient(45deg, rgba(97, 20, 99, 0.1), rgba(247, 147, 30, 0.1))",
-                                color: "#611463",
+                                background: isDarkMode 
+                                    ? "linear-gradient(45deg, rgba(142, 36, 170, 0.2), rgba(255, 167, 38, 0.2))"
+                                    : "linear-gradient(45deg, rgba(97, 20, 99, 0.1), rgba(247, 147, 30, 0.1))",
+                                color: "primary.main",
                                 fontWeight: 600,
                                 borderRadius: 3
                             }}
@@ -444,7 +423,7 @@ const SettingsPage = () => {
                     </Box>
                 )}
 
-                {/* Upload Controls with Beautiful Design */}
+                {/* Upload Controls */}
                 {avatarState.file && (
                     <Fade in={true}>
                         <Box sx={{ textAlign: "center", zIndex: 1, width: "100%" }}>
@@ -452,15 +431,12 @@ const SettingsPage = () => {
                                 sx={{
                                     p: 3,
                                     borderRadius: 4,
-                                    background: "linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9))",
-                                    backdropFilter: "blur(10px)",
-                                    border: "1px solid rgba(97, 20, 99, 0.1)",
                                     mb: 2
                                 }}
                             >
                                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 2 }}>
-                                    <ImageIcon sx={{ color: "#611463", mr: 1 }} />
-                                    <Typography variant="body2" fontWeight={600} color="#611463">
+                                    <ImageIcon sx={{ color: "primary.main", mr: 1 }} />
+                                    <Typography variant="body2" fontWeight={600} color="primary.main">
                                         ໄຟລ໌ທີ່ເລືອກ:
                                     </Typography>
                                 </Box>
@@ -470,8 +446,8 @@ const SettingsPage = () => {
                                     sx={{ 
                                         mb: 3, 
                                         maxWidth: "100%",
-                                        borderColor: "#f7931e",
-                                        color: "#f7931e",
+                                        borderColor: "secondary.main",
+                                        color: "secondary.main",
                                         fontWeight: 600
                                     }}
                                 />
@@ -484,21 +460,8 @@ const SettingsPage = () => {
                                             <CircularProgress size={18} color="inherit" /> : 
                                             <CheckCircleIcon />
                                         }
-                                        sx={{
-                                            background: "linear-gradient(45deg, #4caf50 30%, #66bb6a 90%)",
-                                            color: "white",
-                                            borderRadius: 3,
-                                            px: 3,
-                                            py: 1.5,
-                                            fontWeight: 600,
-                                            boxShadow: "0 4px 15px rgba(76, 175, 80, 0.3)",
-                                            "&:hover": {
-                                                background: "linear-gradient(45deg, #388e3c 30%, #4caf50 90%)",
-                                                transform: "translateY(-2px)",
-                                                boxShadow: "0 6px 20px rgba(76, 175, 80, 0.4)"
-                                            },
-                                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-                                        }}
+                                        color="success"
+                                        sx={{ borderRadius: 3, px: 3, py: 1.5, fontWeight: 600 }}
                                     >
                                         {avatarState.isUploading ? "ອັບໂຫລດ..." : "ບັນທຶກ"}
                                     </Button>
@@ -506,20 +469,8 @@ const SettingsPage = () => {
                                         variant="outlined"
                                         onClick={handleCancelAvatarChange}
                                         disabled={avatarState.isUploading}
-                                        sx={{
-                                            borderColor: "#f44336",
-                                            color: "#f44336",
-                                            borderRadius: 3,
-                                            px: 3,
-                                            py: 1.5,
-                                            fontWeight: 600,
-                                            "&:hover": {
-                                                borderColor: "#d32f2f",
-                                                backgroundColor: "rgba(244, 67, 54, 0.04)",
-                                                transform: "translateY(-2px)"
-                                            },
-                                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-                                        }}
+                                        color="error"
+                                        sx={{ borderRadius: 3, px: 3, py: 1.5, fontWeight: 600 }}
                                     >
                                         ຍົກເລີກ
                                     </Button>
@@ -548,8 +499,8 @@ const SettingsPage = () => {
                     <Fade in={true} timeout={500}>
                         <Box>
                             <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
-                                <PersonIcon sx={{ color: "#611463", mr: 2, fontSize: 28 }} />
-                                <Typography variant="h5" fontWeight={700} color="#611463">
+                                <PersonIcon sx={{ color: "primary.main", mr: 2, fontSize: 28 }} />
+                                <Typography variant="h5" fontWeight={700} color="primary.main">
                                     ຂໍ້ມູນບັນຊີ
                                 </Typography>
                             </Box>
@@ -589,28 +540,12 @@ const SettingsPage = () => {
                                         error={!!errors.username}
                                         helperText={errors.username}
                                         InputProps={{
-                                            sx: { 
-                                                borderRadius: 3,
-                                                backgroundColor: "rgba(255, 255, 255, 0.8)",
-                                                "&:hover": {
-                                                    backgroundColor: "rgba(255, 255, 255, 0.9)"
-                                                }
-                                            },
+                                            sx: { borderRadius: 3 },
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <PersonIcon sx={{ color: "#611463" }} />
+                                                    <PersonIcon sx={{ color: "primary.main" }} />
                                                 </InputAdornment>
                                             )
-                                        }}
-                                        sx={{
-                                            "& .MuiOutlinedInput-root": {
-                                                "&:hover fieldset": {
-                                                    borderColor: "#f7931e"
-                                                },
-                                                "&.Mui-focused fieldset": {
-                                                    borderColor: "#611463"
-                                                }
-                                            }
                                         }}
                                     />
                                 </Grid>
@@ -625,22 +560,7 @@ const SettingsPage = () => {
                                         disabled={!loggedIn || isLoading}
                                         error={!!errors.firstName}
                                         helperText={errors.firstName}
-                                        InputProps={{
-                                            sx: { 
-                                                borderRadius: 3,
-                                                backgroundColor: "rgba(255, 255, 255, 0.8)"
-                                            }
-                                        }}
-                                        sx={{
-                                            "& .MuiOutlinedInput-root": {
-                                                "&:hover fieldset": {
-                                                    borderColor: "#f7931e"
-                                                },
-                                                "&.Mui-focused fieldset": {
-                                                    borderColor: "#611463"
-                                                }
-                                            }
-                                        }}
+                                        InputProps={{ sx: { borderRadius: 3 } }}
                                     />
                                 </Grid>
                                 
@@ -654,22 +574,7 @@ const SettingsPage = () => {
                                         disabled={!loggedIn || isLoading}
                                         error={!!errors.lastName}
                                         helperText={errors.lastName}
-                                        InputProps={{
-                                            sx: { 
-                                                borderRadius: 3,
-                                                backgroundColor: "rgba(255, 255, 255, 0.8)"
-                                            }
-                                        }}
-                                        sx={{
-                                            "& .MuiOutlinedInput-root": {
-                                                "&:hover fieldset": {
-                                                    borderColor: "#f7931e"
-                                                },
-                                                "&.Mui-focused fieldset": {
-                                                    borderColor: "#611463"
-                                                }
-                                            }
-                                        }}
+                                        InputProps={{ sx: { borderRadius: 3 } }}
                                     />
                                 </Grid>
                                 
@@ -681,12 +586,7 @@ const SettingsPage = () => {
                                         variant="outlined"
                                         value={userData?.email || ""}
                                         disabled
-                                        InputProps={{
-                                            sx: { 
-                                                borderRadius: 3,
-                                                backgroundColor: "rgba(240, 240, 240, 0.5)"
-                                            }
-                                        }}
+                                        InputProps={{ sx: { borderRadius: 3 } }}
                                         helperText="ອີເມວບໍ່ສາມາດແກ້ໄຂໄດ້"
                                     />
                                 </Grid>
@@ -707,19 +607,8 @@ const SettingsPage = () => {
                                                 py: 2,
                                                 px: 4,
                                                 borderRadius: 3,
-                                                background: "linear-gradient(45deg, #611463 30%, #8e24aa 90%)",
-                                                boxShadow: "0 4px 15px rgba(97, 20, 99, .3)",
                                                 fontWeight: 600,
                                                 fontSize: "16px",
-                                                transition: "all 0.3s ease",
-                                                "&:hover": {
-                                                    background: "linear-gradient(45deg, #8e24aa 30%, #611463 90%)",
-                                                    transform: "translateY(-2px)",
-                                                    boxShadow: "0 8px 20px rgba(97, 20, 99, .4)"
-                                                },
-                                                "&:disabled": {
-                                                    background: "rgba(0, 0, 0, 0.12)"
-                                                }
                                             }}
                                         >
                                             {isLoading ? "ກຳລັງບັນທຶກ..." : "ບັນທຶກຂໍ້ມູນ"}
@@ -736,8 +625,8 @@ const SettingsPage = () => {
                     <Fade in={true} timeout={500}>
                         <Box>
                             <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
-                                <LockIcon sx={{ color: "#611463", mr: 2, fontSize: 28 }} />
-                                <Typography variant="h5" fontWeight={700} color="#611463">
+                                <LockIcon sx={{ color: "primary.main", mr: 2, fontSize: 28 }} />
+                                <Typography variant="h5" fontWeight={700} color="primary.main">
                                     ການຕັ້ງຄ່າຄວາມປອດໄພ
                                 </Typography>
                             </Box>
@@ -772,37 +661,18 @@ const SettingsPage = () => {
                                         error={!!errors.newPassword}
                                         helperText={errors.newPassword}
                                         InputProps={{
-                                            sx: { 
-                                                borderRadius: 3,
-                                                backgroundColor: "rgba(255, 255, 255, 0.8)"
-                                            },
+                                            sx: { borderRadius: 3 },
                                             endAdornment: (
                                                 <InputAdornment position="end">
                                                     <IconButton
                                                         onClick={() => setShowPassword(!showPassword)}
                                                         edge="end"
                                                         disabled={!loggedIn}
-                                                        sx={{
-                                                            color: "#611463",
-                                                            "&:hover": {
-                                                                backgroundColor: "rgba(97, 20, 99, 0.1)"
-                                                            }
-                                                        }}
                                                     >
                                                         {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
                                                     </IconButton>
                                                 </InputAdornment>
                                             )
-                                        }}
-                                        sx={{
-                                            "& .MuiOutlinedInput-root": {
-                                                "&:hover fieldset": {
-                                                    borderColor: "#f7931e"
-                                                },
-                                                "&.Mui-focused fieldset": {
-                                                    borderColor: "#611463"
-                                                }
-                                            }
                                         }}
                                     />
                                 </Grid>
@@ -819,52 +689,26 @@ const SettingsPage = () => {
                                         error={!!errors.confirmPassword}
                                         helperText={errors.confirmPassword}
                                         InputProps={{
-                                            sx: { 
-                                                borderRadius: 3,
-                                                backgroundColor: "rgba(255, 255, 255, 0.8)"
-                                            },
+                                            sx: { borderRadius: 3 },
                                             endAdornment: (
                                                 <InputAdornment position="end">
                                                     <IconButton
                                                         onClick={() => setShowPassword(!showPassword)}
                                                         edge="end"
                                                         disabled={!loggedIn}
-                                                        sx={{
-                                                            color: "#611463",
-                                                            "&:hover": {
-                                                                backgroundColor: "rgba(97, 20, 99, 0.1)"
-                                                            }
-                                                        }}
                                                     >
                                                         {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
                                                     </IconButton>
                                                 </InputAdornment>
                                             )
                                         }}
-                                        sx={{
-                                            "& .MuiOutlinedInput-root": {
-                                                "&:hover fieldset": {
-                                                    borderColor: "#f7931e"
-                                                },
-                                                "&.Mui-focused fieldset": {
-                                                    borderColor: "#611463"
-                                                }
-                                            }
-                                        }}
                                     />
                                 </Grid>
                                 
                                 {/* Password Requirements */}
                                 <Grid item xs={12}>
-                                    <Paper 
-                                        sx={{ 
-                                            p: 3, 
-                                            borderRadius: 3, 
-                                            backgroundColor: "rgba(97, 20, 99, 0.05)",
-                                            border: "1px solid rgba(97, 20, 99, 0.1)"
-                                        }}
-                                    >
-                                        <Typography variant="subtitle2" color="#611463" fontWeight={600} gutterBottom>
+                                    <Paper sx={{ p: 3, borderRadius: 3 }}>
+                                        <Typography variant="subtitle2" color="primary.main" fontWeight={600} gutterBottom>
                                             ຂໍ້ກຳນົດລະຫັດຜ່ານ:
                                         </Typography>
                                         <Box component="ul" sx={{ margin: 0, paddingLeft: 2 }}>
@@ -894,24 +738,198 @@ const SettingsPage = () => {
                                                 py: 2,
                                                 px: 4,
                                                 borderRadius: 3,
-                                                background: "linear-gradient(45deg, #611463 30%, #8e24aa 90%)",
-                                                boxShadow: "0 4px 15px rgba(97, 20, 99, .3)",
                                                 fontWeight: 600,
                                                 fontSize: "16px",
-                                                transition: "all 0.3s ease",
-                                                "&:hover": {
-                                                    background: "linear-gradient(45deg, #8e24aa 30%, #611463 90%)",
-                                                    transform: "translateY(-2px)",
-                                                    boxShadow: "0 8px 20px rgba(97, 20, 99, .4)"
-                                                },
-                                                "&:disabled": {
-                                                    background: "rgba(0, 0, 0, 0.12)"
-                                                }
                                             }}
                                         >
                                             {isLoading ? "ກຳລັງປ່ຽນ..." : "ປ່ຽນລະຫັດຜ່ານ"}
                                         </Button>
                                     </Box>
+                                </Grid>
+                            </Grid>
+                        </Box>
+                    </Fade>
+                );
+
+            case 2: // Theme Settings - NEW TAB
+                return (
+                    <Fade in={true} timeout={500}>
+                        <Box>
+                            <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
+                                <PaletteIcon sx={{ color: "primary.main", mr: 2, fontSize: 28 }} />
+                                <Typography variant="h5" fontWeight={700} color="primary.main">
+                                    ຮູບແບບການສະແດງຜົນ
+                                </Typography>
+                            </Box>
+                            
+                            <Grid container spacing={4}>
+                                {/* Current Theme Display */}
+                                <Grid item xs={12}>
+                                    <Paper 
+                                        sx={{ 
+                                            p: 4, 
+                                            borderRadius: 3,
+                                            textAlign: "center",
+                                            background: isDarkMode 
+                                                ? "linear-gradient(135deg, rgba(142, 36, 170, 0.1), rgba(255, 167, 38, 0.1))"
+                                                : "linear-gradient(135deg, rgba(97, 20, 99, 0.05), rgba(247, 147, 30, 0.05))",
+                                            border: `2px solid ${isDarkMode ? 'rgba(142, 36, 170, 0.2)' : 'rgba(97, 20, 99, 0.1)'}`,
+                                        }}
+                                    >
+                                        <Box sx={{ mb: 3 }}>
+                                            {isDarkMode ? (
+                                                <DarkModeIcon sx={{ fontSize: 48, color: "primary.main" }} />
+                                            ) : (
+                                                <LightModeIcon sx={{ fontSize: 48, color: "secondary.main" }} />
+                                            )}
+                                        </Box>
+                                        <Typography variant="h6" fontWeight={700} color="primary.main" gutterBottom>
+                                            ຮູບແບບປັດຈຸບັນ: {themeName}
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {isDarkMode 
+                                                ? "ຮູບແບບມືດເໝາະສຳລັບການໃຊ້ໃນເວລາກາງຄືນ" 
+                                                : "ຮູບແບບແຈ້ງງເໝາະສຳລັບການໃຊ້ໃນເວລາກາງເວັນ"
+                                            }
+                                        </Typography>
+                                    </Paper>
+                                </Grid>
+
+                                {/* Theme Toggle */}
+                                <Grid item xs={12}>
+                                    <Paper sx={{ p: 3, borderRadius: 3 }}>
+                                        <Typography variant="h6" fontWeight={600} color="primary.main" gutterBottom>
+                                            ປ່ຽນຮູບແບບ
+                                        </Typography>
+                                        
+                                        <List>
+                                            <ListItem>
+                                                <ListItemIcon>
+                                                    {isDarkMode ? <DarkModeIcon color="primary" /> : <LightModeIcon color="secondary" />}
+                                                </ListItemIcon>
+                                                <ListItemText
+                                                    primary={
+                                                        <Typography variant="body1" fontWeight={600}>
+                                                            {isDarkMode ? "ໂໝດມືດ" : "ໂໝດແຈ້ງງ"}
+                                                        </Typography>
+                                                    }
+                                                    secondary={
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            {isDarkMode 
+                                                                ? "ປົກປ້ອງສາຍຕາໃນສະພາບແວດລ້ອມມືດ"
+                                                                : "ມອງເຫັນໄດ້ຊັດເຈນໃນສະພາບແວດລ້ອມແຈ້ງງ"
+                                                            }
+                                                        </Typography>
+                                                    }
+                                                />
+                                                <ListItemSecondaryAction>
+                                                    <FormControlLabel
+                                                        control={
+                                                            <Switch
+                                                                checked={isDarkMode}
+                                                                onChange={handleThemeToggle}
+                                                                color="primary"
+                                                                size="large"
+                                                                sx={{
+                                                                    '& .MuiSwitch-switchBase.Mui-checked': {
+                                                                        color: 'primary.main',
+                                                                    },
+                                                                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                                                        backgroundColor: 'primary.main',
+                                                                    },
+                                                                }}
+                                                            />
+                                                        }
+                                                        label=""
+                                                    />
+                                                </ListItemSecondaryAction>
+                                            </ListItem>
+                                        </List>
+                                    </Paper>
+                                </Grid>
+
+                                {/* Theme Preview */}
+                                <Grid item xs={12}>
+                                    <Typography variant="h6" fontWeight={600} color="primary.main" gutterBottom>
+                                        ຕົວຢ່າງສີ
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={6} sm={3}>
+                                            <Paper 
+                                                sx={{ 
+                                                    p: 2, 
+                                                    textAlign: "center",
+                                                    backgroundColor: "primary.main",
+                                                    color: "primary.contrastText"
+                                                }}
+                                            >
+                                                <Typography variant="body2" fontWeight={600}>
+                                                    ສີຫຼັກ
+                                                </Typography>
+                                            </Paper>
+                                        </Grid>
+                                        <Grid item xs={6} sm={3}>
+                                            <Paper 
+                                                sx={{ 
+                                                    p: 2, 
+                                                    textAlign: "center",
+                                                    backgroundColor: "secondary.main",
+                                                    color: "secondary.contrastText"
+                                                }}
+                                            >
+                                                <Typography variant="body2" fontWeight={600}>
+                                                    ສີທີ່ສອງ
+                                                </Typography>
+                                            </Paper>
+                                        </Grid>
+                                        <Grid item xs={6} sm={3}>
+                                            <Paper 
+                                                sx={{ 
+                                                    p: 2, 
+                                                    textAlign: "center",
+                                                    backgroundColor: "background.paper",
+                                                    border: 1,
+                                                    borderColor: "divider"
+                                                }}
+                                            >
+                                                <Typography variant="body2" fontWeight={600} color="text.primary">
+                                                    ພື້ນຫຼັງ
+                                                </Typography>
+                                            </Paper>
+                                        </Grid>
+                                        <Grid item xs={6} sm={3}>
+                                            <Paper 
+                                                sx={{ 
+                                                    p: 2, 
+                                                    textAlign: "center",
+                                                    backgroundColor: "action.hover",
+                                                    border: 1,
+                                                    borderColor: "divider"
+                                                }}
+                                            >
+                                                <Typography variant="body2" fontWeight={600} color="text.secondary">
+                                                    ຂໍ້ຄວາມ
+                                                </Typography>
+                                            </Paper>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+
+                                {/* Information */}
+                                <Grid item xs={12}>
+                                    <Alert 
+                                        severity="info" 
+                                        sx={{ 
+                                            borderRadius: 3,
+                                            "& .MuiAlert-icon": {
+                                                fontSize: 24
+                                            }
+                                        }}
+                                    >
+                                        <Typography variant="body1" fontWeight={500}>
+                                            ການຕັ້ງຄ່າຮູບແບບຈະຖືກບັນທຶກອັດຕະໂນມັດ ແລະ ນຳໃຊ້ທຸກຄັ້ງທີ່ທ່ານເຂົ້າສູ່ລະບົບ
+                                        </Typography>
+                                    </Alert>
                                 </Grid>
                             </Grid>
                         </Box>
@@ -925,30 +943,23 @@ const SettingsPage = () => {
 
     return (
         <Box sx={{ 
-            bgcolor: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)", 
             minHeight: "100vh",
-            backgroundAttachment: "fixed"
+            transition: "all 0.3s ease",
         }}>
-            {/* Hero Header with Enhanced Gradient */}
+            {/* Hero Header */}
             <Box
                 sx={{
-                    background: "linear-gradient(135deg, #611463 0%, #f7931e 50%, #611463 100%)",
+                    background: isDarkMode 
+                        ? "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)"
+                        : "linear-gradient(135deg, #611463 0%, #f7931e 50%, #611463 100%)",
                     py: { xs: 6, md: 8 },
                     borderRadius: { xs: 0, md: "0 0 50px 50px" },
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+                    boxShadow: isDarkMode 
+                        ? "0 8px 32px rgba(0,0,0,0.5)" 
+                        : "0 8px 32px rgba(0,0,0,0.2)",
                     mb: 6,
                     position: "relative",
                     overflow: "hidden",
-                    "&::before": {
-                        content: '""',
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: "radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)",
-                        pointerEvents: "none"
-                    }
                 }}
             >
                 <Container maxWidth="lg">
@@ -962,10 +973,6 @@ const SettingsPage = () => {
                                     fontSize: { xs: "2.5rem", sm: "3rem", md: "3.5rem" },
                                     textShadow: "2px 2px 8px rgba(0,0,0,0.3)",
                                     mb: 2,
-                                    background: "linear-gradient(45deg, #ffffff 30%, #ffd700 90%)",
-                                    backgroundClip: "text",
-                                    WebkitBackgroundClip: "text",
-                                    WebkitTextFillColor: "transparent"
                                 }}
                             >
                                 ການຕັ້ງຄ່າ
@@ -1012,7 +1019,7 @@ const SettingsPage = () => {
             {/* Main Settings Section */}
             <Container maxWidth="xl" sx={{ py: { xs: 4, md: 8 } }}>
                 <Grid container spacing={6}>
-                    {/* Enhanced Settings Navigation */}
+                    {/* Settings Navigation */}
                     <Grid item xs={12} md={4} lg={3}>
                         <Card
                             elevation={8}
@@ -1020,30 +1027,22 @@ const SettingsPage = () => {
                                 borderRadius: 6,
                                 overflow: "hidden",
                                 height: "100%",
-                                background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-                                border: "1px solid rgba(97, 20, 99, 0.1)",
                                 transition: "all 0.3s ease-in-out",
                                 "&:hover": {
                                     transform: "translateY(-8px)",
-                                    boxShadow: "0 20px 40px rgba(0,0,0,0.15)"
+                                    boxShadow: isDarkMode 
+                                        ? "0 20px 40px rgba(0,0,0,0.4)" 
+                                        : "0 20px 40px rgba(0,0,0,0.15)"
                                 }
                             }}
                         >
                             <Box sx={{ 
-                                background: "linear-gradient(135deg, #611463 0%, #8e24aa 100%)", 
+                                background: isDarkMode 
+                                    ? "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)"
+                                    : "linear-gradient(135deg, #611463 0%, #8e24aa 100%)", 
                                 color: "#fff", 
                                 p: 4, 
                                 textAlign: "center",
-                                position: "relative",
-                                "&::after": {
-                                    content: '""',
-                                    position: "absolute",
-                                    bottom: 0,
-                                    left: 0,
-                                    right: 0,
-                                    height: "1px",
-                                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)"
-                                }
                             }}>
                                 <Avatar
                                     src={LOGO_HOMECARE}
@@ -1072,7 +1071,7 @@ const SettingsPage = () => {
                                     sx={{
                                         '& .MuiTabs-indicator': {
                                             left: isMobile ? "auto" : 0,
-                                            backgroundColor: "#f7931e",
+                                            backgroundColor: "secondary.main",
                                             width: isMobile ? "auto" : 4,
                                             borderRadius: 4
                                         },
@@ -1087,13 +1086,13 @@ const SettingsPage = () => {
                                             mx: 1,
                                             my: 0.5,
                                             '&:hover': {
-                                                backgroundColor: "rgba(97, 20, 99, 0.08)",
+                                                backgroundColor: "action.hover",
                                                 transform: "translateX(8px)"
                                             },
                                             '&.Mui-selected': {
-                                                color: "#611463",
+                                                color: "primary.main",
                                                 fontWeight: 700,
-                                                backgroundColor: "rgba(247, 147, 30, 0.1)",
+                                                backgroundColor: "action.selected",
                                                 transform: "translateX(8px)"
                                             }
                                         }
@@ -1127,6 +1126,20 @@ const SettingsPage = () => {
                                             </Box>
                                         }
                                     />
+                                    <Tab
+                                        icon={<PaletteIcon sx={{ fontSize: 24 }} />}
+                                        iconPosition="start"
+                                        label={
+                                            <Box>
+                                                <Typography variant="body1" fontWeight="inherit">
+                                                    ຮູບແບບ
+                                                </Typography>
+                                                <Typography variant="caption" color="text.secondary">
+                                                    {themeName}
+                                                </Typography>
+                                            </Box>
+                                        }
+                                    />
                                 </Tabs>
                             </Box>
 
@@ -1143,15 +1156,10 @@ const SettingsPage = () => {
                                     onClick={() => navigate(CONTACT_US_PATH)}
                                     sx={{
                                         borderRadius: 3,
-                                        borderColor: "#611463",
-                                        color: "#611463",
                                         py: 1.5,
                                         fontWeight: 600,
                                         '&:hover': {
-                                            borderColor: "#f7931e",
-                                            backgroundColor: "rgba(247, 147, 30, 0.08)",
                                             transform: "translateY(-2px)",
-                                            boxShadow: "0 4px 12px rgba(97, 20, 99, 0.2)"
                                         }
                                     }}
                                 >
@@ -1161,19 +1169,19 @@ const SettingsPage = () => {
                         </Card>
                     </Grid>
 
-                    {/* Enhanced Settings Content */}
+                    {/* Settings Content */}
                     <Grid item xs={12} md={8} lg={9}>
                         <Paper
                             elevation={8}
                             sx={{
                                 borderRadius: 6,
                                 overflow: "hidden",
-                                background: "linear-gradient(135deg, #ffffff 0%, #fafbfc 100%)",
-                                border: "1px solid rgba(97, 20, 99, 0.05)",
                                 transition: "all 0.3s ease-in-out",
                                 "&:hover": {
                                     transform: "translateY(-4px)",
-                                    boxShadow: "0 20px 40px rgba(0,0,0,0.12)"
+                                    boxShadow: isDarkMode 
+                                        ? "0 20px 40px rgba(0,0,0,0.3)" 
+                                        : "0 20px 40px rgba(0,0,0,0.12)"
                                 }
                             }}
                         >
@@ -1197,7 +1205,7 @@ const SettingsPage = () => {
                 }}
             >
                 <DialogTitle sx={{ 
-                    color: "#611463", 
+                    color: "primary.main", 
                     fontWeight: 700,
                     display: "flex",
                     alignItems: "center",
@@ -1232,7 +1240,7 @@ const SettingsPage = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Enhanced Notification Snackbar */}
+            {/* Notification Snackbar */}
             <Snackbar
                 open={notification.open}
                 autoHideDuration={6000}

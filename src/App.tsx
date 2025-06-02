@@ -8,7 +8,7 @@ import { useLocation } from "react-router-dom";
 import RoutesComponent from "./routes";
 import { loginSuccess, loginFailed } from "./store/authenticationSlice";
 import LoginDialog from "./layout/components/dialog-login"; // Adjust import path as needed
-
+import { ThemeProviderWrapper } from './context/ThemeContext';
 function App() {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -166,10 +166,12 @@ function App() {
   };
 
   return (
+      <ThemeProviderWrapper>
     <Box>
       <RoutesComponent />
       <LoginDialog open={loginDialogOpen} onClose={handleCloseLoginDialog} />
     </Box>
+    </ThemeProviderWrapper>
   );
 }
 
