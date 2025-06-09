@@ -34,11 +34,14 @@ interface ServiceProvider {
   location: string;
   price: number;
   imageUrl: string;
-  rating: number; // This will now be dynamic
+  rating: number;
   category: string;
+  categoryLao: string; // Add Lao translation
   gender: string;
+  genderLao: string; // Add Lao gender translation
   address: string;
   city: string;
+  cityLao: string; // Add Lao city translation
   categoryType: string;
   cat_id: number;
   // Car details
@@ -56,6 +59,135 @@ const Services = () => {
   
   // Get data from controller (now includes rating functions)
   const ctrl = useMainController();
+
+  // Translation mappings - English to Lao
+  const categoryTranslation: Record<string, string> = {
+    'cleaning': 'ທຳຄວາມສະອາດ',
+    'electrical': 'ສ້ອມແປງໄຟຟ້າ',
+    'aircon': 'ສ້ອມແປງແອອາກາດ',
+    'air conditioning': 'ສ້ອມແປງແອອາກາດ',
+    'plumbing': 'ສ້ອມແປງປະປາ',
+    'moving': 'ແກ່ເຄື່ອງ',
+    'transportation': 'ແກ່ເຄື່ອງ',
+    'relocation': 'ແກ່ເຄື່ອງ',
+    'bathroom': 'ດູດສ້ວມ',
+    'toilet': 'ດູດສ້ວມ',
+    'septic': 'ດູດສ້ວມ',
+    'pest': 'ກຳຈັດປວກ',
+    'pest control': 'ກຳຈັດປວກ',
+    'extermination': 'ກຳຈັດປວກ',
+    'house cleaning': 'ທຳຄວາມສະອາດ',
+    'home cleaning': 'ທຳຄວາມສະອາດ',
+    'electrical repair': 'ສ້ອມແປງໄຟຟ້າ',
+    'electrical service': 'ສ້ອມແປງໄຟຟ້າ',
+    'air conditioner repair': 'ສ້ອມແປງແອອາກາດ',
+    'ac repair': 'ສ້ອມແປງແອອາກາດ',
+    'plumbing repair': 'ສ້ອມແປງປະປາ',
+    'water pipe repair': 'ສ້ອມແປງປະປາ',
+    'moving service': 'ແກ່ເຄື່ອງ',
+    'delivery': 'ແກ່ເຄື່ອງ',
+    'septic cleaning': 'ດູດສ້ວມ',
+    'sewage cleaning': 'ດູດສ້ວມ',
+    'other': 'ອື່ນໆ',
+    'general': 'ທົ່ວໄປ'
+  };
+
+  // Gender translation mapping - English to Lao
+  const genderTranslation: Record<string, string> = {
+    'male': 'ຊາຍ',
+    'female': 'ຍິງ',
+    'man': 'ຊາຍ',
+    'woman': 'ຍິງ',
+    'men': 'ຊາຍ',
+    'women': 'ຍິງ',
+    'boy': 'ຊາຍ',
+    'girl': 'ຍິງ',
+    'm': 'ຊາຍ',
+    'f': 'ຍິງ',
+    'other': 'ອື່ນໆ',
+    'unknown': 'ບໍ່ລະບຸ'
+  };
+
+  // City translation mapping - English to Lao (Vientiane Districts)
+  const cityTranslation: Record<string, string> = {
+    'chanthabuly': 'ຈັນທະບູລີ',
+    'chanthabouly': 'ຈັນທະບູລີ',
+    'sikhottabong': 'ສີໂຄດຕະບອງ',
+    'xaysetha': 'ໄຊເສດຖາ',
+    'sisattanak': 'ສີສັດຕະນາກ',
+    'naxaithong': 'ນາຊາຍທອງ',
+    'xaytany': 'ໄຊທານີ',
+    'hadxaifong': 'ຫາດຊາຍຟອງ',
+    // General fallbacks
+    'vientiane': 'ວຽງຈັນ',
+    'vientiane capital': 'ນະຄອນຫຼວງວຽງຈັນ'
+  };
+
+  // Function to translate English category to Lao
+  const translateCategoryToLao = (englishCategory: string): string => {
+    if (!englishCategory) return 'ອື່ນໆ';
+    
+    const normalizedCategory = englishCategory.toLowerCase().trim();
+    
+    // Direct match first
+    if (categoryTranslation[normalizedCategory]) {
+      return categoryTranslation[normalizedCategory];
+    }
+    
+    // Partial matching for compound categories
+    for (const [key, value] of Object.entries(categoryTranslation)) {
+      if (normalizedCategory.includes(key) || key.includes(normalizedCategory)) {
+        return value;
+      }
+    }
+    
+    // If no match found, return the original with a fallback
+    return englishCategory || 'ອື່ນໆ';
+  };
+
+  // Function to translate English gender to Lao
+  const translateGenderToLao = (englishGender: string): string => {
+    if (!englishGender) return 'ບໍ່ລະບຸ';
+    
+    const normalizedGender = englishGender.toLowerCase().trim();
+    
+    // Direct match
+    if (genderTranslation[normalizedGender]) {
+      return genderTranslation[normalizedGender];
+    }
+    
+    // Partial matching
+    for (const [key, value] of Object.entries(genderTranslation)) {
+      if (normalizedGender.includes(key) || key.includes(normalizedGender)) {
+        return value;
+      }
+    }
+    
+    // If no match found, return the original with a fallback
+    return englishGender || 'ບໍ່ລະບຸ';
+  };
+
+  // Function to translate English city to Lao
+  const translateCityToLao = (englishCity: string): string => {
+    if (!englishCity) return 'ວຽງຈັນ';
+    
+    const normalizedCity = englishCity.toLowerCase().trim();
+    
+    // Direct match
+    if (cityTranslation[normalizedCity]) {
+      return cityTranslation[normalizedCity];
+    }
+    
+    // Partial matching
+    for (const [key, value] of Object.entries(cityTranslation)) {
+      if (normalizedCity.includes(key) || key.includes(normalizedCity)) {
+        return value;
+      }
+    }
+    
+    // If no match found, return the original
+    return englishCity || 'ວຽງຈັນ';
+  };
 
   // Define service categories
   const serviceCategories: ServiceCategory[] = [
@@ -128,8 +260,8 @@ const Services = () => {
       if (normalizedName.includes('electrical') || normalizedName.includes('ໄຟຟ້າ')) return 'electrical';
       if (normalizedName.includes('aircon') || normalizedName.includes('air') || normalizedName.includes('ແອ')) return 'aircon';
       if (normalizedName.includes('plumbing') || normalizedName.includes('ປະປາ')) return 'plumbing';
-      if (normalizedName.includes('moving') || normalizedName.includes('ຂົນສົ່ງ')) return 'moving';
-      if (normalizedName.includes('bathroom') || normalizedName.includes('ຫ້ອງນ້ຳ')) return 'bathroom';
+      if (normalizedName.includes('moving') || normalizedName.includes('transport') || normalizedName.includes('ຂົນສົ່ງ')) return 'moving';
+      if (normalizedName.includes('bathroom') || normalizedName.includes('toilet') || normalizedName.includes('septic') || normalizedName.includes('ຫ້ອງນ້ຳ')) return 'bathroom';
       if (normalizedName.includes('pest') || normalizedName.includes('ກຳຈັດແມງໄມ້')) return 'pest';
       return 'other';
     };
@@ -154,6 +286,11 @@ const Services = () => {
     
     console.log(`Employee ${employee.id} (${employee.first_name} ${employee.last_name}) rating: ${actualRating}`);
 
+    // Translate category, gender, and city to Lao
+    const categoryLao = translateCategoryToLao(employee.cat_name);
+    const genderLao = translateGenderToLao(employee.gender);
+    const cityLao = translateCityToLao(employee.city);
+
     const result: ServiceProvider = {
       id: employee.id,
       name: employee.first_name,
@@ -161,11 +298,14 @@ const Services = () => {
       location: employee.address,
       price: parseFloat(employee.price?.toString() || '0'),
       imageUrl: employee.avatar,
-      rating: actualRating, // Use actual rating from comments
-      category: employee.cat_name,
-      gender: employee.gender,
+      rating: actualRating,
+      category: employee.cat_name, // Keep original English category
+      categoryLao: categoryLao, // Add Lao translation
+      gender: employee.gender, // Keep original English gender
+      genderLao: genderLao, // Add Lao gender translation
       address: village, 
-      city: employee.city || 'ວຽງຈັນ',
+      city: employee.city || 'ວຽງຈັນ', // Keep original English city
+      cityLao: cityLao, // Add Lao city translation
       categoryType: categoryType,
       cat_id: employee.cat_id,
     };
@@ -200,10 +340,13 @@ const Services = () => {
           provider.name,
           provider.surname,
           provider.address,
-          provider.gender,
-          provider.category,
+          provider.gender, // Original English gender
+          provider.genderLao, // Lao gender translation
+          provider.category, // Original English category
+          provider.categoryLao, // Lao category translation
           provider.price.toString(),
-          provider.city,
+          provider.city, // Original English city
+          provider.cityLao, // Lao city translation
           provider.carBrand,
           provider.carModel,
           provider.licensePlate,
@@ -229,14 +372,14 @@ const Services = () => {
         return mapEmployeeToServiceProvider(employee);
       });
       
-      console.log("Mapped service providers with ratings:", mappedProviders);
+      console.log("Mapped service providers with Lao categories:", mappedProviders);
       setAllProviders(mappedProviders);
       
       // Apply filters on initial load
       const filtered = filterProviders(mappedProviders, searchQuery, activeCategory);
       setFilteredProviders(filtered);
     }
-  }, [ctrl?.loading, ctrl?.data, ctrl?.car, ctrl?.employeeRatings]); // Added employeeRatings dependency
+  }, [ctrl?.loading, ctrl?.data, ctrl?.car, ctrl?.employeeRatings]);
 
   // Update filtered providers when search query or category changes
   useEffect(() => {
@@ -501,11 +644,11 @@ const Services = () => {
                       surname={provider.surname}
                       price={provider.price}
                       imageUrl={provider.imageUrl}
-                      rating={provider.rating} // Now uses actual rating from comments
-                      category={provider.category}
-                      gender={provider.gender}
+                      rating={provider.rating}
+                      category={provider.categoryLao} // Pass Lao category instead of English
+                      gender={provider.genderLao} // Pass Lao gender instead of English
                       address={provider.address}
-                      city={provider.city}
+                      city={provider.cityLao} // Pass Lao city instead of English
                       cat_id={provider.cat_id}
                       carId={provider.carId}
                       carBrand={provider.carBrand}
@@ -520,7 +663,7 @@ const Services = () => {
                 <Typography variant="h6" color="text.secondary">
                   {searchQuery 
                     ? `ບໍ່ພົບຜົນຄົ້ນຫາສຳລັບ "${searchQuery}"`
-                    : "No services found in this category."}
+                    : "ບໍ່ພົບການບໍລິການໃນປະເພດນີ້."}
                 </Typography>
                 <Button
                   variant="contained"

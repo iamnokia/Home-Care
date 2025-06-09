@@ -37,6 +37,135 @@ const useMainController = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
+  // Translation mappings - English to Lao
+  const categoryTranslation: Record<string, string> = {
+    'cleaning': 'ທຳຄວາມສະອາດ',
+    'electrical': 'ສ້ອມແປງໄຟຟ້າ',
+    'aircon': 'ສ້ອມແປງແອອາກາດ',
+    'air conditioning': 'ສ້ອມແປງແອອາກາດ',
+    'plumbing': 'ສ້ອມແປງປະປາ',
+    'moving': 'ແກ່ເຄື່ອງ',
+    'transportation': 'ແກ່ເຄື່ອງ',
+    'relocation': 'ແກ່ເຄື່ອງ',
+    'bathroom': 'ດູດສ້ວມ',
+    'toilet': 'ດູດສ້ວມ',
+    'septic': 'ດູດສ້ວມ',
+    'pest': 'ກຳຈັດປວກ',
+    'pest control': 'ກຳຈັດປວກ',
+    'extermination': 'ກຳຈັດປວກ',
+    'house cleaning': 'ທຳຄວາມສະອາດ',
+    'home cleaning': 'ທຳຄວາມສະອາດ',
+    'electrical repair': 'ສ້ອມແປງໄຟຟ້າ',
+    'electrical service': 'ສ້ອມແປງໄຟຟ້າ',
+    'air conditioner repair': 'ສ້ອມແປງແອອາກາດ',
+    'ac repair': 'ສ້ອມແປງແອອາກາດ',
+    'plumbing repair': 'ສ້ອມແປງປະປາ',
+    'water pipe repair': 'ສ້ອມແປງປະປາ',
+    'moving service': 'ແກ່ເຄື່ອງ',
+    'delivery': 'ແກ່ເຄື່ອງ',
+    'septic cleaning': 'ດູດສ້ວມ',
+    'sewage cleaning': 'ດູດສ້ວມ',
+    'other': 'ອື່ນໆ',
+    'general': 'ທົ່ວໄປ'
+  };
+
+  // Gender translation mapping - English to Lao
+  const genderTranslation: Record<string, string> = {
+    'male': 'ຊາຍ',
+    'female': 'ຍິງ',
+    'man': 'ຊາຍ',
+    'woman': 'ຍິງ',
+    'men': 'ຊາຍ',
+    'women': 'ຍິງ',
+    'boy': 'ຊາຍ',
+    'girl': 'ຍິງ',
+    'm': 'ຊາຍ',
+    'f': 'ຍິງ',
+    'other': 'ອື່ນໆ',
+    'unknown': 'ບໍ່ລະບຸ'
+  };
+
+  // City translation mapping - English to Lao (Vientiane Districts)
+  const cityTranslation: Record<string, string> = {
+    'chanthabuly': 'ຈັນທະບູລີ',
+    'chanthabouly': 'ຈັນທະບູລີ',
+    'sikhottabong': 'ສີໂຄດຕະບອງ',
+    'xaysetha': 'ໄຊເສດຖາ',
+    'sisattanak': 'ສີສັດຕະນາກ',
+    'naxaithong': 'ນາຊາຍທອງ',
+    'xaytany': 'ໄຊທານີ',
+    'hadxaifong': 'ຫາດຊາຍຟອງ',
+    // General fallbacks
+    'vientiane': 'ວຽງຈັນ',
+    'vientiane capital': 'ນະຄອນຫຼວງວຽງຈັນ'
+  };
+
+  // Function to translate English category to Lao
+  const translateCategoryToLao = (englishCategory: string): string => {
+    if (!englishCategory) return 'ອື່ນໆ';
+    
+    const normalizedCategory = englishCategory.toLowerCase().trim();
+    
+    // Direct match first
+    if (categoryTranslation[normalizedCategory]) {
+      return categoryTranslation[normalizedCategory];
+    }
+    
+    // Partial matching for compound categories
+    for (const [key, value] of Object.entries(categoryTranslation)) {
+      if (normalizedCategory.includes(key) || key.includes(normalizedCategory)) {
+        return value;
+      }
+    }
+    
+    // If no match found, return the original with a fallback
+    return englishCategory || 'ອື່ນໆ';
+  };
+
+  // Function to translate English gender to Lao
+  const translateGenderToLao = (englishGender: string): string => {
+    if (!englishGender) return 'ບໍ່ລະບຸ';
+    
+    const normalizedGender = englishGender.toLowerCase().trim();
+    
+    // Direct match
+    if (genderTranslation[normalizedGender]) {
+      return genderTranslation[normalizedGender];
+    }
+    
+    // Partial matching
+    for (const [key, value] of Object.entries(genderTranslation)) {
+      if (normalizedGender.includes(key) || key.includes(normalizedGender)) {
+        return value;
+      }
+    }
+    
+    // If no match found, return the original with a fallback
+    return englishGender || 'ບໍ່ລະບຸ';
+  };
+
+  // Function to translate English city to Lao
+  const translateCityToLao = (englishCity: string): string => {
+    if (!englishCity) return 'ວຽງຈັນ';
+    
+    const normalizedCity = englishCity.toLowerCase().trim();
+    
+    // Direct match
+    if (cityTranslation[normalizedCity]) {
+      return cityTranslation[normalizedCity];
+    }
+    
+    // Partial matching
+    for (const [key, value] of Object.entries(cityTranslation)) {
+      if (normalizedCity.includes(key) || key.includes(normalizedCity)) {
+        return value;
+      }
+    }
+    
+    // If no match found, return the original
+    return englishCity || 'ວຽງຈັນ';
+  };
+
   const handleNaVigate = (path: string) => {
     navigate(path);
   };
@@ -188,12 +317,12 @@ const useMainController = () => {
     const employee = data[0];
     if (!employee) return null;
 
-    // Determine category type
+    // Determine category type with translation
     const getCategoryType = (categoryName: string) => {
       const lowerCaseCategory = categoryName?.toLowerCase() || "";
-      if (lowerCaseCategory.includes("ຂົນສົ່ງ") || lowerCaseCategory.includes("moving")) {
+      if (lowerCaseCategory.includes("ຂົນສົ່ງ") || lowerCaseCategory.includes("moving") || lowerCaseCategory.includes("transport")) {
         return "moving";
-      } else if (lowerCaseCategory.includes("ຫ້ອງນ້ຳ") || lowerCaseCategory.includes("bathroom")) {
+      } else if (lowerCaseCategory.includes("ຫ້ອງນ້ຳ") || lowerCaseCategory.includes("bathroom") || lowerCaseCategory.includes("toilet") || lowerCaseCategory.includes("septic")) {
         return "bathroom";
       }
       return "cleaning";
@@ -202,11 +331,13 @@ const useMainController = () => {
     // Format price
     const formatPrice = (price: string | number) => {
       const numPrice = parseFloat(price.toString());
-      return numPrice.toLocaleString() + " KIP";
+      return numPrice.toLocaleString() + " ກີບ";
     };
 
-    // Determine gender text
-    const genderText = employee.gender === "male" ? "ຊາຍ" : "ຍິງ";
+    // Translate gender, category, and city to Lao
+    const genderLao = translateGenderToLao(employee.gender);
+    const categoryLao = translateCategoryToLao(employee.cat_name);
+    const cityLao = translateCityToLao(employee.city);
 
     // Extract address components
     const addressParts = employee.address ? employee.address.split(',') : [];
@@ -224,12 +355,12 @@ const useMainController = () => {
       price: parseFloat(employee.price),
       priceFormatted: formatPrice(employee.price),
       image: employee.avatar || "/api/placeholder/400/300",
-      category: employee.cat_name,
+      category: categoryLao, // Use Lao translation instead of English
       categoryType: getCategoryType(employee.cat_name),
-      gender: genderText,
+      gender: genderLao, // Use Lao translation instead of English
       cat_id: employee.cat_id,
       village: village,
-      city: employee.city || "ວຽງຈັນ",
+      city: cityLao, // Use Lao translation instead of English
       skills: employee.cv || "ຂ້ອຍມີປະສົບການໃນການໃຫ້ບໍລິການ. ຂ້ອຍເຮັດວຽກຢ່າງຂະຫຍັນຂັນແຂ່ງ ແລະ ຮັບຜິດຊອບສູງ.",
       rating: averageRating,
       reviews: processedReviews,
@@ -279,7 +410,11 @@ const useMainController = () => {
     navigate,
     id,
     getServiceData,
-    calculateAverageRating: () => calculateAverageRating(comments)
+    calculateAverageRating: () => calculateAverageRating(comments),
+    // Export translation functions for potential use elsewhere
+    translateCategoryToLao,
+    translateGenderToLao,
+    translateCityToLao
   };
 };
 

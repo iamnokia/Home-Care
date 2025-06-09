@@ -13,13 +13,17 @@ export interface ServiceDetail {
   surname: string;
   image: string;
   category: string;
+  categoryLao?: string; // Added Lao version
   gender: string;
+  genderLao?: string; // Added Lao version
   age: number;
   village: string;
   city: string;
+  cityLao?: string; // Added Lao version
   price: number;
   priceFormatted: string;
   service?: string;
+  serviceLao?: string; // Added Lao version
   cat_id?: number;
   // Car details
   carId?: string;
@@ -55,6 +59,123 @@ const CITIES = [
   { en: 'HADXAIFONG', lo: 'ຫາດຊາຍຟອງ', value: 'hadxaifong' }
 ];
 
+// Translation mappings - English to Lao (copied from PaymentPage controller)
+const categoryTranslation: Record<string, string> = {
+  'cleaning': 'ທຳຄວາມສະອາດ',
+  'electrical': 'ສ້ອມແປງໄຟຟ້າ',
+  'aircon': 'ສ້ອມແປງແອອາກາດ',
+  'air conditioning': 'ສ້ອມແປງແອອາກາດ',
+  'plumbing': 'ສ້ອມແປງປະປາ',
+  'moving': 'ແກ່ເຄື່ອງ',
+  'transportation': 'ແກ່ເຄື່ອງ',
+  'relocation': 'ແກ່ເຄື່ອງ',
+  'bathroom': 'ດູດສ້ວມ',
+  'toilet': 'ດູດສ້ວມ',
+  'septic': 'ດູດສ້ວມ',
+  'pest': 'ກຳຈັດປວກ',
+  'pest control': 'ກຳຈັດປວກ',
+  'extermination': 'ກຳຈັດປວກ',
+  'house cleaning': 'ທຳຄວາມສະອາດ',
+  'home cleaning': 'ທຳຄວາມສະອາດ',
+  'electrical repair': 'ສ້ອມແປງໄຟຟ້າ',
+  'electrical service': 'ສ້ອມແປງໄຟຟ້າ',
+  'air conditioner repair': 'ສ້ອມແປງແອອາກາດ',
+  'ac repair': 'ສ້ອມແປງແອອາກາດ',
+  'plumbing repair': 'ສ້ອມແປງປະປາ',
+  'water pipe repair': 'ສ້ອມແປງປະປາ',
+  'moving service': 'ແກ່ເຄື່ອງ',
+  'delivery': 'ແກ່ເຄື່ອງ',
+  'septic cleaning': 'ດູດສ້ວມ',
+  'sewage cleaning': 'ດູດສ້ວມ',
+  'other': 'ອື່ນໆ',
+  'general': 'ທົ່ວໄປ'
+};
+
+// Gender translation mapping - English to Lao
+const genderTranslation: Record<string, string> = {
+  'male': 'ຊາຍ',
+  'female': 'ຍິງ',
+  'man': 'ຊາຍ',
+  'woman': 'ຍິງ',
+  'men': 'ຊາຍ',
+  'women': 'ຍິງ',
+  'boy': 'ຊາຍ',
+  'girl': 'ຍິງ',
+  'm': 'ຊາຍ',
+  'f': 'ຍິງ',
+  'other': 'ອື່ນໆ',
+  'unknown': 'ບໍ່ລະບຸ'
+};
+
+// City translation mapping - English to Lao (Vientiane Districts)
+const cityTranslation: Record<string, string> = {
+  'chanthabuly': 'ຈັນທະບູລີ',
+  'chanthabouly': 'ຈັນທະບູລີ',
+  'sikhottabong': 'ສີໂຄດຕະບອງ',
+  'xaysetha': 'ໄຊເສດຖາ',
+  'sisattanak': 'ສີສັດຕະນາກ',
+  'naxaithong': 'ນາຊາຍທອງ',
+  'xaytany': 'ໄຊທານີ',
+  'hadxaifong': 'ຫາດຊາຍຟອງ',
+  'vientiane': 'ວຽງຈັນ',
+  'vientiane capital': 'ນະຄອນຫຼວງວຽງຈັນ'
+};
+
+// Translation functions (copied from PaymentPage controller)
+const translateCategoryToLao = (englishCategory: string): string => {
+  if (!englishCategory) return 'ອື່ນໆ';
+  
+  const normalizedCategory = englishCategory.toLowerCase().trim();
+  
+  if (categoryTranslation[normalizedCategory]) {
+    return categoryTranslation[normalizedCategory];
+  }
+  
+  for (const [key, value] of Object.entries(categoryTranslation)) {
+    if (normalizedCategory.includes(key) || key.includes(normalizedCategory)) {
+      return value;
+    }
+  }
+  
+  return englishCategory || 'ອື່ນໆ';
+};
+
+const translateGenderToLao = (englishGender: string): string => {
+  if (!englishGender) return 'ບໍ່ລະບຸ';
+  
+  const normalizedGender = englishGender.toLowerCase().trim();
+  
+  if (genderTranslation[normalizedGender]) {
+    return genderTranslation[normalizedGender];
+  }
+  
+  for (const [key, value] of Object.entries(genderTranslation)) {
+    if (normalizedGender.includes(key) || key.includes(normalizedGender)) {
+      return value;
+    }
+  }
+  
+  return englishGender || 'ບໍ່ລະບຸ';
+};
+
+const translateCityToLao = (englishCity: string): string => {
+  if (!englishCity) return 'ວຽງຈັນ';
+  
+  const normalizedCity = englishCity.toLowerCase().trim();
+  
+  if (cityTranslation[normalizedCity]) {
+    return cityTranslation[normalizedCity];
+  }
+  
+  for (const [key, value] of Object.entries(cityTranslation)) {
+    if (normalizedCity.includes(key) || key.includes(normalizedCity)) {
+      return value;
+    }
+  }
+  
+  return englishCity || 'ວຽງຈັນ';
+};
+
 // Helper function to normalize city names - Same as LocationPage/PaymentPage
 const normalizeCityName = (cityName: string): string => {
   if (!cityName) return '';
@@ -84,7 +205,7 @@ const normalizeCityName = (cityName: string): string => {
   return cityMappings[normalized] || normalized;
 };
 
-// Distance fee cal// Distance fee calculation function - Same as LocationPage/PaymentPage
+// Distance fee calculation function - Same as LocationPage/PaymentPage
 const calculateDistanceFee = (employeeCity: string, userCity: string): { fee: number; reason: string } => {
   if (!employeeCity || !userCity) {
     return { fee: 0, reason: 'ບໍ່ສາມາດກຳນົດທີ່ຕັ້ງໄດ້' };
@@ -178,21 +299,25 @@ const calculateDistanceFee = (employeeCity: string, userCity: string): { fee: nu
   return { fee, reason };
 };
 
-// Placeholder data for when API fails but we still want to show UI
+// Placeholder data for when API fails but we still want to show UI (with Lao translations)
 export const placeholderData: ServiceDetail[] = [
   {
     id: "29",
     firstName: "ອຳມະລິນ",
     surname: "ອຸນາລົມ",
     image: "/api/placeholder/40/40",
-    category: "ແມ່ບ້ານ",
-    gender: "ຍິງ",
+    category: "Cleaning",
+    categoryLao: "ທຳຄວາມສະອາດ",
+    gender: "Female",
+    genderLao: "ຍິງ",
     age: 21,
     village: "ບ້ານ ໂນນສະຫວ່າງ",
-    city: "ວຽງຈັນ",
+    city: "Vientiane",
+    cityLao: "ວຽງຈັນ",
     price: 150000,
-    priceFormatted: "150,000 KIP",
-    service: "ທຳຄວາມສະອາດ",
+    priceFormatted: "150,000 ກີບ",
+    service: "Cleaning",
+    serviceLao: "ທຳຄວາມສະອາດ",
     cat_id: 3,
     orderId: "13",
     orderDate: new Date("2025-04-10T14:45:31.000Z").toLocaleDateString('en-US', { 
@@ -484,7 +609,7 @@ const useCommentController = () => {
   // Format price with commas
   const formatCurrency = (value: number | string): string => {
     const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
-    return numValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " KIP";
+    return numValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " ກີບ";
   };
 
   // Generate receipt number
@@ -623,7 +748,7 @@ const useCommentController = () => {
         const fallbackService = placeholderData[0];
         setBillingData({
           customerName: `${fallbackService.firstName} ${fallbackService.surname}`,
-          serviceType: fallbackService.service || fallbackService.category,
+          serviceType: fallbackService.serviceLao || fallbackService.categoryLao || fallbackService.service || fallbackService.category,
           servicePrice: fallbackService.priceFormatted,
           totalPrice: fallbackService.priceFormatted,
           orderDate: fallbackService.orderDate || new Date().toLocaleDateString('en-US', { 
@@ -761,7 +886,7 @@ const useCommentController = () => {
     }
   };
 
-  // Map employee data to service detail format
+  // UPDATED: Map employee data to service detail format WITH LAO TRANSLATIONS
   const mapDataToServiceDetails = () => {
     console.log("Mapping data to service details:", data);
     console.log("Car data:", car);
@@ -782,10 +907,10 @@ const useCommentController = () => {
           const formatPrice = (price): string => {
             try {
               const numPrice = parseFloat(price);
-              return isNaN(numPrice) ? "0 KIP" : numPrice.toLocaleString() + " KIP";
+              return isNaN(numPrice) ? "0 ກີບ" : numPrice.toLocaleString() + " ກີບ";
             } catch(e) {
               console.error("Error formatting price:", e);
-              return "0 KIP";
+              return "0 ກີບ";
             }
           };
 
@@ -802,15 +927,22 @@ const useCommentController = () => {
             }
           };
 
-          // Map gender enum to display text
-          let genderText = "ຍິງ"; // Default to female
+          // UPDATED: Map gender enum to display text WITH LAO TRANSLATION
+          let genderText = "ຍິງ"; // Default to female in Lao
+          let genderLaoText = "ຍິງ";
           try {
             if (employee.gender !== undefined) {
               genderText = employee.gender === Gender.MALE ? "ຊາຍ" : "ຍິງ";
+              // Also translate if backend returns English gender
+              genderLaoText = translateGenderToLao(employee.gender);
             }
           } catch (error) {
             console.warn("Error processing gender:", error);
           }
+
+          // UPDATED: Translate category and city to Lao
+          const categoryLaoText = translateCategoryToLao(employee.cat_name || "");
+          const cityLaoText = translateCityToLao(employee.city || "");
 
           // Safely extract the numeric category ID
           let categoryId: number | undefined;
@@ -829,20 +961,24 @@ const useCommentController = () => {
             categoryId = undefined;
           }
 
-          // Initialize service object with basic information
+          // UPDATED: Initialize service object with basic information AND LAO TRANSLATIONS
           const serviceObject: ServiceDetail = {
             id: employee.id || "unknown",
             firstName: employee.first_name || "Unknown",
             surname: employee.last_name || "",
             image: employee.avatar || "/api/placeholder/40/40",
             category: employee.cat_name || "ບໍລິການ",
-            gender: genderText,
+            categoryLao: categoryLaoText, // ADD LAO VERSION
+            gender: genderText, // Already in Lao
+            genderLao: genderLaoText, // ADD LAO VERSION
             age: calculateAge(),
             village: village,
             city: employee.city || "ວຽງຈັນ",
+            cityLao: cityLaoText, // ADD LAO VERSION
             price: parseFloat(employee.price || "0"),
             priceFormatted: formatPrice(employee.price),
             service: employee.cat_name || "ບໍລິການ",
+            serviceLao: categoryLaoText, // ADD LAO VERSION
             cat_id: categoryId,
             carId: employee?.car_id,
             carBrand: employee?.car_brand,
@@ -900,7 +1036,7 @@ const useCommentController = () => {
       setEmployeeCity(normalizedEmployeeCity);
     }
     
-    // Update billing data based on first service's information
+    // UPDATED: Update billing data based on first service's information WITH LAO TRANSLATIONS
     if (mappedServices.length > 0) {
       const firstService = mappedServices[0];
       
@@ -909,7 +1045,7 @@ const useCommentController = () => {
       
       setBillingData({
         customerName: `${firstService.firstName} ${firstService.surname}`,
-        serviceType: firstService.service || firstService.category,
+        serviceType: firstService.serviceLao || firstService.categoryLao || firstService.service || firstService.category, // PREFER LAO VERSION
         servicePrice: firstService.priceFormatted,
         totalPrice: firstService.priceFormatted, // Will be updated after distance fee calculation
         orderDate: firstService.orderDate || new Date().toLocaleDateString('en-US', { 
@@ -971,7 +1107,7 @@ const useCommentController = () => {
         const fallbackService = placeholderData[0];
         setBillingData({
           customerName: `${fallbackService.firstName} ${fallbackService.surname}`,
-          serviceType: fallbackService.service || fallbackService.category,
+          serviceType: fallbackService.serviceLao || fallbackService.categoryLao || fallbackService.service || fallbackService.category,
           servicePrice: fallbackService.priceFormatted,
           totalPrice: fallbackService.priceFormatted,
           orderDate: fallbackService.orderDate || new Date().toLocaleDateString('en-US', {
@@ -1070,7 +1206,7 @@ const useCommentController = () => {
         const fallbackService = placeholderData[0];
         setBillingData({
           customerName: `${fallbackService.firstName} ${fallbackService.surname}`,
-          serviceType: fallbackService.service || fallbackService.category,
+          serviceType: fallbackService.serviceLao || fallbackService.categoryLao || fallbackService.service || fallbackService.category,
           servicePrice: fallbackService.priceFormatted,
           totalPrice: fallbackService.priceFormatted,
           orderDate: fallbackService.orderDate || new Date().toLocaleDateString('en-US', {
@@ -1090,7 +1226,7 @@ const useCommentController = () => {
       const fallbackService = placeholderData[0];
       setBillingData({
         customerName: `${fallbackService.firstName} ${fallbackService.surname}`,
-        serviceType: fallbackService.service || fallbackService.category,
+        serviceType: fallbackService.serviceLao || fallbackService.categoryLao || fallbackService.service || fallbackService.category,
         servicePrice: fallbackService.priceFormatted,
         totalPrice: fallbackService.priceFormatted,
         orderDate: fallbackService.orderDate || new Date().toLocaleDateString('en-US', {
@@ -1159,7 +1295,12 @@ const useCommentController = () => {
     generateReceiptNumber,
     navigate,
     handleUpdateEmployeeStatus,
-    createServiceOrderDirect // Export the service order creation function
+    createServiceOrderDirect, // Export the service order creation function
+    
+    // Export translation functions for use in component
+    translateCategoryToLao,
+    translateGenderToLao,
+    translateCityToLao
   };
 };
 

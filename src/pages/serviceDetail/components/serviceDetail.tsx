@@ -538,7 +538,7 @@ const ServiceDetailsPage = () => {
             alignItems: "center",
           }}>
             <StarIcon sx={{ mr: 1.5, color: "#611463" }} />
-            ລີວິວຈາກລູກຄ້າ
+            ລີວິວທັງໝົດ
           </Typography>
 
           {serviceData.reviews && serviceData.reviews.length > 0 ? (

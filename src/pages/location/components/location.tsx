@@ -9,7 +9,6 @@ import {
   CardContent,
   Avatar,
   Stack,
-  InputAdornment,
   Divider,
   Paper,
   Grid,
@@ -18,11 +17,6 @@ import {
   IconButton,
   Snackbar,
   Alert,
-  CircularProgress,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -36,8 +30,6 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import BadgeIcon from "@mui/icons-material/Badge";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import TimeToLeaveIcon from "@mui/icons-material/TimeToLeave";
-import LocalTaxiIcon from "@mui/icons-material/LocalTaxi";
-import { LOCATION_DETAIL_PATH, PAYMENT_PATH } from "../../../routes/path";
 import useMainController from "../controllers/index";
 import { EmployeeModel } from "../../../models/employee";
 import { AlertColor } from "@mui/material/Alert";
@@ -62,14 +54,129 @@ const CITIES = [
   { en: 'HADXAIFONG', lo: 'ຫາດຊາຍຟອງ', value: 'hadxaifong' }
 ];
 
+// Translation mappings - English to Lao
+const categoryTranslation: Record<string, string> = {
+  'cleaning': 'ທຳຄວາມສະອາດ',
+  'electrical': 'ສ້ອມແປງໄຟຟ້າ',
+  'aircon': 'ສ້ອມແປງແອອາກາດ',
+  'air conditioning': 'ສ້ອມແປງແອອາກາດ',
+  'plumbing': 'ສ້ອມແປງປະປາ',
+  'moving': 'ແກ່ເຄື່ອງ',
+  'transportation': 'ແກ່ເຄື່ອງ',
+  'relocation': 'ແກ່ເຄື່ອງ',
+  'bathroom': 'ດູດສ້ວມ',
+  'toilet': 'ດູດສ້ວມ',
+  'septic': 'ດູດສ້ວມ',
+  'pest': 'ກຳຈັດປວກ',
+  'pest control': 'ກຳຈັດປວກ',
+  'extermination': 'ກຳຈັດປວກ',
+  'house cleaning': 'ທຳຄວາມສະອາດ',
+  'home cleaning': 'ທຳຄວາມສະອາດ',
+  'electrical repair': 'ສ້ອມແປງໄຟຟ້າ',
+  'electrical service': 'ສ້ອມແປງໄຟຟ້າ',
+  'air conditioner repair': 'ສ້ອມແປງແອອາກາດ',
+  'ac repair': 'ສ້ອມແປງແອອາກາດ',
+  'plumbing repair': 'ສ້ອມແປງປະປາ',
+  'water pipe repair': 'ສ້ອມແປງປະປາ',
+  'moving service': 'ແກ່ເຄື່ອງ',
+  'delivery': 'ແກ່ເຄື່ອງ',
+  'septic cleaning': 'ດູດສ້ວມ',
+  'sewage cleaning': 'ດູດສ້ວມ',
+  'other': 'ອື່ນໆ',
+  'general': 'ທົ່ວໄປ'
+};
+
+// Gender translation mapping - English to Lao
+const genderTranslation: Record<string, string> = {
+  'male': 'ຊາຍ',
+  'female': 'ຍິງ',
+  'man': 'ຊາຍ',
+  'woman': 'ຍິງ',
+  'men': 'ຊາຍ',
+  'women': 'ຍິງ',
+  'boy': 'ຊາຍ',
+  'girl': 'ຍິງ',
+  'm': 'ຊາຍ',
+  'f': 'ຍິງ',
+  'other': 'ອື່ນໆ',
+  'unknown': 'ບໍ່ລະບຸ'
+};
+
+// City translation mapping - English to Lao (Vientiane Districts)
+const cityTranslation: Record<string, string> = {
+  'chanthabuly': 'ຈັນທະບູລີ',
+  'chanthabouly': 'ຈັນທະບູລີ',
+  'sikhottabong': 'ສີໂຄດຕະບອງ',
+  'xaysetha': 'ໄຊເສດຖາ',
+  'sisattanak': 'ສີສັດຕະນາກ',
+  'naxaithong': 'ນາຊາຍທອງ',
+  'xaytany': 'ໄຊທານີ',
+  'hadxaifong': 'ຫາດຊາຍຟອງ',
+  'vientiane': 'ວຽງຈັນ',
+  'vientiane capital': 'ນະຄອນຫຼວງວຽງຈັນ'
+};
+
+// Translation functions
+const translateCategoryToLao = (englishCategory: string): string => {
+  if (!englishCategory) return 'ອື່ນໆ';
+  
+  const normalizedCategory = englishCategory.toLowerCase().trim();
+  
+  if (categoryTranslation[normalizedCategory]) {
+    return categoryTranslation[normalizedCategory];
+  }
+  
+  for (const [key, value] of Object.entries(categoryTranslation)) {
+    if (normalizedCategory.includes(key) || key.includes(normalizedCategory)) {
+      return value;
+    }
+  }
+  
+  return englishCategory || 'ອື່ນໆ';
+};
+
+const translateGenderToLao = (englishGender: string): string => {
+  if (!englishGender) return 'ບໍ່ລະບຸ';
+  
+  const normalizedGender = englishGender.toLowerCase().trim();
+  
+  if (genderTranslation[normalizedGender]) {
+    return genderTranslation[normalizedGender];
+  }
+  
+  for (const [key, value] of Object.entries(genderTranslation)) {
+    if (normalizedGender.includes(key) || key.includes(normalizedGender)) {
+      return value;
+    }
+  }
+  
+  return englishGender || 'ບໍ່ລະບຸ';
+};
+
+const translateCityToLao = (englishCity: string): string => {
+  if (!englishCity) return 'ວຽງຈັນ';
+  
+  const normalizedCity = englishCity.toLowerCase().trim();
+  
+  if (cityTranslation[normalizedCity]) {
+    return cityTranslation[normalizedCity];
+  }
+  
+  for (const [key, value] of Object.entries(cityTranslation)) {
+    if (normalizedCity.includes(key) || key.includes(normalizedCity)) {
+      return value;
+    }
+  }
+  
+  return englishCity || 'ວຽງຈັນ';
+};
+
 // Helper function to normalize city names
 const normalizeCityName = (cityName: string): string => {
   if (!cityName) return '';
   
-  // Convert to lowercase and remove spaces
   let normalized = cityName.toLowerCase().replace(/\s+/g, '');
   
-  // Handle common variations
   const cityMappings: { [key: string]: string } = {
     'chanthabuly': 'chanthabouly',
     'chanthabouly': 'chanthabouly',
@@ -97,7 +204,6 @@ const calculateDistanceFee = (employeeCity: string, userCity: string): { fee: nu
     return { fee: 0, reason: 'ບໍ່ສາມາດກຳນົດທີ່ຕັ້ງໄດ້' };
   }
 
-  // Normalize city names
   const empCity = normalizeCityName(employeeCity);
   const usrCity = normalizeCityName(userCity);
 
@@ -105,7 +211,6 @@ const calculateDistanceFee = (employeeCity: string, userCity: string): { fee: nu
     return { fee: 8000, reason: 'ທີ່ຕັ້ງດຽວກັນ - ຄ່າບໍລິການພື້ນຖານ' };
   }
 
-  // Define distance fee rules based on your requirements
   const distanceRules: { [key: string]: { [key: string]: number } } = {
     'chanthabouly': {
       'sikhottabong': 10000,
@@ -169,7 +274,7 @@ const calculateDistanceFee = (employeeCity: string, userCity: string): { fee: nu
   
   let reason = '';
   if (fee === 0) {
-    reason = 'ບໍ່ມີຂໍ້ມູນ ຄ່າໄລຍະທາງສຳລັບເສັ້ນທາງນີ້';
+    reason = 'ບໍ່ມີຂໍ້ມູນຄ່າໄລຍະທາງສຳລັບເສັ້ນທາງນີ້';
   } else if (fee === 8000) {
     reason = 'ທີ່ຕັ້ງດຽວກັນ - ຄ່າບໍລິການພື້ນຖານ';
   } else if (fee === 10000) {
@@ -177,7 +282,7 @@ const calculateDistanceFee = (employeeCity: string, userCity: string): { fee: nu
   } else if (fee === 15000) {
     reason = 'ຄ່າໄລຍະທາງປານກາງ';
   } else if (fee === 20000) {
-    reason = ' ຄ່າໄລຍະທາງໄກ';
+    reason = 'ຄ່າໄລຍະທາງໄກ';
   } else if (fee === 25000) {
     reason = 'ຄ່າໄລຍະທາງໄກຫຼາຍ';
   }
@@ -185,22 +290,25 @@ const calculateDistanceFee = (employeeCity: string, userCity: string): { fee: nu
   return { fee, reason };
 };
 
-// Define the Location interface for the displayed service providers
+// Define the Location interface with Lao translations
 interface Location {
   id: string;
   firstName: string;
   surname: string;
   image: string;
   category: string;
+  categoryLao: string;
   gender: string;
+  genderLao: string;
   age: number;
   village: string;
   city: string;
+  cityLao: string;
   price: number;
   priceFormatted: string;
   service?: string;
+  serviceLao?: string;
   cat_id?: number;
-  // Car details
   carId?: string;
   carBrand?: string;
   carModel?: string;
@@ -229,12 +337,10 @@ const LocationPage: React.FC = () => {
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [alertSeverity, setAlertSeverity] = useState<AlertColor>("success");
   const [locations, setLocations] = useState<Location[]>([]);
-  
-  // Auto-calculated cities from existing data
   const [userCity, setUserCity] = useState<string>("");
   const [employeeCity, setEmployeeCity] = useState<string>("");
 
-  // Map employee data to location format
+  // Map employee data to location format with translations
   useEffect(() => {
     if (data && data.length > 0) {
       const mappedLocations = data.map((employee: EmployeeModel) => {
@@ -247,7 +353,7 @@ const LocationPage: React.FC = () => {
         // Format price with commas
         const formatPrice = (price: string): string => {
           const numPrice = parseFloat(price);
-          return numPrice.toLocaleString() + " KIP";
+          return numPrice.toLocaleString() + " ກີບ";
         };
 
         // Calculate age (placeholder)
@@ -256,14 +362,16 @@ const LocationPage: React.FC = () => {
             const createdDate = new Date(employee.created_at);
             const today = new Date();
             const age = today.getFullYear() - createdDate.getFullYear();
-            return age > 0 ? age : 21; // Default to 21 if calculation fails
+            return age > 0 ? age : 21;
           } catch (error) {
-            return 21; // Default age
+            return 21;
           }
         };
 
-        // Map gender enum to display text
-        const genderText = employee.gender === Gender.MALE ? "ຊາຍ" : "ຍິງ";
+        // Translate to Lao using our translation functions
+        const genderLao = translateGenderToLao(employee.gender);
+        const categoryLao = translateCategoryToLao(employee.cat_name);
+        const cityLao = translateCityToLao(employee.city || "");
 
         // Safely extract the numeric category ID
         let categoryId: number | undefined;
@@ -273,7 +381,6 @@ const LocationPage: React.FC = () => {
               ? parseInt(employee.cat_id, 10)
               : employee.cat_id;
 
-            // Check if parsing resulted in NaN
             if (isNaN(categoryId)) {
               categoryId = undefined;
             }
@@ -283,22 +390,25 @@ const LocationPage: React.FC = () => {
           categoryId = undefined;
         }
 
-        // Initialize location object with basic information
+        // Initialize location object with translations
         const locationObject: Location = {
           id: employee.id,
           firstName: employee.first_name,
           surname: employee.last_name,
           image: employee.avatar || "https://via.placeholder.com/40",
           category: employee.cat_name,
-          gender: genderText,
+          categoryLao: categoryLao,
+          gender: employee.gender,
+          genderLao: genderLao,
           age: calculateAge(),
           village: village,
           city: employee.city || "ວຽງຈັນ",
+          cityLao: cityLao,
           price: parseFloat(employee.price),
           priceFormatted: formatPrice(employee.price),
           service: employee.cat_name,
+          serviceLao: categoryLao,
           cat_id: categoryId,
-          // Basic car details from employee
           carId: employee?.car_id,
           carBrand: employee?.car_brand,
           carModel: employee?.car_model,
@@ -307,11 +417,9 @@ const LocationPage: React.FC = () => {
 
         // For category ID 5 (moving service), try to find matching car data
         if (categoryId === 5 && car && car.length > 0) {
-          // Find car that belongs to this employee
           const employeeCar = car.find(c => c.emp_id === employee.id);
 
           if (employeeCar) {
-            // Update with detailed car information
             locationObject.carId = employeeCar.id || locationObject.carId;
             locationObject.carBrand = employeeCar.car_brand || locationObject.carBrand;
             locationObject.carModel = employeeCar.model || locationObject.carModel;
@@ -335,7 +443,7 @@ const LocationPage: React.FC = () => {
     }
   }, [data, car]);
 
-  // Auto-get user city from localStorage (set from location selection)
+  // Auto-get user city from localStorage
   useEffect(() => {
     const savedUserCity = localStorage.getItem('addressCity');
     if (savedUserCity) {
@@ -350,8 +458,6 @@ const LocationPage: React.FC = () => {
     setBaseAmount(base);
 
     const savedLocationName = localStorage.getItem('selectedLocationName');
-
-    // If a location name exists in localStorage, set it to the address state
     if (savedLocationName) {
       setAddress(savedLocationName);
     }
@@ -376,7 +482,7 @@ const LocationPage: React.FC = () => {
 
   // Format number as currency
   const formatCurrency = (value: number): string => {
-    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " KIP";
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " ກີບ";
   };
 
   // Handle alert close
@@ -384,9 +490,8 @@ const LocationPage: React.FC = () => {
     setAlertOpen(false);
   };
 
-  // Handle proceed to payment with distance fee included
+  // Handle proceed to payment
   const handleProceedToPayment = () => {
-    // Store the total amount including distance fee for the payment page
     localStorage.setItem('totalAmountWithDistanceFee', totalAmount.toString());
     localStorage.setItem('distanceFee', distanceFee.toString());
     localStorage.setItem('baseAmount', baseAmount.toString());
@@ -394,7 +499,7 @@ const LocationPage: React.FC = () => {
     navigate(`/payment/${id}`);
   };
 
-  // Show enhanced loading state
+  // Loading component
   if (loading) {
     return (
       <Box
@@ -409,7 +514,6 @@ const LocationPage: React.FC = () => {
           position: "relative"
         }}
       >
-        {/* Background decorative elements */}
         <Box
           sx={{
             position: "absolute",
@@ -440,7 +544,6 @@ const LocationPage: React.FC = () => {
           }}
         />
 
-        {/* Main loading spinner with custom animation */}
         <Box
           sx={{
             position: "relative",
@@ -452,7 +555,6 @@ const LocationPage: React.FC = () => {
             mb: 2
           }}
         >
-          {/* Outer spinning circle - purple */}
           <Box
             sx={{
               position: "absolute",
@@ -468,8 +570,6 @@ const LocationPage: React.FC = () => {
               }
             }}
           />
-
-          {/* Inner spinning circle - orange */}
           <Box
             sx={{
               position: "absolute",
@@ -485,8 +585,6 @@ const LocationPage: React.FC = () => {
               }
             }}
           />
-
-          {/* Center pulsing dot - mix */}
           <Box
             sx={{
               width: "20px",
@@ -498,7 +596,6 @@ const LocationPage: React.FC = () => {
           />
         </Box>
 
-        {/* Loading text with animation */}
         <Typography
           variant="h6"
           sx={{
@@ -518,7 +615,6 @@ const LocationPage: React.FC = () => {
           ກຳລັງໂຫຼດ...
         </Typography>
 
-        {/* Animated progress dots - alternating colors */}
         <Box
           sx={{
             display: "flex",
@@ -603,7 +699,6 @@ const LocationPage: React.FC = () => {
               <ArrowBackIcon />
             </IconButton>
 
-            {/* Title */}
             <Typography
               variant="h5"
               gutterBottom
@@ -622,10 +717,10 @@ const LocationPage: React.FC = () => {
             >
               ຢືນຢັນຄຳສັ່ງ
             </Typography>
-            <Box sx={{ width: 40 }} /> {/* Spacer for alignment */}
+            <Box sx={{ width: 40 }} />
           </Box>
 
-          {/* Address Input (Clickable) */}
+          {/* Address Input */}
           <Box sx={{ mb: 4, mt: 3 }}>
             <Typography
               color="textSecondary"
@@ -638,7 +733,6 @@ const LocationPage: React.FC = () => {
               ທີ່ຢູ່
             </Typography>
 
-            {/* Styled Box that looks like TextField but allows for formatted content */}
             <Box
               onClick={() => navigate(`/Location-detail/${id}`)}
               sx={{
@@ -660,10 +754,8 @@ const LocationPage: React.FC = () => {
                 border: '1px solid rgba(0, 0, 0, 0.23)',
               }}
             >
-              {/* Start Icon */}
               <LocationOnIcon sx={{ color: '#611463', mr: 1 }} />
 
-              {/* Address Content with bold name */}
               <Box sx={{ flexGrow: 1 }}>
                 {address ? (
                   <>
@@ -684,7 +776,7 @@ const LocationPage: React.FC = () => {
                         color: 'text.secondary'
                       }}
                     >
-                      {localStorage.getItem("addressVillage") || ""}, {localStorage.getItem("addressCity") || ""}
+                      {localStorage.getItem("addressVillage") || ""}, {translateCityToLao(localStorage.getItem("addressCity") || "")}
                     </Typography>
                   </>
                 ) : (
@@ -694,12 +786,11 @@ const LocationPage: React.FC = () => {
                 )}
               </Box>
 
-              {/* End Icon */}
               <KeyboardArrowRightIcon sx={{ color: '#611463' }} />
             </Box>
           </Box>
 
-          {/* Enhanced Distance Fee Display */}
+          {/* Distance Fee Display */}
           {(employeeCity || userCity) && distanceFee > 0 && (
             <Box sx={{ mb: 3 }}>
               <Card
@@ -711,7 +802,6 @@ const LocationPage: React.FC = () => {
                 }}
               >
                 <CardContent sx={{ p: 2 }}>
-                  {/* Header with icon and title */}
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                     <DirectionsCarIcon sx={{ fontSize: '1rem', color: '#8a1c8d', mr: 1 }} />
                     <Typography variant="body2" sx={{ fontSize: '0.9rem', color: '#611463', fontWeight: 600 }}>
@@ -719,7 +809,6 @@ const LocationPage: React.FC = () => {
                     </Typography>
                   </Box>
 
-                  {/* Route Information */}
                   <Box sx={{ 
                     display: 'flex', 
                     alignItems: 'center', 
@@ -729,7 +818,6 @@ const LocationPage: React.FC = () => {
                     mb: 1.5
                   }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', minWidth: '60%' }}>
-                      {/* From City */}
                       <Box sx={{ 
                         bgcolor: 'rgba(97, 20, 99, 0.1)', 
                         px: 1, 
@@ -738,14 +826,12 @@ const LocationPage: React.FC = () => {
                         border: '1px solid rgba(97, 20, 99, 0.2)'
                       }}>
                         <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#611463', fontWeight: 500 }}>
-                          {employeeCity ? employeeCity.charAt(0).toUpperCase() + employeeCity.slice(1) : 'ບໍ່ທາງ'}
+                          {employeeCity ? translateCityToLao(employeeCity) : 'ບໍ່ທາງ'}
                         </Typography>
                       </Box>
 
-                      {/* Arrow */}
                       <KeyboardArrowRightIcon sx={{ fontSize: '1.2rem', color: '#8a1c8d', mx: 0.5 }} />
 
-                      {/* To City */}
                       <Box sx={{ 
                         bgcolor: 'rgba(97, 20, 99, 0.1)', 
                         px: 1, 
@@ -754,12 +840,11 @@ const LocationPage: React.FC = () => {
                         border: '1px solid rgba(97, 20, 99, 0.2)'
                       }}>
                         <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#611463', fontWeight: 500 }}>
-                          {userCity ? userCity.charAt(0).toUpperCase() + userCity.slice(1) : 'ບໍ່ທາງ'}
+                          {userCity ? translateCityToLao(userCity) : 'ບໍ່ທາງ'}
                         </Typography>
                       </Box>
                     </Box>
 
-                    {/* Fee Amount */}
                     <Typography
                       sx={{
                         fontSize: '0.9rem',
@@ -776,7 +861,6 @@ const LocationPage: React.FC = () => {
                     </Typography>
                   </Box>
 
-                  {/* Fee Reason/Category */}
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Typography variant="body2" sx={{ 
                       fontSize: '0.8rem', 
@@ -785,8 +869,6 @@ const LocationPage: React.FC = () => {
                     }}>
                       {distanceFeeReason}
                     </Typography>
-
-                  
                   </Box>
                 </CardContent>
               </Card>
@@ -848,7 +930,7 @@ const LocationPage: React.FC = () => {
                       </Typography>
                       <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
                         <Typography variant="body2" sx={{ fontSize: '0.85rem', mr: 1.5, color: '#555' }}>
-                          {location.service}
+                          {location.serviceLao}
                         </Typography>
                       </Box>
                     </Box>
@@ -885,7 +967,7 @@ const LocationPage: React.FC = () => {
                     }}>
                       <CategoryIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
                       <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
-                        {location.category}
+                        {location.categoryLao}
                       </Typography>
                     </Box>
                     <Box sx={{
@@ -898,86 +980,81 @@ const LocationPage: React.FC = () => {
                     }}>
                       <PersonIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
                       <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
-                        {location.gender}
+                        {location.genderLao}
                       </Typography>
                     </Box>
                   </Box>
 
                   {/* Car details - ONLY for category ID 5 */}
                   {location.cat_id === 5 && (
-                    <>
-                      {/* Enhanced car details with image (similar to ServiceDetailsPage) */}
-                      <Box sx={{
-                        display: "flex",
-                        flexDirection: { xs: "column", sm: "row" },
-                        alignItems: { xs: "center", sm: "flex-start" },
-                        gap: 2,
-                        mb: 2,
-                        p: 2,
-                        backgroundColor: '#f0e9f1',
-                        borderRadius: 2,
-                        border: '1px dashed rgba(97, 20, 99, 0.2)',
-                        borderLeft: '3px solid #8a1c8d'
-                      }}>
-                        {/* Car image - only if available */}
-                        {location.carImage && (
-                          <Box sx={{
-                            width: { xs: "100%", sm: "40%" },
-                            height: { xs: 150, sm: 120 },
-                            borderRadius: 2,
-                            overflow: "hidden",
-                            position: "relative",
-                            boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-                            flexShrink: 0,
-                          }}>
-                            <img
-                              src={location.carImage}
-                              alt="Vehicle"
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                              }}
-                            />
-                          </Box>
-                        )}
+                    <Box sx={{
+                      display: "flex",
+                      flexDirection: { xs: "column", sm: "row" },
+                      alignItems: { xs: "center", sm: "flex-start" },
+                      gap: 2,
+                      mb: 2,
+                      p: 2,
+                      backgroundColor: '#f0e9f1',
+                      borderRadius: 2,
+                      border: '1px dashed rgba(97, 20, 99, 0.2)',
+                      borderLeft: '3px solid #8a1c8d'
+                    }}>
+                      {location.carImage && (
+                        <Box sx={{
+                          width: { xs: "100%", sm: "40%" },
+                          height: { xs: 150, sm: 120 },
+                          borderRadius: 2,
+                          overflow: "hidden",
+                          position: "relative",
+                          boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+                          flexShrink: 0,
+                        }}>
+                          <img
+                            src={location.carImage}
+                            alt="Vehicle"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        </Box>
+                      )}
 
-                        {/* Car details */}
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="subtitle2" sx={{ mb: 1, color: '#611463', fontWeight: 600 }}>
-                            ຂໍ້ມູນລົດ
-                          </Typography>
-                          <Grid container spacing={1}>
-                            <Grid item xs={12} sm={6}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                                <TimeToLeaveIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
-                                <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555', fontWeight: 500 }}>
-                                  {location.carBrand || 'N/A'} {location.carModel || 'N/A'}
-                                </Typography>
-                              </Box>
-                            </Grid>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="subtitle2" sx={{ mb: 1, color: '#611463', fontWeight: 600 }}>
+                          ຂໍ້ມູນລົດ
+                        </Typography>
+                        <Grid container spacing={1}>
+                          <Grid item xs={12} sm={6}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                              <TimeToLeaveIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555', fontWeight: 500 }}>
+                                {location.carBrand || 'N/A'} {location.carModel || 'N/A'}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                              <BadgeIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
+                                {location.licensePlate || 'N/A'}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          {location.carYear && (
                             <Grid item xs={12} sm={6}>
                               <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                                <BadgeIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
+                                <CalendarTodayIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
                                 <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
-                                  {location.licensePlate || 'N/A'}
+                                  ປີ {location.carYear}
                                 </Typography>
                               </Box>
                             </Grid>
-                            {location.carYear && (
-                              <Grid item xs={12} sm={6}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                                  <CalendarTodayIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
-                                  <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
-                                    ປີ {location.carYear}
-                                  </Typography>
-                                </Box>
-                              </Grid>
-                            )}
-                          </Grid>
-                        </Box>
+                          )}
+                        </Grid>
                       </Box>
-                    </>
+                    </Box>
                   )}
 
                   {/* Location info row */}
@@ -990,7 +1067,6 @@ const LocationPage: React.FC = () => {
                     flexWrap: { xs: "wrap", sm: "nowrap" },
                     borderLeft: '3px solid #8a1c8d'
                   }}>
-
                     <Box sx={{ display: "flex", alignItems: "center", mr: 2, mb: { xs: 1, sm: 0 }, minWidth: "45%" }}>
                       <HomeIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
                       <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
@@ -1000,7 +1076,7 @@ const LocationPage: React.FC = () => {
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                       <LocationCityIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
                       <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
-                        {location.city}
+                        {location.cityLao}
                       </Typography>
                     </Box>
                   </Box>
@@ -1015,11 +1091,10 @@ const LocationPage: React.FC = () => {
             borderWidth: 1
           }} />
 
-          {/* Two-column layout on larger screens */}
+          {/* Two-column layout */}
           <Grid container spacing={3}>
             {/* Left column - Notes */}
             <Grid item xs={12} md={6}>
-              {/* Notes - Editable */}
               <TextField
                 label="ໝາຍເຫດ"
                 fullWidth

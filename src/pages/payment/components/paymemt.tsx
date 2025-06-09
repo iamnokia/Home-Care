@@ -52,11 +52,43 @@ const fontSize = {
   button: "1rem",
 };
 
+// Translation functions (same as controller)
+const translateCityToLao = (englishCity: string): string => {
+  if (!englishCity) return 'ວຽງຈັນ';
+  
+  const cityTranslation: Record<string, string> = {
+    'chanthabuly': 'ຈັນທະບູລີ',
+    'chanthabouly': 'ຈັນທະບູລີ',
+    'sikhottabong': 'ສີໂຄດຕະບອງ',
+    'xaysetha': 'ໄຊເສດຖາ',
+    'sisattanak': 'ສີສັດຕະນາກ',
+    'naxaithong': 'ນາຊາຍທອງ',
+    'xaytany': 'ໄຊທານີ',
+    'hadxaifong': 'ຫາດຊາຍຟອງ',
+    'vientiane': 'ວຽງຈັນ',
+    'vientiane capital': 'ນະຄອນຫຼວງວຽງຈັນ'
+  };
+  
+  const normalizedCity = englishCity.toLowerCase().trim();
+  
+  if (cityTranslation[normalizedCity]) {
+    return cityTranslation[normalizedCity];
+  }
+  
+  for (const [key, value] of Object.entries(cityTranslation)) {
+    if (normalizedCity.includes(key) || key.includes(normalizedCity)) {
+      return value;
+    }
+  }
+  
+  return englishCity || 'ວຽງຈັນ';
+};
+
 const PaymentPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // Get everything from the controller including distance fee calculations
+  // Get everything from the controller including distance fee calculations and translations
   const {
     locations,
     loading,
@@ -79,7 +111,8 @@ const PaymentPage: React.FC = () => {
     formatCurrency,
     handlePaymentAmountChange,
     handleAlertClose,
-    handlePaymentSubmit
+    handlePaymentSubmit,
+    translateCityToLao: translateCityFromController
   } = useMainController();
 
   // Show enhanced loading state
@@ -128,7 +161,6 @@ const PaymentPage: React.FC = () => {
           }}
         />
 
-        {/* Main loading spinner with custom animation */}
         <Box
           sx={{
             position: "relative",
@@ -140,7 +172,6 @@ const PaymentPage: React.FC = () => {
             mb: 2
           }}
         >
-          {/* Outer spinning circle - purple */}
           <Box
             sx={{
               position: "absolute",
@@ -156,8 +187,6 @@ const PaymentPage: React.FC = () => {
               }
             }}
           />
-
-          {/* Inner spinning circle - orange */}
           <Box
             sx={{
               position: "absolute",
@@ -173,8 +202,6 @@ const PaymentPage: React.FC = () => {
               }
             }}
           />
-
-          {/* Center pulsing dot - mix */}
           <Box
             sx={{
               width: "20px",
@@ -186,7 +213,6 @@ const PaymentPage: React.FC = () => {
           />
         </Box>
 
-        {/* Loading text with animation */}
         <Typography
           variant="h6"
           sx={{
@@ -206,7 +232,6 @@ const PaymentPage: React.FC = () => {
           ກຳລັງໂຫຼດ...
         </Typography>
 
-        {/* Animated progress dots - alternating colors */}
         <Box
           sx={{
             display: "flex",
@@ -320,7 +345,6 @@ const PaymentPage: React.FC = () => {
               <ArrowBackIcon />
             </IconButton>
 
-            {/* Title */}
             <Typography
               variant="h5"
               gutterBottom
@@ -343,7 +367,7 @@ const PaymentPage: React.FC = () => {
               <PaymentsIcon sx={{ mr: 1, WebkitTextFillColor: '#611463' }} />
               ຊຳລະເງິນ
             </Typography>
-            <Box sx={{ width: 40 }} /> {/* Spacer for alignment */}
+            <Box sx={{ width: 40 }} />
           </Box>
 
           {/* Left and Right Sections */}
@@ -409,7 +433,7 @@ const PaymentPage: React.FC = () => {
                             </Typography>
                             <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
                               <Typography variant="body2" sx={{ fontSize: '0.85rem', mr: 1.5, color: '#555' }}>
-                                {location.service}
+                                {location.serviceLao}
                               </Typography>
                             </Box>
                           </Box>
@@ -446,7 +470,7 @@ const PaymentPage: React.FC = () => {
                           }}>
                             <CategoryIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
                             <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
-                              {location.category}
+                              {location.categoryLao}
                             </Typography>
                           </Box>
                           <Box sx={{
@@ -459,7 +483,7 @@ const PaymentPage: React.FC = () => {
                           }}>
                             <PersonIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
                             <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
-                              {location.gender}
+                              {location.genderLao}
                             </Typography>
                           </Box>
                         </Box>
@@ -478,7 +502,6 @@ const PaymentPage: React.FC = () => {
                             border: '1px dashed rgba(97, 20, 99, 0.2)',
                             borderLeft: '3px solid #8a1c8d'
                           }}>
-                            {/* Car image - only if available */}
                             {location.carImage && (
                               <Box sx={{
                                 width: { xs: "100%", sm: "40%" },
@@ -501,7 +524,6 @@ const PaymentPage: React.FC = () => {
                               </Box>
                             )}
 
-                            {/* Car details */}
                             <Box sx={{ flex: 1 }}>
                               <Typography variant="subtitle2" sx={{ mb: 1, color: '#611463', fontWeight: 600 }}>
                                 ຂໍ້ມູນລົດ
@@ -557,7 +579,7 @@ const PaymentPage: React.FC = () => {
                           <Box sx={{ display: "flex", alignItems: "center" }}>
                             <LocationCityIcon sx={{ fontSize: '0.9rem', color: '#8a1c8d', mr: 0.5 }} />
                             <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>
-                              {location.city}
+                              {location.cityLao}
                             </Typography>
                           </Box>
                         </Box>
@@ -584,7 +606,6 @@ const PaymentPage: React.FC = () => {
                   ທີ່ຢູ່
                 </Typography>
 
-                {/* Custom Address Display Box */}
                 <Box
                   sx={{
                     display: 'flex',
@@ -599,10 +620,8 @@ const PaymentPage: React.FC = () => {
                     border: '1px solid rgba(0, 0, 0, 0.23)',
                   }}
                 >
-                  {/* Start Icon */}
                   <LocationOnIcon sx={{ color: '#611463', mr: 1.5, mt: 0.5 }} />
 
-                  {/* Address Content */}
                   <Box sx={{ flexGrow: 1 }}>
                     {localStorage.getItem('addressName') ? (
                       <>
@@ -624,7 +643,7 @@ const PaymentPage: React.FC = () => {
                             mt: 0.5
                           }}
                         >
-                          {localStorage.getItem("addressVillage") || ""}, {localStorage.getItem("addressCity") || ""}
+                          {localStorage.getItem("addressVillage") || ""}, {translateCityToLao(localStorage.getItem("addressCity") || "")}
                         </Typography>
                       </>
                     ) : (
@@ -655,7 +674,7 @@ const PaymentPage: React.FC = () => {
                 </Box>
               </Box>
 
-              {/* Enhanced Distance Fee Display - Same as LocationPage */}
+              {/* Enhanced Distance Fee Display */}
               {(employeeCity || userCity) && distanceFee > 0 && (
                 <Box sx={{ mb: 3 }}>
                   <Card
@@ -667,7 +686,6 @@ const PaymentPage: React.FC = () => {
                     }}
                   >
                     <CardContent sx={{ p: 2 }}>
-                      {/* Header with icon and title */}
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                         <DirectionsCarIcon sx={{ fontSize: '1rem', color: '#8a1c8d', mr: 1 }} />
                         <Typography variant="body2" sx={{ fontSize: '0.9rem', color: '#611463', fontWeight: 600 }}>
@@ -675,7 +693,6 @@ const PaymentPage: React.FC = () => {
                         </Typography>
                       </Box>
 
-                      {/* Route Information */}
                       <Box sx={{ 
                         display: 'flex', 
                         alignItems: 'center', 
@@ -685,7 +702,6 @@ const PaymentPage: React.FC = () => {
                         mb: 1.5
                       }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', minWidth: '60%' }}>
-                          {/* From City */}
                           <Box sx={{ 
                             bgcolor: 'rgba(97, 20, 99, 0.1)', 
                             px: 1, 
@@ -694,14 +710,12 @@ const PaymentPage: React.FC = () => {
                             border: '1px solid rgba(97, 20, 99, 0.2)'
                           }}>
                             <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#611463', fontWeight: 500 }}>
-                              {employeeCity ? employeeCity.charAt(0).toUpperCase() + employeeCity.slice(1) : 'ບໍ່ທາງ'}
+                              {employeeCity ? translateCityFromController ? translateCityFromController(employeeCity) : translateCityToLao(employeeCity) : 'ບໍ່ທາງ'}
                             </Typography>
                           </Box>
 
-                          {/* Arrow */}
                           <KeyboardArrowRightIcon sx={{ fontSize: '1.2rem', color: '#8a1c8d', mx: 0.5 }} />
 
-                          {/* To City */}
                           <Box sx={{ 
                             bgcolor: 'rgba(97, 20, 99, 0.1)', 
                             px: 1, 
@@ -710,12 +724,11 @@ const PaymentPage: React.FC = () => {
                             border: '1px solid rgba(97, 20, 99, 0.2)'
                           }}>
                             <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#611463', fontWeight: 500 }}>
-                              {userCity ? userCity.charAt(0).toUpperCase() + userCity.slice(1) : 'ບໍ່ທາງ'}
+                              {userCity ? translateCityFromController ? translateCityFromController(userCity) : translateCityToLao(userCity) : 'ບໍ່ທາງ'}
                             </Typography>
                           </Box>
                         </Box>
 
-                        {/* Fee Amount */}
                         <Typography
                           sx={{
                             fontSize: '0.9rem',
@@ -732,7 +745,6 @@ const PaymentPage: React.FC = () => {
                         </Typography>
                       </Box>
 
-                      {/* Fee Reason/Category */}
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Typography variant="body2" sx={{ 
                           fontSize: '0.8rem', 
@@ -899,7 +911,7 @@ const PaymentPage: React.FC = () => {
                   <TextField
                     fullWidth
                     variant="outlined"
-                    label="ຈຳນວນເງິນ (KIP)"
+                    label="ຈຳນວນເງິນ (ກີບ)"
                     value={paymentAmount}
                     onChange={handlePaymentAmountChange}
                     error={!!paymentError}
@@ -951,7 +963,6 @@ const PaymentPage: React.FC = () => {
                   </CardContent>
                 </Card>
               )}
-              {/* Add this new code block for insufficient payment */}
               {paymentState === "insufficient" && (
                 <Card sx={{
                   mb: 2,
@@ -970,7 +981,6 @@ const PaymentPage: React.FC = () => {
                 </Card>
               )}
 
-              {/* Debug Button - Helps with troubleshooting */}
               {error && (
                 <Box sx={{ textAlign: 'center', mt: 1, mb: 1 }}>
                   <Button
@@ -1063,7 +1073,6 @@ const PaymentPage: React.FC = () => {
           }}
         >
           <DialogContent sx={{ position: 'relative', textAlign: 'center', py: 3 }}>
-            {/* Success icon animation */}
             <Box sx={{
               position: 'relative',
               height: '100px',
@@ -1073,7 +1082,6 @@ const PaymentPage: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              {/* Animated rings around the check icon */}
               <Box sx={{
                 position: 'absolute',
                 width: '100%',
@@ -1102,7 +1110,6 @@ const PaymentPage: React.FC = () => {
                 animationIterationCount: 1
               }} />
 
-              {/* Success icon */}
               <CheckCircleIcon
                 sx={{
                   fontSize: '80px',
@@ -1117,7 +1124,6 @@ const PaymentPage: React.FC = () => {
               />
             </Box>
 
-            {/* Success message */}
             <Typography
               variant="h5"
               sx={{
@@ -1142,7 +1148,6 @@ const PaymentPage: React.FC = () => {
               ຂອບໃຈສຳລັບການໃຊ້ບໍລິການ. ກຳລັງໄປຫາໜ້າຖັດໄປ...
             </Typography>
 
-            {/* Payment amount detail */}
             <Box sx={{
               mt: 2,
               p: 2.5,

@@ -1,4 +1,4 @@
-// Enhanced useMainController.tsx for PaymentPage with distance fee calculation
+// Enhanced useMainController.tsx for PaymentPage with distance fee calculation and Lao translations
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EmployeeModel } from "../../../models/employee";
@@ -9,20 +9,24 @@ import { SERVICE_STATUS_PATH } from "../../../routes/path";
 import { AlertColor } from "@mui/material/Alert";
 import { useSelector } from "react-redux";
 
-// Interface for location data format
+// Interface for location data format with Lao translations
 export interface Location {
   id: string;
   firstName: string;
   surname: string;
   image: string;
   category: string;
+  categoryLao: string;
   gender: string;
+  genderLao: string;
   age: number;
   village: string;
   city: string;
+  cityLao: string;
   price: number;
   priceFormatted: string;
   service?: string;
+  serviceLao?: string;
   cat_id?: number;
   // Car details
   carId?: string;
@@ -33,7 +37,7 @@ export interface Location {
   carImage?: string;
 }
 
-// City definitions with English and Lao names - Same as LocationPage
+// City definitions with English and Lao names
 const CITIES = [
   { en: 'CHANTHABULY', lo: 'ຈັນທະບູລີ', value: 'chanthabouly' },
   { en: 'SIKHOTTABONG', lo: 'ສີໂຄດຕະບອງ', value: 'sikhottabong' },
@@ -44,14 +48,129 @@ const CITIES = [
   { en: 'HADXAIFONG', lo: 'ຫາດຊາຍຟອງ', value: 'hadxaifong' }
 ];
 
-// Helper function to normalize city names - Same as LocationPage
+// Translation mappings - English to Lao
+const categoryTranslation: Record<string, string> = {
+  'cleaning': 'ທຳຄວາມສະອາດ',
+  'electrical': 'ສ້ອມແປງໄຟຟ້າ',
+  'aircon': 'ສ້ອມແປງແອອາກາດ',
+  'air conditioning': 'ສ້ອມແປງແອອາກາດ',
+  'plumbing': 'ສ້ອມແປງປະປາ',
+  'moving': 'ແກ່ເຄື່ອງ',
+  'transportation': 'ແກ່ເຄື່ອງ',
+  'relocation': 'ແກ່ເຄື່ອງ',
+  'bathroom': 'ດູດສ້ວມ',
+  'toilet': 'ດູດສ້ວມ',
+  'septic': 'ດູດສ້ວມ',
+  'pest': 'ກຳຈັດປວກ',
+  'pest control': 'ກຳຈັດປວກ',
+  'extermination': 'ກຳຈັດປວກ',
+  'house cleaning': 'ທຳຄວາມສະອາດ',
+  'home cleaning': 'ທຳຄວາມສະອາດ',
+  'electrical repair': 'ສ້ອມແປງໄຟຟ້າ',
+  'electrical service': 'ສ້ອມແປງໄຟຟ້າ',
+  'air conditioner repair': 'ສ້ອມແປງແອອາກາດ',
+  'ac repair': 'ສ້ອມແປງແອອາກາດ',
+  'plumbing repair': 'ສ້ອມແປງປະປາ',
+  'water pipe repair': 'ສ້ອມແປງປະປາ',
+  'moving service': 'ແກ່ເຄື່ອງ',
+  'delivery': 'ແກ່ເຄື່ອງ',
+  'septic cleaning': 'ດູດສ້ວມ',
+  'sewage cleaning': 'ດູດສ້ວມ',
+  'other': 'ອື່ນໆ',
+  'general': 'ທົ່ວໄປ'
+};
+
+// Gender translation mapping - English to Lao
+const genderTranslation: Record<string, string> = {
+  'male': 'ຊາຍ',
+  'female': 'ຍິງ',
+  'man': 'ຊາຍ',
+  'woman': 'ຍິງ',
+  'men': 'ຊາຍ',
+  'women': 'ຍິງ',
+  'boy': 'ຊາຍ',
+  'girl': 'ຍິງ',
+  'm': 'ຊາຍ',
+  'f': 'ຍິງ',
+  'other': 'ອື່ນໆ',
+  'unknown': 'ບໍ່ລະບຸ'
+};
+
+// City translation mapping - English to Lao (Vientiane Districts)
+const cityTranslation: Record<string, string> = {
+  'chanthabuly': 'ຈັນທະບູລີ',
+  'chanthabouly': 'ຈັນທະບູລີ',
+  'sikhottabong': 'ສີໂຄດຕະບອງ',
+  'xaysetha': 'ໄຊເສດຖາ',
+  'sisattanak': 'ສີສັດຕະນາກ',
+  'naxaithong': 'ນາຊາຍທອງ',
+  'xaytany': 'ໄຊທານີ',
+  'hadxaifong': 'ຫາດຊາຍຟອງ',
+  'vientiane': 'ວຽງຈັນ',
+  'vientiane capital': 'ນະຄອນຫຼວງວຽງຈັນ'
+};
+
+// Translation functions
+const translateCategoryToLao = (englishCategory: string): string => {
+  if (!englishCategory) return 'ອື່ນໆ';
+  
+  const normalizedCategory = englishCategory.toLowerCase().trim();
+  
+  if (categoryTranslation[normalizedCategory]) {
+    return categoryTranslation[normalizedCategory];
+  }
+  
+  for (const [key, value] of Object.entries(categoryTranslation)) {
+    if (normalizedCategory.includes(key) || key.includes(normalizedCategory)) {
+      return value;
+    }
+  }
+  
+  return englishCategory || 'ອື່ນໆ';
+};
+
+const translateGenderToLao = (englishGender: string): string => {
+  if (!englishGender) return 'ບໍ່ລະບຸ';
+  
+  const normalizedGender = englishGender.toLowerCase().trim();
+  
+  if (genderTranslation[normalizedGender]) {
+    return genderTranslation[normalizedGender];
+  }
+  
+  for (const [key, value] of Object.entries(genderTranslation)) {
+    if (normalizedGender.includes(key) || key.includes(normalizedGender)) {
+      return value;
+    }
+  }
+  
+  return englishGender || 'ບໍ່ລະບຸ';
+};
+
+const translateCityToLao = (englishCity: string): string => {
+  if (!englishCity) return 'ວຽງຈັນ';
+  
+  const normalizedCity = englishCity.toLowerCase().trim();
+  
+  if (cityTranslation[normalizedCity]) {
+    return cityTranslation[normalizedCity];
+  }
+  
+  for (const [key, value] of Object.entries(cityTranslation)) {
+    if (normalizedCity.includes(key) || key.includes(normalizedCity)) {
+      return value;
+    }
+  }
+  
+  return englishCity || 'ວຽງຈັນ';
+};
+
+// Helper function to normalize city names
 const normalizeCityName = (cityName: string): string => {
   if (!cityName) return '';
   
-  // Convert to lowercase and remove spaces
   let normalized = cityName.toLowerCase().replace(/\s+/g, '');
   
-  // Handle common variations
   const cityMappings: { [key: string]: string } = {
     'chanthabuly': 'chanthabouly',
     'chanthabouly': 'chanthabouly',
@@ -73,13 +192,12 @@ const normalizeCityName = (cityName: string): string => {
   return cityMappings[normalized] || normalized;
 };
 
-// Distance fee calculation function - Same as LocationPage
+// Distance fee calculation function
 const calculateDistanceFee = (employeeCity: string, userCity: string): { fee: number; reason: string } => {
   if (!employeeCity || !userCity) {
     return { fee: 0, reason: 'ບໍ່ສາມາດກຳນົດທີ່ຕັ້ງໄດ້' };
   }
 
-  // Normalize city names
   const empCity = normalizeCityName(employeeCity);
   const usrCity = normalizeCityName(userCity);
 
@@ -87,7 +205,6 @@ const calculateDistanceFee = (employeeCity: string, userCity: string): { fee: nu
     return { fee: 8000, reason: 'ທີ່ຕັ້ງດຽວກັນ - ຄ່າບໍລິການພື້ນຖານ' };
   }
 
-  // Define distance fee rules based on your requirements
   const distanceRules: { [key: string]: { [key: string]: number } } = {
     'chanthabouly': {
       'sikhottabong': 10000,
@@ -167,21 +284,25 @@ const calculateDistanceFee = (employeeCity: string, userCity: string): { fee: nu
   return { fee, reason };
 };
 
-// Placeholder data for when API fails but we still want to show UI
+// Placeholder data with Lao translations
 export const placeholderData: Location[] = [
   {
     id: "placeholder",
     firstName: "ແມ່ບ້ານ",
     surname: "ບໍລິການ",
     image: "https://via.placeholder.com/40",
-    category: "ແມ່ບ້ານ",
-    gender: "ຍິງ",
+    category: "Cleaning",
+    categoryLao: "ທຳຄວາມສະອາດ",
+    gender: "Female",
+    genderLao: "ຍິງ",
     age: 21,
     village: "ບ້ານ ໂນນສະຫວ່າງ",
-    city: "ວຽງຈັນ",
+    city: "Vientiane",
+    cityLao: "ວຽງຈັນ",
     price: 250000,
-    priceFormatted: "250,000 KIP",
-    service: "ແມ່ບ້ານ",
+    priceFormatted: "250,000 ກິບ",
+    service: "Cleaning",
+    serviceLao: "ທຳຄວາມສະອາດ",
     cat_id: 1
   }
 ];
@@ -194,13 +315,13 @@ const useMainController = () => {
   const [error, setError] = useState<string | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);
   
-  // Amount calculations - Like LocationPage
+  // Amount calculations
   const [baseAmount, setBaseAmount] = useState<number>(0);
   const [distanceFee, setDistanceFee] = useState<number>(0);
   const [distanceFeeReason, setDistanceFeeReason] = useState<string>("");
   const [totalAmount, setTotalAmount] = useState<number>(0);
   
-  // City tracking - Like LocationPage
+  // City tracking
   const [userCity, setUserCity] = useState<string>("");
   const [employeeCity, setEmployeeCity] = useState<string>("");
   
@@ -349,13 +470,12 @@ const useMainController = () => {
   const handleGetDataById = async (): Promise<void> => {
     try {
       setLoading(true);
-      // Using the id parameter in the URL
       const res = await axios.get(`https://homecare-pro.onrender.com/employees/${id}`, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      setData(Array.isArray(res.data) ? res.data : [res.data]); // Handle both array and single object responses
+      setData(Array.isArray(res.data) ? res.data : [res.data]);
       setError(null);
     } catch (error) {
       console.error("Error fetching employee data:", error);
@@ -368,23 +488,21 @@ const useMainController = () => {
   // Get car data for moving service (category ID 5)
   const handleGetCarByCatId = async (): Promise<void> => {
     try {
-      // Using the id parameter in the URL
       const res = await axios.get("https://homecare-pro.onrender.com/employees/read_emp_car_employees/5", {
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      setCar(Array.isArray(res.data) ? res.data : [res.data]); // Handle both array and single object responses
+      setCar(Array.isArray(res.data) ? res.data : [res.data]);
     } catch (error) {
       console.error("Error fetching car data:", error);
-      // Don't set error state here as car data might be optional
     }
   };
 
   // Format price with commas
   const formatCurrency = (value: number | string): string => {
     const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
-    return numValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " KIP";
+    return numValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " ກີບ";
   };
 
   // Retry function for when data loading fails
@@ -438,7 +556,6 @@ const useMainController = () => {
     try {
       console.log(`Updating employee ${employeeId} status to inactive`);
       
-      // Convert string ID to number if needed
       const numericId = typeof employeeId === 'string' ? parseInt(employeeId, 10) : employeeId;
       
       if (isNaN(numericId)) {
@@ -459,14 +576,12 @@ const useMainController = () => {
       console.log(`Successfully updated employee ${employeeId} status to inactive`);
     } catch (error) {
       console.error(`Error updating employee ${employeeId} status:`, error);
-      // Don't throw error here to prevent disrupting the payment flow
     }
   };
 
   // Get selected location from localStorage
   const getSelectedLocationId = () => {
     try {
-      // Get the JSON string from localStorage
       const selectedLocationStr = localStorage.getItem('selectedLocation');
       
       if (!selectedLocationStr) {
@@ -474,10 +589,7 @@ const useMainController = () => {
         return null;
       }
       
-      // Parse the JSON string to an object
       const selectedLocation = JSON.parse(selectedLocationStr);
-      
-      // Extract the ID
       return selectedLocation.id;
     } catch (error) {
       console.error("Error retrieving selected location ID:", error);
@@ -489,8 +601,6 @@ const useMainController = () => {
   const sendWhatsAppNotification = async (): Promise<any> => {
     try {
       const locationId = getSelectedLocationId();
-      
-      // Get employee phone number from data
       const employeePhone = data[0]?.tel;
       
       if (!employeePhone) {
@@ -498,12 +608,10 @@ const useMainController = () => {
         throw new Error("Employee phone number not found");
       }
       
-      // The backend only expects the 'to' field with the employee's phone number
       const whatsappPayload = {
         to: employeePhone
       };
       
-      // Make the API call to send WhatsApp and create service order in one step
       const response = await axios.post(
         `https://homecare-pro.onrender.com/service_order/whatsapp/${locationId}`,
         whatsappPayload,
@@ -515,15 +623,13 @@ const useMainController = () => {
       );
       
       console.log("WhatsApp notification sent and service order created:", response.data);
-      
-      // Return the response data which should include the created service order
       return response.data;
     } catch (error) {
       console.error("Error sending WhatsApp notification:", error);
       if (error.response) {
         console.error("Error response:", error.response.data);
       }
-      throw error; // Re-throw to allow handling in the payment function
+      throw error;
     }
   };
 
@@ -531,7 +637,6 @@ const useMainController = () => {
   const handlePaymentSubmit = async (): Promise<void> => {
     const enteredAmount = parseInt(paymentAmount) || 0;
 
-    // Validate payment amount
     if (enteredAmount < totalAmount) {
       setAlertMessage("ກະລຸນາໃສ່ຈຳນວນເງິນໃຫ້ພຽງພໍ!");
       setAlertSeverity("error");
@@ -546,7 +651,6 @@ const useMainController = () => {
       return;
     }
 
-    // Check if user is authenticated
     if (!authUser) {
       setAlertMessage("ກະລຸນາເຂົ້າສູ່ລະບົບກ່ອນດຳເນີນການຊຳລະເງິນ");
       setAlertSeverity("error");
@@ -554,72 +658,58 @@ const useMainController = () => {
       return;
     }
 
-    // Show loading dialog
     setSuccessDialogOpen(true);
 
     try {
-      // Get employee ID from locations
       const employeeId = locations[0]?.id;
       
       if (!employeeId) {
         throw new Error("Employee ID not found");
       }
       
-      // Play the payment success sound
       playPaymentSuccessSound();
       
-      // Call the WhatsApp notification API which also creates the service order
       const orderResponse = await sendWhatsAppNotification();
-      
-      // Get the created service order ID from the response
       const serviceOrderId = orderResponse?.service_order?.id;
       
-      // Update employee status to inactive
       if (employeeId) {
         await handleUpdateEmployeeStatus(employeeId);
       }
       
-      // Store service order ID in localStorage for reference
       if (serviceOrderId) {
         localStorage.setItem('lastOrderId', serviceOrderId.toString());
       }
       
-      // Store payment details including distance fee
       localStorage.setItem('totalAmountWithDistanceFee', totalAmount.toString());
       localStorage.setItem('distanceFee', distanceFee.toString());
       localStorage.setItem('baseAmount', baseAmount.toString());
       
-      // Keep success dialog open briefly before navigating
       setTimeout(() => {
         setSuccessDialogOpen(false);
         navigate(`/service-status/${id}`);
       }, 3000);
     } catch (error) {
-      // Close success dialog if there's an error
       setSuccessDialogOpen(false);
       
       console.error("Error processing payment:", error);
       
-      // FALLBACK METHOD: If WhatsApp notification fails, try to create order directly
       if (error.message?.includes("WhatsApp")) {
         try {
           setAlertMessage("ບໍ່ສາມາດສົ່ງແຈ້ງເຕືອນ WhatsApp ໄດ້, ກຳລັງສ້າງການບໍລິການໂດຍກົງ...");
           setAlertSeverity("warning");
           setAlertOpen(true);
           
-          // Get necessary IDs
           const employeeId = locations[0]?.id;
           const categoryId = locations[0]?.cat_id;
           const userId = authUser.id;
           const addressId = localStorage.getItem('selectedAddressId') || "7";
           
-          // Create service order directly
           const serviceOrderPayload = {
             user_id: userId,
             employees_id: employeeId,
             cat_id: categoryId,
             address_users_detail_id: addressId,
-            amount: totalAmount, // This now includes distance fee
+            amount: totalAmount,
             payment_status: "paid",
             service_status: "Not Start"
           };
@@ -638,12 +728,10 @@ const useMainController = () => {
           
           console.log("Service order created directly:", response.data);
           
-          // Update employee status
           if (employeeId) {
             await handleUpdateEmployeeStatus(employeeId);
           }
           
-          // Store order ID and payment details
           if (response.data?.id) {
             localStorage.setItem('lastOrderId', response.data.id.toString());
           }
@@ -651,7 +739,6 @@ const useMainController = () => {
           localStorage.setItem('distanceFee', distanceFee.toString());
           localStorage.setItem('baseAmount', baseAmount.toString());
           
-          // Navigate to status page
           setTimeout(() => {
             navigate(`/service-status/${id}`);
           }, 2000);
@@ -662,14 +749,13 @@ const useMainController = () => {
         }
       }
       
-      // Show error message
       setAlertMessage("ເກີດຂໍ້ຜິດພາດໃນການສ້າງຄຳສັ່ງ. ກະລຸນາລອງໃໝ່ອີກຄັ້ງ.");
       setAlertSeverity("error");
       setAlertOpen(true);
     }
   };
 
-  // Map employee data to location format
+  // Map employee data to location format with translations
   useEffect(() => {
     console.log("Data from controller:", data);
     console.log("Car data from controller:", car);
@@ -686,10 +772,10 @@ const useMainController = () => {
         const formatPrice = (price): string => {
           try {
             const numPrice = parseFloat(price);
-            return isNaN(numPrice) ? "0 KIP" : numPrice.toLocaleString() + " KIP";
+            return isNaN(numPrice) ? "0 ກີບ" : numPrice.toLocaleString() + " ກີບ";
           } catch(e) {
             console.error("Error formatting price:", e);
-            return "0 KIP";
+            return "0 ກິບ";
           }
         };
 
@@ -699,22 +785,17 @@ const useMainController = () => {
             const createdDate = new Date(employee.created_at);
             const today = new Date();
             const age = today.getFullYear() - createdDate.getFullYear();
-            return age > 0 ? age : 21; // Default to 21 if calculation fails
+            return age > 0 ? age : 21;
           } catch (error) {
             console.warn("Error calculating age:", error);
-            return 21; // Default age
+            return 21;
           }
         };
 
-        // Map gender enum to display text
-        let genderText = "ຍິງ"; // Default to female
-        try {
-          if (employee.gender !== undefined) {
-            genderText = employee.gender === Gender.MALE ? "ຊາຍ" : "ຍິງ";
-          }
-        } catch (error) {
-          console.warn("Error processing gender:", error);
-        }
+        // Translate gender, category, and city to Lao
+        const genderLao = translateGenderToLao(employee.gender || "");
+        const categoryLao = translateCategoryToLao(employee.cat_name || "");
+        const cityLao = translateCityToLao(employee.city || "");
 
         // Safely extract the numeric category ID
         let categoryId: number | undefined;
@@ -724,7 +805,6 @@ const useMainController = () => {
               ? parseInt(employee.cat_id, 10) 
               : employee.cat_id;
             
-            // Check if parsing resulted in NaN
             if (isNaN(categoryId)) {
               categoryId = undefined;
             }
@@ -734,22 +814,25 @@ const useMainController = () => {
           categoryId = undefined;
         }
 
-        // Initialize location object with basic information
+        // Initialize location object with translations
         const locationObject: Location = {
           id: employee.id || "unknown",
           firstName: employee.first_name || "Unknown",
           surname: employee.last_name || "",
           image: employee.avatar || "https://via.placeholder.com/40",
           category: employee.cat_name || "ບໍລິການ",
-          gender: genderText,
+          categoryLao: categoryLao,
+          gender: employee.gender || "ບໍ່ລະບຸ",
+          genderLao: genderLao,
           age: calculateAge(),
           village: village,
           city: employee.city || "ວຽງຈັນ",
+          cityLao: cityLao,
           price: parseFloat(employee.price || "0"),
           priceFormatted: formatPrice(employee.price),
           service: employee.cat_name || "ບໍລິການ",
+          serviceLao: categoryLao,
           cat_id: categoryId,
-          // Basic car details from employee (these might be null/undefined)
           carId: employee?.car_id,
           carBrand: employee?.car_brand,
           carModel: employee?.car_model,
@@ -758,11 +841,9 @@ const useMainController = () => {
 
         // For category ID 5 (moving service), try to find matching car data
         if (categoryId === 5 && car && car.length > 0) {
-          // Find car that belongs to this employee
           const employeeCar = car.find(c => c.emp_id === employee.id);
           
           if (employeeCar) {
-            // Update with detailed car information
             locationObject.carId = employeeCar.id || locationObject.carId;
             locationObject.carBrand = employeeCar.car_brand || locationObject.carBrand;
             locationObject.carModel = employeeCar.model || locationObject.carModel;
@@ -779,23 +860,21 @@ const useMainController = () => {
       console.log("Mapped locations:", mappedLocations);
       setLocations(mappedLocations);
       
-      // Auto-set employee city from first location data - Like LocationPage
+      // Auto-set employee city from first location data
       if (mappedLocations.length > 0 && mappedLocations[0].city) {
         const normalizedEmployeeCity = normalizeCityName(mappedLocations[0].city);
         setEmployeeCity(normalizedEmployeeCity);
       }
     } else if (error) {
-      // Use placeholder data when there's an error
       console.log("Using placeholder data due to error:", error);
       setLocations(placeholderData);
     } else if (!loading && (!data || data.length === 0)) {
-      // No data returned, use placeholder
       console.log("No data returned, using placeholder data");
       setLocations(placeholderData);
     }
   }, [data, error, loading, car]);
 
-  // Auto-get user city from localStorage (set from location selection) - Like LocationPage
+  // Auto-get user city from localStorage
   useEffect(() => {
     const savedUserCity = localStorage.getItem('addressCity');
     if (savedUserCity) {
@@ -804,13 +883,13 @@ const useMainController = () => {
     }
   }, []);
 
-  // Calculate base amount whenever locations change - Like LocationPage
+  // Calculate base amount whenever locations change
   useEffect(() => {
     const base = locations.reduce((sum, item) => sum + item.price, 0);
     setBaseAmount(base);
   }, [locations]);
 
-  // Auto-calculate distance fee when cities are available - Like LocationPage
+  // Auto-calculate distance fee when cities are available
   useEffect(() => {
     if (employeeCity && userCity) {
       const result = calculateDistanceFee(employeeCity, userCity);
@@ -822,7 +901,7 @@ const useMainController = () => {
     }
   }, [employeeCity, userCity]);
 
-  // Calculate total amount - Like LocationPage
+  // Calculate total amount
   useEffect(() => {
     setTotalAmount(baseAmount + distanceFee);
   }, [baseAmount, distanceFee]);
@@ -854,13 +933,13 @@ const useMainController = () => {
     error,
     locations,
     
-    // Amount calculations - Like LocationPage
+    // Amount calculations
     baseAmount,
     distanceFee,
     distanceFeeReason,
     totalAmount,
     
-    // City tracking - Like LocationPage
+    // City tracking
     userCity,
     employeeCity,
     
@@ -884,7 +963,12 @@ const useMainController = () => {
     playPaymentSuccessSound,
     handleUpdateEmployeeStatus, 
     sendWhatsAppNotification,
-    id
+    id,
+    
+    // Export translation functions
+    translateCategoryToLao,
+    translateGenderToLao,
+    translateCityToLao
   };
 };
 

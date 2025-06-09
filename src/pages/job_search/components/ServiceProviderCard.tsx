@@ -61,7 +61,7 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
   // Format price to have commas
   const formatPrice = (price?: number): string => {
     if (price === undefined || price === null) return "N/A";
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " KIP";
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " ກີບ";
   };
 
   const handleCardClick = (): void => {

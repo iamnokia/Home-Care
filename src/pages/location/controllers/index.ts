@@ -15,6 +15,135 @@ export const CITIES = [
   { en: 'HADXAIFONG', lo: 'ຫາດຊາຍຟອງ', value: 'hadxaifong' }
 ];
 
+// Translation mappings - English to Lao
+const categoryTranslation: Record<string, string> = {
+  'cleaning': 'ທຳຄວາມສະອາດ',
+  'electrical': 'ສ້ອມແປງໄຟຟ້າ',
+  'aircon': 'ສ້ອມແປງແອອາກາດ',
+  'air conditioning': 'ສ້ອມແປງແອອາກາດ',
+  'plumbing': 'ສ້ອມແປງປະປາ',
+  'moving': 'ແກ່ເຄື່ອງ',
+  'transportation': 'ແກ່ເຄື່ອງ',
+  'relocation': 'ແກ່ເຄື່ອງ',
+  'bathroom': 'ດູດສ້ວມ',
+  'toilet': 'ດູດສ້ວມ',
+  'septic': 'ດູດສ້ວມ',
+  'pest': 'ກຳຈັດປວກ',
+  'pest control': 'ກຳຈັດປວກ',
+  'extermination': 'ກຳຈັດປວກ',
+  'house cleaning': 'ທຳຄວາມສະອາດ',
+  'home cleaning': 'ທຳຄວາມສະອາດ',
+  'electrical repair': 'ສ້ອມແປງໄຟຟ້າ',
+  'electrical service': 'ສ້ອມແປງໄຟຟ້າ',
+  'air conditioner repair': 'ສ້ອມແປງແອອາກາດ',
+  'ac repair': 'ສ້ອມແປງແອອາກາດ',
+  'plumbing repair': 'ສ້ອມແປງປະປາ',
+  'water pipe repair': 'ສ້ອມແປງປະປາ',
+  'moving service': 'ແກ່ເຄື່ອງ',
+  'delivery': 'ແກ່ເຄື່ອງ',
+  'septic cleaning': 'ດູດສ້ວມ',
+  'sewage cleaning': 'ດູດສ້ວມ',
+  'other': 'ອື່ນໆ',
+  'general': 'ທົ່ວໄປ'
+};
+
+// Gender translation mapping - English to Lao
+const genderTranslation: Record<string, string> = {
+  'male': 'ຊາຍ',
+  'female': 'ຍິງ',
+  'man': 'ຊາຍ',
+  'woman': 'ຍິງ',
+  'men': 'ຊາຍ',
+  'women': 'ຍິງ',
+  'boy': 'ຊາຍ',
+  'girl': 'ຍິງ',
+  'm': 'ຊາຍ',
+  'f': 'ຍິງ',
+  'other': 'ອື່ນໆ',
+  'unknown': 'ບໍ່ລະບຸ'
+};
+
+// City translation mapping - English to Lao (Vientiane Districts)
+const cityTranslation: Record<string, string> = {
+  'chanthabuly': 'ຈັນທະບູລີ',
+  'chanthabouly': 'ຈັນທະບູລີ',
+  'sikhottabong': 'ສີໂຄດຕະບອງ',
+  'xaysetha': 'ໄຊເສດຖາ',
+  'sisattanak': 'ສີສັດຕະນາກ',
+  'naxaithong': 'ນາຊາຍທອງ',
+  'xaytany': 'ໄຊທານີ',
+  'hadxaifong': 'ຫາດຊາຍຟອງ',
+  // General fallbacks
+  'vientiane': 'ວຽງຈັນ',
+  'vientiane capital': 'ນະຄອນຫຼວງວຽງຈັນ'
+};
+
+// Function to translate English category to Lao
+export const translateCategoryToLao = (englishCategory: string): string => {
+  if (!englishCategory) return 'ອື່ນໆ';
+  
+  const normalizedCategory = englishCategory.toLowerCase().trim();
+  
+  // Direct match first
+  if (categoryTranslation[normalizedCategory]) {
+    return categoryTranslation[normalizedCategory];
+  }
+  
+  // Partial matching for compound categories
+  for (const [key, value] of Object.entries(categoryTranslation)) {
+    if (normalizedCategory.includes(key) || key.includes(normalizedCategory)) {
+      return value;
+    }
+  }
+  
+  // If no match found, return the original with a fallback
+  return englishCategory || 'ອື່ນໆ';
+};
+
+// Function to translate English gender to Lao
+export const translateGenderToLao = (englishGender: string): string => {
+  if (!englishGender) return 'ບໍ່ລະບຸ';
+  
+  const normalizedGender = englishGender.toLowerCase().trim();
+  
+  // Direct match
+  if (genderTranslation[normalizedGender]) {
+    return genderTranslation[normalizedGender];
+  }
+  
+  // Partial matching
+  for (const [key, value] of Object.entries(genderTranslation)) {
+    if (normalizedGender.includes(key) || key.includes(normalizedGender)) {
+      return value;
+    }
+  }
+  
+  // If no match found, return the original with a fallback
+  return englishGender || 'ບໍ່ລະບຸ';
+};
+
+// Function to translate English city to Lao
+export const translateCityToLao = (englishCity: string): string => {
+  if (!englishCity) return 'ວຽງຈັນ';
+  
+  const normalizedCity = englishCity.toLowerCase().trim();
+  
+  // Direct match
+  if (cityTranslation[normalizedCity]) {
+    return cityTranslation[normalizedCity];
+  }
+  
+  // Partial matching
+  for (const [key, value] of Object.entries(cityTranslation)) {
+    if (normalizedCity.includes(key) || key.includes(normalizedCity)) {
+      return value;
+    }
+  }
+  
+  // If no match found, return the original
+  return englishCity || 'ວຽງຈັນ';
+};
+
 // Distance fee calculation function based on your exact requirements
 export const calculateDistanceFee = (employeeCity: string, userCity: string): { fee: number; reason: string } => {
   if (!employeeCity || !userCity) {
@@ -143,10 +272,10 @@ export const formatCurrency = (value: number): string => {
   return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " KIP";
 };
 
-// Helper function to get city display name
+// Helper function to get city display name in Lao
 export const getCityDisplayName = (cityValue: string): string => {
   const city = CITIES.find(c => c.value === cityValue.toLowerCase());
-  return city ? `${city.lo} (${city.en})` : cityValue;
+  return city ? city.lo : translateCityToLao(cityValue);
 };
 
 // Helper function to convert city name to value
@@ -238,7 +367,11 @@ const useMainController = () => {
     formatCurrency,
     getCityDisplayName,
     getCityValueFromName,
-    CITIES
+    CITIES,
+    // Export translation functions
+    translateCategoryToLao,
+    translateGenderToLao,
+    translateCityToLao
   };
 };
 

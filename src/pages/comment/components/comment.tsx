@@ -36,6 +36,123 @@ const fontSize = {
   button: "1rem",
 };
 
+// Translation mappings - English to Lao (copied from PaymentPage controller)
+const categoryTranslation: Record<string, string> = {
+  'cleaning': 'ທຳຄວາມສະອາດ',
+  'electrical': 'ສ້ອມແປງໄຟຟ້າ',
+  'aircon': 'ສ້ອມແປງແອອາກາດ',
+  'air conditioning': 'ສ້ອມແປງແອອາກາດ',
+  'plumbing': 'ສ້ອມແປງປະປາ',
+  'moving': 'ແກ່ເຄື່ອງ',
+  'transportation': 'ແກ່ເຄື່ອງ',
+  'relocation': 'ແກ່ເຄື່ອງ',
+  'bathroom': 'ດູດສ້ວມ',
+  'toilet': 'ດູດສ້ວມ',
+  'septic': 'ດູດສ້ວມ',
+  'pest': 'ກຳຈັດປວກ',
+  'pest control': 'ກຳຈັດປວກ',
+  'extermination': 'ກຳຈັດປວກ',
+  'house cleaning': 'ທຳຄວາມສະອາດ',
+  'home cleaning': 'ທຳຄວາມສະອາດ',
+  'electrical repair': 'ສ້ອມແປງໄຟຟ້າ',
+  'electrical service': 'ສ້ອມແປງໄຟຟ້າ',
+  'air conditioner repair': 'ສ້ອມແປງແອອາກາດ',
+  'ac repair': 'ສ້ອມແປງແອອາກາດ',
+  'plumbing repair': 'ສ້ອມແປງປະປາ',
+  'water pipe repair': 'ສ້ອມແປງປະປາ',
+  'moving service': 'ແກ່ເຄື່ອງ',
+  'delivery': 'ແກ່ເຄື່ອງ',
+  'septic cleaning': 'ດູດສ້ວມ',
+  'sewage cleaning': 'ດູດສ້ວມ',
+  'other': 'ອື່ນໆ',
+  'general': 'ທົ່ວໄປ'
+};
+
+// Gender translation mapping - English to Lao
+const genderTranslation: Record<string, string> = {
+  'male': 'ຊາຍ',
+  'female': 'ຍິງ',
+  'man': 'ຊາຍ',
+  'woman': 'ຍິງ',
+  'men': 'ຊາຍ',
+  'women': 'ຍິງ',
+  'boy': 'ຊາຍ',
+  'girl': 'ຍິງ',
+  'm': 'ຊາຍ',
+  'f': 'ຍິງ',
+  'other': 'ອື່ນໆ',
+  'unknown': 'ບໍ່ລະບຸ'
+};
+
+// City translation mapping - English to Lao (Vientiane Districts)
+const cityTranslation: Record<string, string> = {
+  'chanthabuly': 'ຈັນທະບູລີ',
+  'chanthabouly': 'ຈັນທະບູລີ',
+  'sikhottabong': 'ສີໂຄດຕະບອງ',
+  'xaysetha': 'ໄຊເສດຖາ',
+  'sisattanak': 'ສີສັດຕະນາກ',
+  'naxaithong': 'ນາຊາຍທອງ',
+  'xaytany': 'ໄຊທານີ',
+  'hadxaifong': 'ຫາດຊາຍຟອງ',
+  'vientiane': 'ວຽງຈັນ',
+  'vientiane capital': 'ນະຄອນຫຼວງວຽງຈັນ'
+};
+
+// Translation functions (copied from PaymentPage controller)
+const translateCategoryToLao = (englishCategory: string): string => {
+  if (!englishCategory) return 'ອື່ນໆ';
+  
+  const normalizedCategory = englishCategory.toLowerCase().trim();
+  
+  if (categoryTranslation[normalizedCategory]) {
+    return categoryTranslation[normalizedCategory];
+  }
+  
+  for (const [key, value] of Object.entries(categoryTranslation)) {
+    if (normalizedCategory.includes(key) || key.includes(normalizedCategory)) {
+      return value;
+    }
+  }
+  
+  return englishCategory || 'ອື່ນໆ';
+};
+
+const translateGenderToLao = (englishGender: string): string => {
+  if (!englishGender) return 'ບໍ່ລະບຸ';
+  
+  const normalizedGender = englishGender.toLowerCase().trim();
+  
+  if (genderTranslation[normalizedGender]) {
+    return genderTranslation[normalizedGender];
+  }
+  
+  for (const [key, value] of Object.entries(genderTranslation)) {
+    if (normalizedGender.includes(key) || key.includes(normalizedGender)) {
+      return value;
+    }
+  }
+  
+  return englishGender || 'ບໍ່ລະບຸ';
+};
+
+const translateCityToLao = (englishCity: string): string => {
+  if (!englishCity) return 'ວຽງຈັນ';
+  
+  const normalizedCity = englishCity.toLowerCase().trim();
+  
+  if (cityTranslation[normalizedCity]) {
+    return cityTranslation[normalizedCity];
+  }
+  
+  for (const [key, value] of Object.entries(cityTranslation)) {
+    if (normalizedCity.includes(key) || key.includes(normalizedCity)) {
+      return value;
+    }
+  }
+  
+  return englishCity || 'ວຽງຈັນ';
+};
+
 const CommentPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -337,7 +454,7 @@ const CommentPage: React.FC = () => {
       const customerDetails = document.createElement('div');
       customerDetails.style.fontSize = '14px';
       customerDetails.style.color = '#666';
-      customerDetails.textContent = service ? `${service.gender}, ${service.village} ${service.city}` : 'ບ້ານ ໂນນສະຫວ່າງ ເມືອງ ໄຊເສດຖາ';
+      customerDetails.textContent = service ? `${translateGenderToLao(service.gender)}, ${service.village} ${translateCityToLao(service.city)}` : 'ບ້ານ ໂນນສະຫວ່າງ ເມືອງ ໄຊເສດຖາ';
 
       customerCard.appendChild(customerName);
       customerCard.appendChild(customerDetails);
@@ -359,13 +476,13 @@ const CommentPage: React.FC = () => {
         distanceTitle.style.color = '#ef6c00';
         distanceTitle.style.display = 'flex';
         distanceTitle.style.alignItems = 'center';
-        distanceTitle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef6c00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M9 12l2 2 4-4"></path><path d="M21 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"></path><path d="M3 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"></path><path d="M12 21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"></path><path d="M12 3c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"></path></svg> ຄ່າໄລຍະທາງ';
+        distanceTitle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef6c00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M9 12l2 2 4-4"></path><path d="M21 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"></path><path d="M3 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"></path><path d="M12 21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"></path><path d="M12 3c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1s .448 1 1 1z"></path></svg> ຄ່າໄລຍະທາງ';
 
         const routeInfo = document.createElement('div');
         routeInfo.style.fontSize = '12px';
         routeInfo.style.color = '#666';
         routeInfo.style.marginBottom = '5px';
-        routeInfo.textContent = `${employeeCity ? employeeCity.charAt(0).toUpperCase() + employeeCity.slice(1) : 'ບໍ່ທາງ'} → ${userCity ? userCity.charAt(0).toUpperCase() + userCity.slice(1) : 'ບໍ່ທາງ'}`;
+        routeInfo.textContent = `${employeeCity ? translateCityToLao(employeeCity) : 'ບໍ່ທາງ'} → ${userCity ? translateCityToLao(userCity) : 'ບໍ່ທາງ'}`;
 
         const feeInfo = document.createElement('div');
         feeInfo.style.fontSize = '11px';
@@ -410,7 +527,7 @@ const CommentPage: React.FC = () => {
       const tableBody = document.createElement('tbody');
       tableBody.innerHTML = `
         <tr style="border-bottom: 1px solid #eee;">
-          <td style="padding: 15px 15px; text-align: left;">${service ? service.service : billingData.serviceType}</td>
+          <td style="padding: 15px 15px; text-align: left;">${service ? translateCategoryToLao(service.service || service.category) : translateCategoryToLao(billingData.serviceType)}</td>
           <td style="padding: 15px 15px; text-align: right;">${formatCurrency(baseAmount)}</td>
         </tr>
       `;
@@ -723,7 +840,7 @@ const CommentPage: React.FC = () => {
               </Button>
             </Box>
 
-            {/* Service Items - Display actual data */}
+            {/* Service Items - Display actual data with Lao translations */}
             <Box sx={{ mb: 3.5 }}>
               {serviceDetails.map((item, index) => (
                 <Card
@@ -787,7 +904,7 @@ const CommentPage: React.FC = () => {
                               display: "inline-block"
                             }}
                           >
-                            {item.gender}
+                            {translateGenderToLao(item.gender)}
                           </Typography>
                         </Box>
                       </Box>
@@ -806,7 +923,7 @@ const CommentPage: React.FC = () => {
                       </Typography>
                     </Box>
 
-                    {/* Additional info row */}
+                    {/* Additional info row with Lao translation */}
                     <Box sx={{
                       display: "flex",
                       alignItems: "center",
@@ -826,12 +943,12 @@ const CommentPage: React.FC = () => {
                       }}>
                         <CategoryIcon sx={{ fontSize: '1rem', color: '#611463', mr: 0.7 }} />
                         <Typography variant="body2" sx={{ fontSize: '0.95rem', fontWeight: 'medium' }}>
-                          {item.category}
+                          {translateCategoryToLao(item.category)}
                         </Typography>
                       </Box>
                     </Box>
 
-                    {/* Location info row */}
+                    {/* Location info row with Lao translation */}
                     <Box sx={{
                       display: "flex",
                       alignItems: "center",
@@ -850,7 +967,7 @@ const CommentPage: React.FC = () => {
                       <Box sx={{ display: "flex", alignItems: "center" }}>
                         <LocationCityIcon sx={{ fontSize: '1rem', color: '#611463', mr: 0.7 }} />
                         <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
-                          {item.city}
+                          {translateCityToLao(item.city)}
                         </Typography>
                       </Box>
                     </Box>
@@ -858,7 +975,7 @@ const CommentPage: React.FC = () => {
                 </Card>
               ))}
 
-              {/* Enhanced Distance Fee Display - Same as LocationPage/PaymentPage */}
+              {/* Enhanced Distance Fee Display - Same as LocationPage/PaymentPage with Lao city names */}
               {(employeeCity || userCity) && distanceFee > 0 && (
                 <Box sx={{ mb: 3 }}>
                   <Card
@@ -878,7 +995,7 @@ const CommentPage: React.FC = () => {
                         </Typography>
                       </Box>
 
-                      {/* Route Information */}
+                      {/* Route Information with Lao city names */}
                       <Box sx={{ 
                         display: 'flex', 
                         alignItems: 'center', 
@@ -897,7 +1014,7 @@ const CommentPage: React.FC = () => {
                             border: '1px solid rgba(97, 20, 99, 0.2)'
                           }}>
                             <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#611463', fontWeight: 500 }}>
-                              {employeeCity ? employeeCity.charAt(0).toUpperCase() + employeeCity.slice(1) : 'ບໍ່ທາງ'}
+                              {employeeCity ? translateCityToLao(employeeCity) : 'ບໍ່ທາງ'}
                             </Typography>
                           </Box>
 
@@ -913,7 +1030,7 @@ const CommentPage: React.FC = () => {
                             border: '1px solid rgba(97, 20, 99, 0.2)'
                           }}>
                             <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#611463', fontWeight: 500 }}>
-                              {userCity ? userCity.charAt(0).toUpperCase() + userCity.slice(1) : 'ບໍ່ທາງ'}
+                              {userCity ? translateCityToLao(userCity) : 'ບໍ່ທາງ'}
                             </Typography>
                           </Box>
                         </Box>
