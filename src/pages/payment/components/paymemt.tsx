@@ -22,6 +22,7 @@ import {
   Zoom,
   CircularProgress,
   Skeleton,
+  Divider,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PersonIcon from "@mui/icons-material/Person";
@@ -38,6 +39,8 @@ import TimeToLeaveIcon from "@mui/icons-material/TimeToLeave";
 import BadgeIcon from "@mui/icons-material/Badge";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import { HOME_PATH, LOCATION_PATH, SERVICE_PATH } from "../../../routes/path";
 import useMainController from "../controllers/index";
 
@@ -53,12 +56,17 @@ const PaymentPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // Get everything from the controller
+  // Get everything from the controller including distance fee calculations
   const {
     locations,
     loading,
     error,
+    baseAmount,
+    distanceFee,
+    distanceFeeReason,
     totalAmount,
+    userCity,
+    employeeCity,
     paymentAmount,
     paymentError,
     paymentState,
@@ -73,8 +81,6 @@ const PaymentPage: React.FC = () => {
     handleAlertClose,
     handlePaymentSubmit
   } = useMainController();
-
-  // Loading component with white background, #611463 and #f7931e accents
 
   // Show enhanced loading state
   if (loading) {
@@ -649,7 +655,99 @@ const PaymentPage: React.FC = () => {
                 </Box>
               </Box>
 
-              {/* Payment Section */}
+              {/* Enhanced Distance Fee Display - Same as LocationPage */}
+              {(employeeCity || userCity) && distanceFee > 0 && (
+                <Box sx={{ mb: 3 }}>
+                  <Card
+                    sx={{
+                      backgroundColor: "#f0e9f1",
+                      borderRadius: 2,
+                      border: '1px solid rgba(97, 20, 99, 0.1)',
+                      borderLeft: '3px solid #8a1c8d'
+                    }}
+                  >
+                    <CardContent sx={{ p: 2 }}>
+                      {/* Header with icon and title */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                        <DirectionsCarIcon sx={{ fontSize: '1rem', color: '#8a1c8d', mr: 1 }} />
+                        <Typography variant="body2" sx={{ fontSize: '0.9rem', color: '#611463', fontWeight: 600 }}>
+                          ຄ່າໄລຍະທາງ
+                        </Typography>
+                      </Box>
+
+                      {/* Route Information */}
+                      <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: 1,
+                        mb: 1.5
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', minWidth: '60%' }}>
+                          {/* From City */}
+                          <Box sx={{ 
+                            bgcolor: 'rgba(97, 20, 99, 0.1)', 
+                            px: 1, 
+                            py: 0.5, 
+                            borderRadius: 1,
+                            border: '1px solid rgba(97, 20, 99, 0.2)'
+                          }}>
+                            <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#611463', fontWeight: 500 }}>
+                              {employeeCity ? employeeCity.charAt(0).toUpperCase() + employeeCity.slice(1) : 'ບໍ່ທາງ'}
+                            </Typography>
+                          </Box>
+
+                          {/* Arrow */}
+                          <KeyboardArrowRightIcon sx={{ fontSize: '1.2rem', color: '#8a1c8d', mx: 0.5 }} />
+
+                          {/* To City */}
+                          <Box sx={{ 
+                            bgcolor: 'rgba(97, 20, 99, 0.1)', 
+                            px: 1, 
+                            py: 0.5, 
+                            borderRadius: 1,
+                            border: '1px solid rgba(97, 20, 99, 0.2)'
+                          }}>
+                            <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#611463', fontWeight: 500 }}>
+                              {userCity ? userCity.charAt(0).toUpperCase() + userCity.slice(1) : 'ບໍ່ທາງ'}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        {/* Fee Amount */}
+                        <Typography
+                          sx={{
+                            fontSize: '0.9rem',
+                            fontWeight: "bold",
+                            color: distanceFee === 8000 ? "#10b981" : "#f7931e",
+                            bgcolor: distanceFee === 8000 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(247, 147, 30, 0.1)',
+                            px: 1.5,
+                            py: 0.5,
+                            borderRadius: 1,
+                            border: `1px solid ${distanceFee === 8000 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(247, 147, 30, 0.3)'}`
+                          }}
+                        >
+                          +{formatCurrency(distanceFee)}
+                        </Typography>
+                      </Box>
+
+                      {/* Fee Reason/Category */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" sx={{ 
+                          fontSize: '0.8rem', 
+                          color: '#666',
+                          fontStyle: 'italic'
+                        }}>
+                          {distanceFeeReason}
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Box>
+              )}
+
+              {/* Payment Section with updated calculations */}
               <Card
                 sx={{
                   backgroundColor: "#f8f6f9",
@@ -689,6 +787,44 @@ const PaymentPage: React.FC = () => {
                   </Typography>
 
                   <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Typography sx={{ fontSize: fontSize.text, fontWeight: "500", color: '#374151' }}>
+                        ລາຄາພື້ນຖານ:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sx={{ textAlign: "right" }}>
+                      <Typography
+                        sx={{
+                          fontSize: fontSize.text,
+                          fontWeight: "bold",
+                          color: "#374151"
+                        }}
+                      >
+                        {formatCurrency(baseAmount)}
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={6}>
+                      <Typography sx={{ fontSize: fontSize.text, fontWeight: "500", color: '#374151' }}>
+                        ຄ່າໄລຍະທາງ:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sx={{ textAlign: "right" }}>
+                      <Typography
+                        sx={{
+                          fontSize: fontSize.text,
+                          fontWeight: "bold",
+                          color: distanceFee === 8000 ? "#10b981" : (distanceFee > 0 ? "#f7931e" : "#6b7280")
+                        }}
+                      >
+                        {formatCurrency(distanceFee)}
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <Divider sx={{ my: 1, borderColor: 'rgba(97, 20, 99, 0.2)' }} />
+                    </Grid>
+
                     <Grid item xs={6}>
                       <Typography sx={{ fontSize: fontSize.subtitle, fontWeight: "bold", color: '#611463' }}>
                         ລາຄາລວມ:
@@ -839,7 +975,7 @@ const PaymentPage: React.FC = () => {
                 <Box sx={{ textAlign: 'center', mt: 1, mb: 1 }}>
                   <Button
                     size="small"
-                    onClick={() => console.log("Debug info", { locations, totalAmount })}
+                    onClick={() => console.log("Debug info", { locations, totalAmount, baseAmount, distanceFee })}
                     sx={{ fontSize: '0.7rem', color: 'rgba(97, 20, 99, 0.6)' }}
                   >
                     ສະແດງຂໍ້ມູນການແກ້ໄຂ

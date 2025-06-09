@@ -44,6 +44,140 @@ export interface BillingData {
   receiptNo?: string;
 }
 
+// City definitions with English and Lao names - Same as LocationPage/PaymentPage
+const CITIES = [
+  { en: 'CHANTHABULY', lo: 'ຈັນທະບູລີ', value: 'chanthabouly' },
+  { en: 'SIKHOTTABONG', lo: 'ສີໂຄດຕະບອງ', value: 'sikhottabong' },
+  { en: 'XAYSETHA', lo: 'ໄຊເສດຖາ', value: 'xaysetha' },
+  { en: 'SISATTANAK', lo: 'ສີສັດຕະນາກ', value: 'sisattanak' },
+  { en: 'NAXAITHONG', lo: 'ນາຊາຍທອງ', value: 'naxaithong' },
+  { en: 'XAYTANY', lo: 'ໄຊທານີ', value: 'xaytany' },
+  { en: 'HADXAIFONG', lo: 'ຫາດຊາຍຟອງ', value: 'hadxaifong' }
+];
+
+// Helper function to normalize city names - Same as LocationPage/PaymentPage
+const normalizeCityName = (cityName: string): string => {
+  if (!cityName) return '';
+  
+  // Convert to lowercase and remove spaces
+  let normalized = cityName.toLowerCase().replace(/\s+/g, '');
+  
+  // Handle common variations
+  const cityMappings: { [key: string]: string } = {
+    'chanthabuly': 'chanthabouly',
+    'chanthabouly': 'chanthabouly',
+    'ຈັນທະບູລີ': 'chanthabouly',
+    'sikhottabong': 'sikhottabong', 
+    'ສີໂຄດຕະບອງ': 'sikhottabong',
+    'xaysetha': 'xaysetha',
+    'ໄຊເສດຖາ': 'xaysetha',
+    'sisattanak': 'sisattanak',
+    'ສີສັດຕະນາກ': 'sisattanak',
+    'naxaithong': 'naxaithong',
+    'ນາຊາຍທອງ': 'naxaithong',
+    'xaytany': 'xaytany',
+    'ໄຊທານີ': 'xaytany',
+    'hadxaifong': 'hadxaifong',
+    'ຫາດຊາຍຟອງ': 'hadxaifong'
+  };
+  
+  return cityMappings[normalized] || normalized;
+};
+
+// Distance fee cal// Distance fee calculation function - Same as LocationPage/PaymentPage
+const calculateDistanceFee = (employeeCity: string, userCity: string): { fee: number; reason: string } => {
+  if (!employeeCity || !userCity) {
+    return { fee: 0, reason: 'ບໍ່ສາມາດກຳນົດທີ່ຕັ້ງໄດ້' };
+  }
+
+  // Normalize city names
+  const empCity = normalizeCityName(employeeCity);
+  const usrCity = normalizeCityName(userCity);
+
+  if (empCity === usrCity) {
+    return { fee: 8000, reason: 'ທີ່ຕັ້ງດຽວກັນ - ຄ່າບໍລິການພື້ນຖານ' };
+  }
+
+  // Define distance fee rules based on your requirements
+  const distanceRules: { [key: string]: { [key: string]: number } } = {
+    'chanthabouly': {
+      'sikhottabong': 10000,
+      'xaysetha': 10000,
+      'sisattanak': 10000,
+      'xaytany': 15000,
+      'naxaithong': 15000,
+      'hadxaifong': 15000
+    },
+    'sikhottabong': {
+      'chanthabouly': 10000,
+      'sisattanak': 10000,
+      'naxaithong': 15000,
+      'xaysetha': 15000,
+      'hadxaifong': 20000,
+      'xaytany': 20000
+    },
+    'naxaithong': {
+      'chanthabouly': 15000,
+      'sikhottabong': 15000,
+      'sisattanak': 20000,
+      'xaysetha': 20000,
+      'hadxaifong': 25000,
+      'xaytany': 25000
+    },
+    'xaytany': {
+      'chanthabouly': 15000,
+      'xaysetha': 15000,
+      'sisattanak': 20000,
+      'hadxaifong': 20000,
+      'naxaithong': 25000,
+      'sikhottabong': 25000
+    },
+    'xaysetha': {
+      'chanthabouly': 10000,
+      'sisattanak': 10000,
+      'xaytany': 10000,
+      'hadxaifong': 10000,
+      'naxaithong': 15000,
+      'sikhottabong': 15000
+    },
+    'hadxaifong': {
+      'xaysetha': 10000,
+      'sisattanak': 10000,
+      'xaytany': 15000,
+      'sikhottabong': 15000,
+      'chanthabouly': 15000,
+      'naxaithong': 25000
+    },
+    'sisattanak': {
+      'sikhottabong': 10000,
+      'chanthabouly': 10000,
+      'xaysetha': 10000,
+      'hadxaifong': 10000,
+      'naxaithong': 20000,
+      'xaytany': 20000
+    }
+  };
+
+  const fee = distanceRules[empCity]?.[usrCity] || 0;
+  
+  let reason = '';
+  if (fee === 0) {
+    reason = 'ບໍ່ມີຂໍ້ມູນ ຄ່າໄລຍະທາງສຳລັບເສັ້ນທາງນີ້';
+  } else if (fee === 8000) {
+    reason = 'ທີ່ຕັ້ງດຽວກັນ - ຄ່າບໍລິການພື້ນຖານ';
+  } else if (fee === 10000) {
+    reason = 'ຄ່າໄລຍະທາງໃກ້ຄຽງ';
+  } else if (fee === 15000) {
+    reason = 'ຄ່າໄລຍະທາງປານກາງ';
+  } else if (fee === 20000) {
+    reason = ' ຄ່າໄລຍະທາງໄກ';
+  } else if (fee === 25000) {
+    reason = 'ຄ່າໄລຍະທາງໄກຫຼາຍ';
+  }
+
+  return { fee, reason };
+};
+
 // Placeholder data for when API fails but we still want to show UI
 export const placeholderData: ServiceDetail[] = [
   {
@@ -82,7 +216,16 @@ const useCommentController = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [serviceDetails, setServiceDetails] = useState<ServiceDetail[]>([]);
+  
+  // Amount calculations - Like LocationPage/PaymentPage
+  const [baseAmount, setBaseAmount] = useState<number>(0);
+  const [distanceFee, setDistanceFee] = useState<number>(0);
+  const [distanceFeeReason, setDistanceFeeReason] = useState<string>("");
   const [totalAmount, setTotalAmount] = useState<number>(0);
+  
+  // City tracking - Like LocationPage/PaymentPage
+  const [userCity, setUserCity] = useState<string>("");
+  const [employeeCity, setEmployeeCity] = useState<string>("");
   
   // Billing data for receipt
   const [billingData, setBillingData] = useState<BillingData>({
@@ -293,13 +436,13 @@ const useCommentController = () => {
         return null;
       }
       
-      // Create service order payload
+      // Create service order payload (using totalAmount which includes distance fee)
       const serviceOrderPayload = {
         user_id: parseInt(userId.toString()),
         employees_id: parseInt(employeeId.toString()),
         cat_id: parseInt(categoryId.toString()),
         address_users_detail_id: parseInt(addressId.toString()),
-        amount: amount,
+        amount: totalAmount, // Use totalAmount which includes distance fee
         payment_status: "paid",
         service_status: "Not Start"
       };
@@ -417,6 +560,31 @@ const useCommentController = () => {
             }
           }
           
+          // Get stored distance fee and base amount from localStorage (set by PaymentPage)
+          const storedDistanceFee = parseInt(localStorage.getItem('distanceFee') || '0');
+          const storedBaseAmount = parseInt(localStorage.getItem('baseAmount') || '0');
+          const storedTotalAmount = parseInt(localStorage.getItem('totalAmountWithDistanceFee') || '0');
+          
+          console.log("Retrieved stored amounts:", {
+            storedDistanceFee,
+            storedBaseAmount, 
+            storedTotalAmount,
+            orderAmount: orderData.amount
+          });
+          
+          // Set amounts from stored data or order data
+          if (storedBaseAmount > 0) {
+            setBaseAmount(storedBaseAmount);
+          }
+          if (storedDistanceFee >= 0) {
+            setDistanceFee(storedDistanceFee);
+          }
+          if (storedTotalAmount > 0) {
+            setTotalAmount(storedTotalAmount);
+          } else if (orderData.amount) {
+            setTotalAmount(parseFloat(orderData.amount));
+          }
+          
           // Update service details with order information
           setServiceDetails(prevDetails => {
             return prevDetails.map(detail => ({
@@ -435,14 +603,9 @@ const useCommentController = () => {
             orderDate: new Date(orderData.created_at).toLocaleDateString('en-US', { 
               year: 'numeric', month: 'short', day: 'numeric' 
             }),
-            totalPrice: formatCurrency(orderData.amount),
-            servicePrice: formatCurrency(orderData.amount)
+            totalPrice: formatCurrency(storedTotalAmount || orderData.amount),
+            servicePrice: formatCurrency(storedBaseAmount || orderData.amount)
           }));
-          
-          // Update total amount if available
-          if (orderData.amount) {
-            setTotalAmount(parseFloat(orderData.amount));
-          }
           
           return orderData;
         }
@@ -468,6 +631,9 @@ const useCommentController = () => {
           }),
           receiptNo: generateReceiptNumber()
         });
+        
+        setBaseAmount(fallbackService.price);
+        setTotalAmount(fallbackService.price);
       }
       
       return Promise.reject(error);
@@ -728,24 +894,68 @@ const useCommentController = () => {
     console.log("Final mapped services:", mappedServices);
     setServiceDetails(mappedServices);
     
+    // Auto-set employee city from first service's data - Like LocationPage/PaymentPage
+    if (mappedServices.length > 0 && mappedServices[0].city) {
+      const normalizedEmployeeCity = normalizeCityName(mappedServices[0].city);
+      setEmployeeCity(normalizedEmployeeCity);
+    }
+    
     // Update billing data based on first service's information
     if (mappedServices.length > 0) {
       const firstService = mappedServices[0];
+      
+      // Set base amount from service price
+      setBaseAmount(firstService.price);
+      
       setBillingData({
         customerName: `${firstService.firstName} ${firstService.surname}`,
         serviceType: firstService.service || firstService.category,
         servicePrice: firstService.priceFormatted,
-        totalPrice: firstService.priceFormatted,
+        totalPrice: firstService.priceFormatted, // Will be updated after distance fee calculation
         orderDate: firstService.orderDate || new Date().toLocaleDateString('en-US', { 
           year: 'numeric', month: 'short', day: 'numeric' 
         }),
         receiptNo: generateReceiptNumber()
       });
-      
-      // Update total amount
-      setTotalAmount(firstService.price);
     }
   };
+
+  // Auto-get user city from localStorage (set from location selection) - Like LocationPage/PaymentPage
+  useEffect(() => {
+    const savedUserCity = localStorage.getItem('addressCity');
+    if (savedUserCity) {
+      const normalizedUserCity = normalizeCityName(savedUserCity);
+      setUserCity(normalizedUserCity);
+    }
+  }, []);
+
+  // Auto-calculate distance fee when cities are available - Like LocationPage/PaymentPage
+  useEffect(() => {
+    if (employeeCity && userCity) {
+      const result = calculateDistanceFee(employeeCity, userCity);
+      setDistanceFee(result.fee);
+      setDistanceFeeReason(result.reason);
+    } else {
+      // Try to get from localStorage if cities are not available
+      const storedDistanceFee = parseInt(localStorage.getItem('distanceFee') || '0');
+      const storedReason = localStorage.getItem('distanceFeeReason') || 'ກຳລັງກຳນົດທີ່ຕັ້ງ...';
+      
+      setDistanceFee(storedDistanceFee);
+      setDistanceFeeReason(storedReason);
+    }
+  }, [employeeCity, userCity]);
+
+  // Calculate total amount - Like LocationPage/PaymentPage
+  useEffect(() => {
+    const newTotal = baseAmount + distanceFee;
+    setTotalAmount(newTotal);
+    
+    // Update billing data with new total
+    setBillingData(prevBilling => ({
+      ...prevBilling,
+      totalPrice: formatCurrency(newTotal)
+    }));
+  }, [baseAmount, distanceFee]);
 
   // Load all required data
   const loadData = async () => {
@@ -770,6 +980,7 @@ const useCommentController = () => {
           receiptNo: generateReceiptNumber()
         });
         
+        setBaseAmount(fallbackService.price);
         setTotalAmount(fallbackService.price);
         setLoading(false);
       }
@@ -868,6 +1079,7 @@ const useCommentController = () => {
           receiptNo: generateReceiptNumber()
         });
         
+        setBaseAmount(fallbackService.price);
         setTotalAmount(fallbackService.price);
       }
     } catch (error) {
@@ -887,6 +1099,7 @@ const useCommentController = () => {
         receiptNo: generateReceiptNumber()
       });
       
+      setBaseAmount(fallbackService.price);
       setTotalAmount(fallbackService.price);
     } finally {
       // Clear timeout and set loading to false
@@ -916,7 +1129,16 @@ const useCommentController = () => {
     billingData,
     loading,
     error,
+    
+    // Amount calculations - Like LocationPage/PaymentPage
+    baseAmount,
+    distanceFee,
+    distanceFeeReason,
     totalAmount,
+    
+    // City tracking - Like LocationPage/PaymentPage
+    userCity,
+    employeeCity,
     
     // Comment/Rating state
     rating,

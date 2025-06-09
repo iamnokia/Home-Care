@@ -19,6 +19,10 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -32,6 +36,7 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import BadgeIcon from "@mui/icons-material/Badge";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import TimeToLeaveIcon from "@mui/icons-material/TimeToLeave";
+import LocalTaxiIcon from "@mui/icons-material/LocalTaxi";
 import { LOCATION_DETAIL_PATH, PAYMENT_PATH } from "../../../routes/path";
 import useMainController from "../controllers/index";
 import { EmployeeModel } from "../../../models/employee";
@@ -44,6 +49,140 @@ const fontSize = {
   subtitle: "1.1rem",
   text: "0.9rem",
   button: "1rem",
+};
+
+// City definitions with English and Lao names
+const CITIES = [
+  { en: 'CHANTHABULY', lo: 'ຈັນທະບູລີ', value: 'chanthabouly' },
+  { en: 'SIKHOTTABONG', lo: 'ສີໂຄດຕະບອງ', value: 'sikhottabong' },
+  { en: 'XAYSETHA', lo: 'ໄຊເສດຖາ', value: 'xaysetha' },
+  { en: 'SISATTANAK', lo: 'ສີສັດຕະນາກ', value: 'sisattanak' },
+  { en: 'NAXAITHONG', lo: 'ນາຊາຍທອງ', value: 'naxaithong' },
+  { en: 'XAYTANY', lo: 'ໄຊທານີ', value: 'xaytany' },
+  { en: 'HADXAIFONG', lo: 'ຫາດຊາຍຟອງ', value: 'hadxaifong' }
+];
+
+// Helper function to normalize city names
+const normalizeCityName = (cityName: string): string => {
+  if (!cityName) return '';
+  
+  // Convert to lowercase and remove spaces
+  let normalized = cityName.toLowerCase().replace(/\s+/g, '');
+  
+  // Handle common variations
+  const cityMappings: { [key: string]: string } = {
+    'chanthabuly': 'chanthabouly',
+    'chanthabouly': 'chanthabouly',
+    'ຈັນທະບູລີ': 'chanthabouly',
+    'sikhottabong': 'sikhottabong', 
+    'ສີໂຄດຕະບອງ': 'sikhottabong',
+    'xaysetha': 'xaysetha',
+    'ໄຊເສດຖາ': 'xaysetha',
+    'sisattanak': 'sisattanak',
+    'ສີສັດຕະນາກ': 'sisattanak',
+    'naxaithong': 'naxaithong',
+    'ນາຊາຍທອງ': 'naxaithong',
+    'xaytany': 'xaytany',
+    'ໄຊທານີ': 'xaytany',
+    'hadxaifong': 'hadxaifong',
+    'ຫາດຊາຍຟອງ': 'hadxaifong'
+  };
+  
+  return cityMappings[normalized] || normalized;
+};
+
+// Distance fee calculation function
+const calculateDistanceFee = (employeeCity: string, userCity: string): { fee: number; reason: string } => {
+  if (!employeeCity || !userCity) {
+    return { fee: 0, reason: 'ບໍ່ສາມາດກຳນົດທີ່ຕັ້ງໄດ້' };
+  }
+
+  // Normalize city names
+  const empCity = normalizeCityName(employeeCity);
+  const usrCity = normalizeCityName(userCity);
+
+  if (empCity === usrCity) {
+    return { fee: 8000, reason: 'ທີ່ຕັ້ງດຽວກັນ - ຄ່າບໍລິການພື້ນຖານ' };
+  }
+
+  // Define distance fee rules based on your requirements
+  const distanceRules: { [key: string]: { [key: string]: number } } = {
+    'chanthabouly': {
+      'sikhottabong': 10000,
+      'xaysetha': 10000,
+      'sisattanak': 10000,
+      'xaytany': 15000,
+      'naxaithong': 15000,
+      'hadxaifong': 15000
+    },
+    'sikhottabong': {
+      'chanthabouly': 10000,
+      'sisattanak': 10000,
+      'naxaithong': 15000,
+      'xaysetha': 15000,
+      'hadxaifong': 20000,
+      'xaytany': 20000
+    },
+    'naxaithong': {
+      'chanthabouly': 15000,
+      'sikhottabong': 15000,
+      'sisattanak': 20000,
+      'xaysetha': 20000,
+      'hadxaifong': 25000,
+      'xaytany': 25000
+    },
+    'xaytany': {
+      'chanthabouly': 15000,
+      'xaysetha': 15000,
+      'sisattanak': 20000,
+      'hadxaifong': 20000,
+      'naxaithong': 25000,
+      'sikhottabong': 25000
+    },
+    'xaysetha': {
+      'chanthabouly': 10000,
+      'sisattanak': 10000,
+      'xaytany': 10000,
+      'hadxaifong': 10000,
+      'naxaithong': 15000,
+      'sikhottabong': 15000
+    },
+    'hadxaifong': {
+      'xaysetha': 10000,
+      'sisattanak': 10000,
+      'xaytany': 15000,
+      'sikhottabong': 15000,
+      'chanthabouly': 15000,
+      'naxaithong': 25000
+    },
+    'sisattanak': {
+      'sikhottabong': 10000,
+      'chanthabouly': 10000,
+      'xaysetha': 10000,
+      'hadxaifong': 10000,
+      'naxaithong': 20000,
+      'xaytany': 20000
+    }
+  };
+
+  const fee = distanceRules[empCity]?.[usrCity] || 0;
+  
+  let reason = '';
+  if (fee === 0) {
+    reason = 'ບໍ່ມີຂໍ້ມູນ ຄ່າໄລຍະທາງສຳລັບເສັ້ນທາງນີ້';
+  } else if (fee === 8000) {
+    reason = 'ທີ່ຕັ້ງດຽວກັນ - ຄ່າບໍລິການພື້ນຖານ';
+  } else if (fee === 10000) {
+    reason = 'ຄ່າໄລຍະທາງໃກ້ຄຽງ';
+  } else if (fee === 15000) {
+    reason = 'ຄ່າໄລຍະທາງປານກາງ';
+  } else if (fee === 20000) {
+    reason = ' ຄ່າໄລຍະທາງໄກ';
+  } else if (fee === 25000) {
+    reason = 'ຄ່າໄລຍະທາງໄກຫຼາຍ';
+  }
+
+  return { fee, reason };
 };
 
 // Define the Location interface for the displayed service providers
@@ -60,7 +199,7 @@ interface Location {
   price: number;
   priceFormatted: string;
   service?: string;
-  cat_id?: number; // Added category ID field
+  cat_id?: number;
   // Car details
   carId?: string;
   carBrand?: string;
@@ -82,11 +221,18 @@ const LocationPage: React.FC = () => {
   // State variables
   const [address, setAddress] = useState<string>("");
   const [note, setNote] = useState<string>("");
+  const [baseAmount, setBaseAmount] = useState<number>(0);
+  const [distanceFee, setDistanceFee] = useState<number>(0);
+  const [distanceFeeReason, setDistanceFeeReason] = useState<string>("");
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [alertOpen, setAlertOpen] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [alertSeverity, setAlertSeverity] = useState<AlertColor>("success");
   const [locations, setLocations] = useState<Location[]>([]);
+  
+  // Auto-calculated cities from existing data
+  const [userCity, setUserCity] = useState<string>("");
+  const [employeeCity, setEmployeeCity] = useState<string>("");
 
   // Map employee data to location format
   useEffect(() => {
@@ -150,9 +296,9 @@ const LocationPage: React.FC = () => {
           city: employee.city || "ວຽງຈັນ",
           price: parseFloat(employee.price),
           priceFormatted: formatPrice(employee.price),
-          service: employee.cat_name, // Set service to category name
-          cat_id: categoryId, // Add safely parsed category ID
-          // Basic car details from employee (these might be null/undefined)
+          service: employee.cat_name,
+          cat_id: categoryId,
+          // Basic car details from employee
           carId: employee?.car_id,
           carBrand: employee?.car_brand,
           carModel: employee?.car_model,
@@ -180,13 +326,28 @@ const LocationPage: React.FC = () => {
       });
 
       setLocations(mappedLocations);
+      
+      // Auto-set employee city from first location data
+      if (mappedLocations.length > 0 && mappedLocations[0].city) {
+        const normalizedEmployeeCity = normalizeCityName(mappedLocations[0].city);
+        setEmployeeCity(normalizedEmployeeCity);
+      }
     }
   }, [data, car]);
 
-  // Calculate total whenever locations change
+  // Auto-get user city from localStorage (set from location selection)
   useEffect(() => {
-    const total = locations.reduce((sum, item) => sum + item.price, 0);
-    setTotalAmount(total);
+    const savedUserCity = localStorage.getItem('addressCity');
+    if (savedUserCity) {
+      const normalizedUserCity = normalizeCityName(savedUserCity);
+      setUserCity(normalizedUserCity);
+    }
+  }, []);
+
+  // Calculate base amount whenever locations change
+  useEffect(() => {
+    const base = locations.reduce((sum, item) => sum + item.price, 0);
+    setBaseAmount(base);
 
     const savedLocationName = localStorage.getItem('selectedLocationName');
 
@@ -195,6 +356,23 @@ const LocationPage: React.FC = () => {
       setAddress(savedLocationName);
     }
   }, [locations]);
+
+  // Auto-calculate distance fee when cities are available
+  useEffect(() => {
+    if (employeeCity && userCity) {
+      const result = calculateDistanceFee(employeeCity, userCity);
+      setDistanceFee(result.fee);
+      setDistanceFeeReason(result.reason);
+    } else {
+      setDistanceFee(0);
+      setDistanceFeeReason('ກຳລັງກຳນົດທີ່ຕັ້ງ...');
+    }
+  }, [employeeCity, userCity]);
+
+  // Calculate total amount
+  useEffect(() => {
+    setTotalAmount(baseAmount + distanceFee);
+  }, [baseAmount, distanceFee]);
 
   // Format number as currency
   const formatCurrency = (value: number): string => {
@@ -206,7 +384,15 @@ const LocationPage: React.FC = () => {
     setAlertOpen(false);
   };
 
-  // Loading component with white background, #611463 and #f7931e accents
+  // Handle proceed to payment with distance fee included
+  const handleProceedToPayment = () => {
+    // Store the total amount including distance fee for the payment page
+    localStorage.setItem('totalAmountWithDistanceFee', totalAmount.toString());
+    localStorage.setItem('distanceFee', distanceFee.toString());
+    localStorage.setItem('baseAmount', baseAmount.toString());
+    
+    navigate(`/payment/${id}`);
+  };
 
   // Show enhanced loading state
   if (loading) {
@@ -512,6 +698,101 @@ const LocationPage: React.FC = () => {
               <KeyboardArrowRightIcon sx={{ color: '#611463' }} />
             </Box>
           </Box>
+
+          {/* Enhanced Distance Fee Display */}
+          {(employeeCity || userCity) && distanceFee > 0 && (
+            <Box sx={{ mb: 3 }}>
+              <Card
+                sx={{
+                  backgroundColor: "#f0e9f1",
+                  borderRadius: 2,
+                  border: '1px solid rgba(97, 20, 99, 0.1)',
+                  borderLeft: '3px solid #8a1c8d'
+                }}
+              >
+                <CardContent sx={{ p: 2 }}>
+                  {/* Header with icon and title */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                    <DirectionsCarIcon sx={{ fontSize: '1rem', color: '#8a1c8d', mr: 1 }} />
+                    <Typography variant="body2" sx={{ fontSize: '0.9rem', color: '#611463', fontWeight: 600 }}>
+                       ຄ່າໄລຍະທາງ
+                    </Typography>
+                  </Box>
+
+                  {/* Route Information */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: 1,
+                    mb: 1.5
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', minWidth: '60%' }}>
+                      {/* From City */}
+                      <Box sx={{ 
+                        bgcolor: 'rgba(97, 20, 99, 0.1)', 
+                        px: 1, 
+                        py: 0.5, 
+                        borderRadius: 1,
+                        border: '1px solid rgba(97, 20, 99, 0.2)'
+                      }}>
+                        <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#611463', fontWeight: 500 }}>
+                          {employeeCity ? employeeCity.charAt(0).toUpperCase() + employeeCity.slice(1) : 'ບໍ່ທາງ'}
+                        </Typography>
+                      </Box>
+
+                      {/* Arrow */}
+                      <KeyboardArrowRightIcon sx={{ fontSize: '1.2rem', color: '#8a1c8d', mx: 0.5 }} />
+
+                      {/* To City */}
+                      <Box sx={{ 
+                        bgcolor: 'rgba(97, 20, 99, 0.1)', 
+                        px: 1, 
+                        py: 0.5, 
+                        borderRadius: 1,
+                        border: '1px solid rgba(97, 20, 99, 0.2)'
+                      }}>
+                        <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#611463', fontWeight: 500 }}>
+                          {userCity ? userCity.charAt(0).toUpperCase() + userCity.slice(1) : 'ບໍ່ທາງ'}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* Fee Amount */}
+                    <Typography
+                      sx={{
+                        fontSize: '0.9rem',
+                        fontWeight: "bold",
+                        color: distanceFee === 8000 ? "#10b981" : "#f7931e",
+                        bgcolor: distanceFee === 8000 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(247, 147, 30, 0.1)',
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: 1,
+                        border: `1px solid ${distanceFee === 8000 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(247, 147, 30, 0.3)'}`
+                      }}
+                    >
+                      +{formatCurrency(distanceFee)}
+                    </Typography>
+                  </Box>
+
+                  {/* Fee Reason/Category */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Typography variant="body2" sx={{ 
+                      fontSize: '0.8rem', 
+                      color: '#666',
+                      fontStyle: 'italic'
+                    }}>
+                      {distanceFeeReason}
+                    </Typography>
+
+                  
+                  </Box>
+                </CardContent>
+              </Card>
+            </Box>
+          )}
+
           {/* Service Items List */}
           <Typography
             variant="subtitle1"
@@ -818,6 +1099,44 @@ const LocationPage: React.FC = () => {
 
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
+                      <Typography sx={{ fontSize: fontSize.text, fontWeight: "500", color: '#374151' }}>
+                        ລາຄາພື້ນຖານ:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sx={{ textAlign: "right" }}>
+                      <Typography
+                        sx={{
+                          fontSize: fontSize.text,
+                          fontWeight: "bold",
+                          color: "#374151"
+                        }}
+                      >
+                        {formatCurrency(baseAmount)}
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={6}>
+                      <Typography sx={{ fontSize: fontSize.text, fontWeight: "500", color: '#374151' }}>
+                        ຄ່າໄລຍະທາງ:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sx={{ textAlign: "right" }}>
+                      <Typography
+                        sx={{
+                          fontSize: fontSize.text,
+                          fontWeight: "bold",
+                          color: distanceFee === 8000 ? "#10b981" : (distanceFee > 0 ? "#f7931e" : "#6b7280")
+                        }}
+                      >
+                        {formatCurrency(distanceFee)}
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <Divider sx={{ my: 1, borderColor: 'rgba(97, 20, 99, 0.2)' }} />
+                    </Grid>
+
+                    <Grid item xs={6}>
                       <Typography sx={{ fontSize: fontSize.subtitle, fontWeight: "bold", color: '#611463' }}>
                         ລາຄາລວມ:
                       </Typography>
@@ -875,7 +1194,7 @@ const LocationPage: React.FC = () => {
             </Button>
             <Button
               variant="contained"
-              onClick={() => navigate(`/payment/${id}`)}
+              onClick={handleProceedToPayment}
               sx={{
                 fontSize: fontSize.button,
                 px: 4,

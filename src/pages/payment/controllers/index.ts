@@ -1,4 +1,4 @@
-// Enhanced useMainController.tsx with correct WhatsApp notification implementation
+// Enhanced useMainController.tsx for PaymentPage with distance fee calculation
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EmployeeModel } from "../../../models/employee";
@@ -33,6 +33,140 @@ export interface Location {
   carImage?: string;
 }
 
+// City definitions with English and Lao names - Same as LocationPage
+const CITIES = [
+  { en: 'CHANTHABULY', lo: 'ຈັນທະບູລີ', value: 'chanthabouly' },
+  { en: 'SIKHOTTABONG', lo: 'ສີໂຄດຕະບອງ', value: 'sikhottabong' },
+  { en: 'XAYSETHA', lo: 'ໄຊເສດຖາ', value: 'xaysetha' },
+  { en: 'SISATTANAK', lo: 'ສີສັດຕະນາກ', value: 'sisattanak' },
+  { en: 'NAXAITHONG', lo: 'ນາຊາຍທອງ', value: 'naxaithong' },
+  { en: 'XAYTANY', lo: 'ໄຊທານີ', value: 'xaytany' },
+  { en: 'HADXAIFONG', lo: 'ຫາດຊາຍຟອງ', value: 'hadxaifong' }
+];
+
+// Helper function to normalize city names - Same as LocationPage
+const normalizeCityName = (cityName: string): string => {
+  if (!cityName) return '';
+  
+  // Convert to lowercase and remove spaces
+  let normalized = cityName.toLowerCase().replace(/\s+/g, '');
+  
+  // Handle common variations
+  const cityMappings: { [key: string]: string } = {
+    'chanthabuly': 'chanthabouly',
+    'chanthabouly': 'chanthabouly',
+    'ຈັນທະບູລີ': 'chanthabouly',
+    'sikhottabong': 'sikhottabong', 
+    'ສີໂຄດຕະບອງ': 'sikhottabong',
+    'xaysetha': 'xaysetha',
+    'ໄຊເສດຖາ': 'xaysetha',
+    'sisattanak': 'sisattanak',
+    'ສີສັດຕະນາກ': 'sisattanak',
+    'naxaithong': 'naxaithong',
+    'ນາຊາຍທອງ': 'naxaithong',
+    'xaytany': 'xaytany',
+    'ໄຊທານີ': 'xaytany',
+    'hadxaifong': 'hadxaifong',
+    'ຫາດຊາຍຟອງ': 'hadxaifong'
+  };
+  
+  return cityMappings[normalized] || normalized;
+};
+
+// Distance fee calculation function - Same as LocationPage
+const calculateDistanceFee = (employeeCity: string, userCity: string): { fee: number; reason: string } => {
+  if (!employeeCity || !userCity) {
+    return { fee: 0, reason: 'ບໍ່ສາມາດກຳນົດທີ່ຕັ້ງໄດ້' };
+  }
+
+  // Normalize city names
+  const empCity = normalizeCityName(employeeCity);
+  const usrCity = normalizeCityName(userCity);
+
+  if (empCity === usrCity) {
+    return { fee: 8000, reason: 'ທີ່ຕັ້ງດຽວກັນ - ຄ່າບໍລິການພື້ນຖານ' };
+  }
+
+  // Define distance fee rules based on your requirements
+  const distanceRules: { [key: string]: { [key: string]: number } } = {
+    'chanthabouly': {
+      'sikhottabong': 10000,
+      'xaysetha': 10000,
+      'sisattanak': 10000,
+      'xaytany': 15000,
+      'naxaithong': 15000,
+      'hadxaifong': 15000
+    },
+    'sikhottabong': {
+      'chanthabouly': 10000,
+      'sisattanak': 10000,
+      'naxaithong': 15000,
+      'xaysetha': 15000,
+      'hadxaifong': 20000,
+      'xaytany': 20000
+    },
+    'naxaithong': {
+      'chanthabouly': 15000,
+      'sikhottabong': 15000,
+      'sisattanak': 20000,
+      'xaysetha': 20000,
+      'hadxaifong': 25000,
+      'xaytany': 25000
+    },
+    'xaytany': {
+      'chanthabouly': 15000,
+      'xaysetha': 15000,
+      'sisattanak': 20000,
+      'hadxaifong': 20000,
+      'naxaithong': 25000,
+      'sikhottabong': 25000
+    },
+    'xaysetha': {
+      'chanthabouly': 10000,
+      'sisattanak': 10000,
+      'xaytany': 10000,
+      'hadxaifong': 10000,
+      'naxaithong': 15000,
+      'sikhottabong': 15000
+    },
+    'hadxaifong': {
+      'xaysetha': 10000,
+      'sisattanak': 10000,
+      'xaytany': 15000,
+      'sikhottabong': 15000,
+      'chanthabouly': 15000,
+      'naxaithong': 25000
+    },
+    'sisattanak': {
+      'sikhottabong': 10000,
+      'chanthabouly': 10000,
+      'xaysetha': 10000,
+      'hadxaifong': 10000,
+      'naxaithong': 20000,
+      'xaytany': 20000
+    }
+  };
+
+  const fee = distanceRules[empCity]?.[usrCity] || 0;
+  
+  let reason = '';
+  if (fee === 0) {
+    reason = 'ບໍ່ມີຂໍ້ມູນ ຄ່າໄລຍະທາງສຳລັບເສັ້ນທາງນີ້';
+  } else if (fee === 8000) {
+    reason = 'ທີ່ຕັ້ງດຽວກັນ - ຄ່າບໍລິການພື້ນຖານ';
+  } else if (fee === 10000) {
+    reason = 'ຄ່າໄລຍະທາງໃກ້ຄຽງ';
+  } else if (fee === 15000) {
+    reason = 'ຄ່າໄລຍະທາງປານກາງ';
+  } else if (fee === 20000) {
+    reason = ' ຄ່າໄລຍະທາງໄກ';
+  } else if (fee === 25000) {
+    reason = 'ຄ່າໄລຍະທາງໄກຫຼາຍ';
+  }
+
+  return { fee, reason };
+};
+
 // Placeholder data for when API fails but we still want to show UI
 export const placeholderData: Location[] = [
   {
@@ -59,7 +193,16 @@ const useMainController = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);
+  
+  // Amount calculations - Like LocationPage
+  const [baseAmount, setBaseAmount] = useState<number>(0);
+  const [distanceFee, setDistanceFee] = useState<number>(0);
+  const [distanceFeeReason, setDistanceFeeReason] = useState<string>("");
   const [totalAmount, setTotalAmount] = useState<number>(0);
+  
+  // City tracking - Like LocationPage
+  const [userCity, setUserCity] = useState<string>("");
+  const [employeeCity, setEmployeeCity] = useState<string>("");
   
   // Payment state
   const [paymentAmount, setPaymentAmount] = useState<string>("");
@@ -320,32 +463,29 @@ const useMainController = () => {
     }
   };
 
-
   // Get selected location from localStorage
-const getSelectedLocationId = () => {
-  try {
-    // Get the JSON string from localStorage
-    const selectedLocationStr = localStorage.getItem('selectedLocation');
-    
-    if (!selectedLocationStr) {
-      console.error("No selected location found in localStorage");
+  const getSelectedLocationId = () => {
+    try {
+      // Get the JSON string from localStorage
+      const selectedLocationStr = localStorage.getItem('selectedLocation');
+      
+      if (!selectedLocationStr) {
+        console.error("No selected location found in localStorage");
+        return null;
+      }
+      
+      // Parse the JSON string to an object
+      const selectedLocation = JSON.parse(selectedLocationStr);
+      
+      // Extract the ID
+      return selectedLocation.id;
+    } catch (error) {
+      console.error("Error retrieving selected location ID:", error);
       return null;
     }
-    
-    // Parse the JSON string to an object
-    const selectedLocation = JSON.parse(selectedLocationStr);
-    
-    // Extract the ID
-    return selectedLocation.id;
-  } catch (error) {
-    console.error("Error retrieving selected location ID:", error);
-    return null;
-  }
-};
+  };
 
-// Usage example
-
-  // COMPLETELY REWRITTEN: Send WhatsApp notification and create service order
+  // Send WhatsApp notification and create service order
   const sendWhatsAppNotification = async (): Promise<any> => {
     try {
       const locationId = getSelectedLocationId();
@@ -387,7 +527,7 @@ const getSelectedLocationId = () => {
     }
   };
 
-  // COMPLETELY REWRITTEN: Handle payment submission
+  // Handle payment submission
   const handlePaymentSubmit = async (): Promise<void> => {
     const enteredAmount = parseInt(paymentAmount) || 0;
 
@@ -444,6 +584,11 @@ const getSelectedLocationId = () => {
         localStorage.setItem('lastOrderId', serviceOrderId.toString());
       }
       
+      // Store payment details including distance fee
+      localStorage.setItem('totalAmountWithDistanceFee', totalAmount.toString());
+      localStorage.setItem('distanceFee', distanceFee.toString());
+      localStorage.setItem('baseAmount', baseAmount.toString());
+      
       // Keep success dialog open briefly before navigating
       setTimeout(() => {
         setSuccessDialogOpen(false);
@@ -474,7 +619,7 @@ const getSelectedLocationId = () => {
             employees_id: employeeId,
             cat_id: categoryId,
             address_users_detail_id: addressId,
-            amount: totalAmount,
+            amount: totalAmount, // This now includes distance fee
             payment_status: "paid",
             service_status: "Not Start"
           };
@@ -498,10 +643,13 @@ const getSelectedLocationId = () => {
             await handleUpdateEmployeeStatus(employeeId);
           }
           
-          // Store order ID
+          // Store order ID and payment details
           if (response.data?.id) {
             localStorage.setItem('lastOrderId', response.data.id.toString());
           }
+          localStorage.setItem('totalAmountWithDistanceFee', totalAmount.toString());
+          localStorage.setItem('distanceFee', distanceFee.toString());
+          localStorage.setItem('baseAmount', baseAmount.toString());
           
           // Navigate to status page
           setTimeout(() => {
@@ -630,6 +778,12 @@ const getSelectedLocationId = () => {
 
       console.log("Mapped locations:", mappedLocations);
       setLocations(mappedLocations);
+      
+      // Auto-set employee city from first location data - Like LocationPage
+      if (mappedLocations.length > 0 && mappedLocations[0].city) {
+        const normalizedEmployeeCity = normalizeCityName(mappedLocations[0].city);
+        setEmployeeCity(normalizedEmployeeCity);
+      }
     } else if (error) {
       // Use placeholder data when there's an error
       console.log("Using placeholder data due to error:", error);
@@ -641,18 +795,45 @@ const getSelectedLocationId = () => {
     }
   }, [data, error, loading, car]);
 
-  // Calculate total whenever locations change
+  // Auto-get user city from localStorage (set from location selection) - Like LocationPage
   useEffect(() => {
-    const total = locations.reduce((sum, item) => sum + item.price, 0);
-    console.log("Calculated total amount:", total);
-    setTotalAmount(total);
-    
-    // Set initial payment amount to match total
-    setPaymentAmount(total.toString());
-    
-    // Set initial payment state
-    setPaymentState("valid");
+    const savedUserCity = localStorage.getItem('addressCity');
+    if (savedUserCity) {
+      const normalizedUserCity = normalizeCityName(savedUserCity);
+      setUserCity(normalizedUserCity);
+    }
+  }, []);
+
+  // Calculate base amount whenever locations change - Like LocationPage
+  useEffect(() => {
+    const base = locations.reduce((sum, item) => sum + item.price, 0);
+    setBaseAmount(base);
   }, [locations]);
+
+  // Auto-calculate distance fee when cities are available - Like LocationPage
+  useEffect(() => {
+    if (employeeCity && userCity) {
+      const result = calculateDistanceFee(employeeCity, userCity);
+      setDistanceFee(result.fee);
+      setDistanceFeeReason(result.reason);
+    } else {
+      setDistanceFee(0);
+      setDistanceFeeReason('ກຳລັງກຳນົດທີ່ຕັ້ງ...');
+    }
+  }, [employeeCity, userCity]);
+
+  // Calculate total amount - Like LocationPage
+  useEffect(() => {
+    setTotalAmount(baseAmount + distanceFee);
+  }, [baseAmount, distanceFee]);
+
+  // Set initial payment amount to match total when total changes
+  useEffect(() => {
+    if (totalAmount > 0) {
+      setPaymentAmount(totalAmount.toString());
+      setPaymentState("valid");
+    }
+  }, [totalAmount]);
 
   // Load data when component mounts or ID changes
   useEffect(() => {
@@ -672,7 +853,16 @@ const getSelectedLocationId = () => {
     loading,
     error,
     locations,
+    
+    // Amount calculations - Like LocationPage
+    baseAmount,
+    distanceFee,
+    distanceFeeReason,
     totalAmount,
+    
+    // City tracking - Like LocationPage
+    userCity,
+    employeeCity,
     
     // Payment
     paymentAmount,

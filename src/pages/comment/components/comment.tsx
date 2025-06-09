@@ -16,6 +16,7 @@ import {
   useMediaQuery,
   Rating,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 import CategoryIcon from "@mui/icons-material/Category";
 import HomeIcon from "@mui/icons-material/Home";
@@ -23,6 +24,8 @@ import LocationCityIcon from "@mui/icons-material/LocationCity";
 import DownloadIcon from "@mui/icons-material/Download";
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import useCommentController from "../controllers/index";
 
 // Font size constants
@@ -37,7 +40,7 @@ const CommentPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // Get everything from the controller
+  // Get everything from the controller including distance fee data
   const {
     serviceDetails,
     billingData,
@@ -49,14 +52,20 @@ const CommentPage: React.FC = () => {
     alertOpen,
     alertMessage,
     alertSeverity,
+    // Distance fee data
+    baseAmount,
+    distanceFee,
+    distanceFeeReason,
+    totalAmount,
+    userCity,
+    employeeCity,
     setRating,
     handleCommentChange,
     handleAlertClose,
     handleCommentSubmit,
-    handleDownloadReceipt
+    handleDownloadReceipt,
+    formatCurrency
   } = useCommentController();
-
-  // Loading component with white background, #611463 and #f7931e accents
 
   // Show enhanced loading state
   if (loading) {
@@ -214,7 +223,7 @@ const CommentPage: React.FC = () => {
     );
   }
 
-  // Generate and download beautiful receipt as PNG
+  // Generate and download beautiful receipt as PNG with distance fee
   const handleDownloadPDF = () => {
     // Create a beautiful bill receipt element
     const createBillElement = () => {
@@ -334,6 +343,42 @@ const CommentPage: React.FC = () => {
       customerCard.appendChild(customerDetails);
       content.appendChild(customerCard);
 
+      // Distance fee information if applicable
+      if (distanceFee > 0 && (employeeCity || userCity)) {
+        const distanceCard = document.createElement('div');
+        distanceCard.style.backgroundColor = '#fff3e0';
+        distanceCard.style.borderRadius = '12px';
+        distanceCard.style.padding = '15px 20px';
+        distanceCard.style.marginBottom = '25px';
+        distanceCard.style.border = '1px solid #ffcc80';
+
+        const distanceTitle = document.createElement('div');
+        distanceTitle.style.fontWeight = 'bold';
+        distanceTitle.style.fontSize = '14px';
+        distanceTitle.style.marginBottom = '8px';
+        distanceTitle.style.color = '#ef6c00';
+        distanceTitle.style.display = 'flex';
+        distanceTitle.style.alignItems = 'center';
+        distanceTitle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef6c00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M9 12l2 2 4-4"></path><path d="M21 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"></path><path d="M3 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"></path><path d="M12 21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"></path><path d="M12 3c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z"></path></svg> ຄ່າໄລຍະທາງ';
+
+        const routeInfo = document.createElement('div');
+        routeInfo.style.fontSize = '12px';
+        routeInfo.style.color = '#666';
+        routeInfo.style.marginBottom = '5px';
+        routeInfo.textContent = `${employeeCity ? employeeCity.charAt(0).toUpperCase() + employeeCity.slice(1) : 'ບໍ່ທາງ'} → ${userCity ? userCity.charAt(0).toUpperCase() + userCity.slice(1) : 'ບໍ່ທາງ'}`;
+
+        const feeInfo = document.createElement('div');
+        feeInfo.style.fontSize = '11px';
+        feeInfo.style.color = '#666';
+        feeInfo.style.fontStyle = 'italic';
+        feeInfo.textContent = distanceFeeReason;
+
+        distanceCard.appendChild(distanceTitle);
+        distanceCard.appendChild(routeInfo);
+        distanceCard.appendChild(feeInfo);
+        content.appendChild(distanceCard);
+      }
+
       // Create service info section
       const serviceTitle = document.createElement('div');
       serviceTitle.style.fontWeight = 'bold';
@@ -366,9 +411,20 @@ const CommentPage: React.FC = () => {
       tableBody.innerHTML = `
         <tr style="border-bottom: 1px solid #eee;">
           <td style="padding: 15px 15px; text-align: left;">${service ? service.service : billingData.serviceType}</td>
-          <td style="padding: 15px 15px; text-align: right;">${service ? service.priceFormatted : billingData.servicePrice}</td>
+          <td style="padding: 15px 15px; text-align: right;">${formatCurrency(baseAmount)}</td>
         </tr>
       `;
+
+      // Add distance fee row if applicable
+      if (distanceFee > 0) {
+        tableBody.innerHTML += `
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 15px 15px; text-align: left; color: #ef6c00;">ຄ່າໄລຍະທາງ</td>
+            <td style="padding: 15px 15px; text-align: right; color: #ef6c00;">${formatCurrency(distanceFee)}</td>
+          </tr>
+        `;
+      }
+
       serviceTable.appendChild(tableBody);
       content.appendChild(serviceTable);
 
@@ -400,15 +456,36 @@ const CommentPage: React.FC = () => {
       priceRow1.style.fontSize = '15px';
 
       const priceLabel1 = document.createElement('div');
-      priceLabel1.textContent = 'ລາຄາ';
+      priceLabel1.textContent = 'ລາຄາພື້ນຖານ';
       priceLabel1.style.color = '#666';
 
       const priceValue1 = document.createElement('div');
-      priceValue1.textContent = service ? service.priceFormatted : billingData.servicePrice;
+      priceValue1.textContent = formatCurrency(baseAmount);
 
       priceRow1.appendChild(priceLabel1);
       priceRow1.appendChild(priceValue1);
       priceSummaryCard.appendChild(priceRow1);
+
+      // Distance fee row if applicable
+      if (distanceFee > 0) {
+        const priceRow2 = document.createElement('div');
+        priceRow2.style.display = 'flex';
+        priceRow2.style.justifyContent = 'space-between';
+        priceRow2.style.margin = '12px 0';
+        priceRow2.style.fontSize = '15px';
+
+        const priceLabel2 = document.createElement('div');
+        priceLabel2.textContent = 'ຄ່າໄລຍະທາງ';
+        priceLabel2.style.color = '#ef6c00';
+
+        const priceValue2 = document.createElement('div');
+        priceValue2.textContent = formatCurrency(distanceFee);
+        priceValue2.style.color = '#ef6c00';
+
+        priceRow2.appendChild(priceLabel2);
+        priceRow2.appendChild(priceValue2);
+        priceSummaryCard.appendChild(priceRow2);
+      }
 
       // Add divider
       const divider = document.createElement('div');
@@ -429,7 +506,7 @@ const CommentPage: React.FC = () => {
       totalLabel.textContent = 'ລາຄາລວມ';
 
       const totalValue = document.createElement('div');
-      totalValue.textContent = service ? service.priceFormatted : billingData.totalPrice;
+      totalValue.textContent = formatCurrency(totalAmount);
       totalValue.style.color = '#611463';
 
       totalRow.appendChild(totalLabel);
@@ -725,7 +802,7 @@ const CommentPage: React.FC = () => {
                           borderRadius: "8px",
                         }}
                       >
-                        {item.priceFormatted}
+                        {formatCurrency(baseAmount)}
                       </Typography>
                     </Box>
 
@@ -781,7 +858,99 @@ const CommentPage: React.FC = () => {
                 </Card>
               ))}
 
-              {/* Billing Summary Card */}
+              {/* Enhanced Distance Fee Display - Same as LocationPage/PaymentPage */}
+              {(employeeCity || userCity) && distanceFee > 0 && (
+                <Box sx={{ mb: 3 }}>
+                  <Card
+                    sx={{
+                      backgroundColor: "#f0e9f1",
+                      borderRadius: 2,
+                      border: '1px solid rgba(97, 20, 99, 0.1)',
+                      borderLeft: '3px solid #8a1c8d'
+                    }}
+                  >
+                    <CardContent sx={{ p: 2 }}>
+                      {/* Header with icon and title */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                        <DirectionsCarIcon sx={{ fontSize: '1rem', color: '#8a1c8d', mr: 1 }} />
+                        <Typography variant="body2" sx={{ fontSize: '0.9rem', color: '#611463', fontWeight: 600 }}>
+                          ຄ່າໄລຍະທາງ
+                        </Typography>
+                      </Box>
+
+                      {/* Route Information */}
+                      <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: 1,
+                        mb: 1.5
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', minWidth: '60%' }}>
+                          {/* From City */}
+                          <Box sx={{ 
+                            bgcolor: 'rgba(97, 20, 99, 0.1)', 
+                            px: 1, 
+                            py: 0.5, 
+                            borderRadius: 1,
+                            border: '1px solid rgba(97, 20, 99, 0.2)'
+                          }}>
+                            <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#611463', fontWeight: 500 }}>
+                              {employeeCity ? employeeCity.charAt(0).toUpperCase() + employeeCity.slice(1) : 'ບໍ່ທາງ'}
+                            </Typography>
+                          </Box>
+
+                          {/* Arrow */}
+                          <KeyboardArrowRightIcon sx={{ fontSize: '1.2rem', color: '#8a1c8d', mx: 0.5 }} />
+
+                          {/* To City */}
+                          <Box sx={{ 
+                            bgcolor: 'rgba(97, 20, 99, 0.1)', 
+                            px: 1, 
+                            py: 0.5, 
+                            borderRadius: 1,
+                            border: '1px solid rgba(97, 20, 99, 0.2)'
+                          }}>
+                            <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#611463', fontWeight: 500 }}>
+                              {userCity ? userCity.charAt(0).toUpperCase() + userCity.slice(1) : 'ບໍ່ທາງ'}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        {/* Fee Amount */}
+                        <Typography
+                          sx={{
+                            fontSize: '0.9rem',
+                            fontWeight: "bold",
+                            color: distanceFee === 8000 ? "#10b981" : "#f7931e",
+                            bgcolor: distanceFee === 8000 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(247, 147, 30, 0.1)',
+                            px: 1.5,
+                            py: 0.5,
+                            borderRadius: 1,
+                            border: `1px solid ${distanceFee === 8000 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(247, 147, 30, 0.3)'}`
+                          }}
+                        >
+                          +{formatCurrency(distanceFee)}
+                        </Typography>
+                      </Box>
+
+                      {/* Fee Reason/Category */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" sx={{ 
+                          fontSize: '0.8rem', 
+                          color: '#666',
+                          fontStyle: 'italic'
+                        }}>
+                          {distanceFeeReason}
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Box>
+              )}
+
+              {/* Enhanced Billing Summary Card with Distance Fee Breakdown */}
               <Card
                 sx={{
                   mb: 2.5,
@@ -816,6 +985,7 @@ const CommentPage: React.FC = () => {
                     ສະຫຼຸບການຊຳລະເງິນ
                   </Typography>
 
+                  {/* Base Amount */}
                   <Box sx={{
                     display: "flex",
                     justifyContent: "space-between",
@@ -827,12 +997,33 @@ const CommentPage: React.FC = () => {
                     }
                   }}>
                     <Typography sx={{ fontSize: fontSize.text, color: "text.secondary" }}>
-                      ລາຄາ
+                      ລາຄາພື້ນຖານ
                     </Typography>
                     <Typography sx={{ fontSize: fontSize.text }}>
-                      {serviceDetails.length > 0 ? serviceDetails[0].priceFormatted : billingData.servicePrice}
+                      {formatCurrency(baseAmount)}
                     </Typography>
                   </Box>
+
+                  {/* Distance Fee - only show if > 0 */}
+                  {distanceFee > 0 && (
+                    <Box sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mb: 1.5,
+                      p: 1.2,
+                      borderRadius: 2,
+                      "&:hover": {
+                        backgroundColor: "rgba(247, 147, 30, 0.03)"
+                      }
+                    }}>
+                      <Typography sx={{ fontSize: fontSize.text, color: "#f7931e" }}>
+                        ຄ່າໄລຍະທາງ
+                      </Typography>
+                      <Typography sx={{ fontSize: fontSize.text, color: "#f7931e", fontWeight: 500 }}>
+                        {formatCurrency(distanceFee)}
+                      </Typography>
+                    </Box>
+                  )}
 
                   <Box sx={{
                     height: "1px",
@@ -840,6 +1031,7 @@ const CommentPage: React.FC = () => {
                     my: 2
                   }} />
 
+                  {/* Total Amount */}
                   <Box sx={{
                     display: "flex",
                     justifyContent: "space-between",
@@ -860,7 +1052,7 @@ const CommentPage: React.FC = () => {
                       borderRadius: 1.5,
                       boxShadow: "0 2px 8px rgba(97, 20, 99, 0.1)"
                     }}>
-                      {serviceDetails.length > 0 ? serviceDetails[0].priceFormatted : billingData.totalPrice}
+                      {formatCurrency(totalAmount)}
                     </Typography>
                   </Box>
                 </CardContent>
