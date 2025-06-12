@@ -4,18 +4,15 @@ import {
   Typography, 
   Card, 
   Avatar, 
-  IconButton, 
   Container, 
   useMediaQuery, 
   useTheme,
   Chip,
-  Divider,
   Paper,
   Grid,
   Badge,
   Button,
   alpha,
-  Tooltip,
   CircularProgress,
   Stack
 } from "@mui/material";
@@ -42,13 +39,13 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Icon from '../../../assets/icons/HomeCareLogo.png';
 import useMainController from "../controller/index";
 
 const ServiceListing: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   
   // Get controller
   const ctrl = useMainController();
@@ -106,6 +103,38 @@ const ServiceListing: React.FC = () => {
         return 'ກຳລັງດຳເນີນການ';
       default:
         return status;
+    }
+  };
+
+  // Format date and time for better display
+  const formatDateTime = (dateString: string): { date: string, time: string } => {
+    if (!dateString) return { date: "ບໍ່ລະບຸ", time: "" };
+    
+    try {
+      const date = new Date(dateString);
+      
+      if (isNaN(date.getTime())) {
+        return { date: "ບໍ່ລະບຸ", time: "" };
+      }
+      
+      const dateStr = date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        timeZone: 'Asia/Vientiane'
+      });
+      
+      const timeStr = date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Vientiane'
+      });
+      
+      return { date: dateStr, time: timeStr };
+    } catch (error) {
+      console.error("Error formatting date time:", error);
+      return { date: "ບໍ່ລະບຸ", time: "" };
     }
   };
 
@@ -300,6 +329,7 @@ const ServiceListing: React.FC = () => {
         {!ctrl.loading && !ctrl.error && ctrl.services.map((service) => {
           // Check if this is a vehicle service
           const vehicleService = ctrl.isVehicleService(service.occupation === 'Transportation' ? 5 : 0);
+          const { date, time } = formatDateTime(service.date);
           
           return (
             <Card
@@ -319,7 +349,7 @@ const ServiceListing: React.FC = () => {
                 }
               }}
             >
-              {/* Top bar with Contract ID, Date, and Delete Button */}
+              {/* Top bar with Contract ID, Date, Time, and Status */}
               <Box sx={{ 
                 display: "flex", 
                 justifyContent: "space-between", 
@@ -328,11 +358,14 @@ const ServiceListing: React.FC = () => {
                 borderBottom: "1px solid #eee",
                 py: 1,
                 px: 3,
+                flexWrap: "wrap",
+                gap: 1
               }}>
                 {/* Contract ID */}
                 <Box sx={{ 
                   display: "flex", 
-                  alignItems: "center" 
+                  alignItems: "center",
+                  minWidth: "fit-content"
                 }}>
                   <ReceiptIcon sx={{ 
                     fontSize: "0.9rem", 
@@ -350,29 +383,66 @@ const ServiceListing: React.FC = () => {
                   </Typography>
                 </Box>
                 
-                {/* Middle spacer */}
-                <Box flexGrow={1} />
-                
-                {/* Date */}
+                {/* Date and Time */}
                 <Box sx={{ 
                   display: "flex", 
                   alignItems: "center",
-                  mr: 2
+                  gap: 2,
+                  flexWrap: "wrap"
                 }}>
-                  <DateRangeIcon sx={{ 
-                    fontSize: "0.9rem", 
-                    color: "#611463", 
-                    mr: 1 
-                  }} />
-                  <Typography 
-                    sx={{ 
-                      fontSize: { xs: "0.75rem", sm: "0.8rem" },
-                      color: "#611463",
-                    }}
-                  >
-                    {ctrl.formatDate(service.date)}
-                  </Typography>
+                  <Box sx={{ 
+                    display: "flex", 
+                    alignItems: "center"
+                  }}>
+                    <DateRangeIcon sx={{ 
+                      fontSize: "0.9rem", 
+                      color: "#611463", 
+                      mr: 0.5 
+                    }} />
+                    <Typography 
+                      sx={{ 
+                        fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                        color: "#611463",
+                      }}
+                    >
+                      {date}
+                    </Typography>
+                  </Box>
+                  
+                  {time && (
+                    <Box sx={{ 
+                      display: "flex", 
+                      alignItems: "center"
+                    }}>
+                      <AccessTimeIcon sx={{ 
+                        fontSize: "0.9rem", 
+                        color: "#f7931e", 
+                        mr: 0.5 
+                      }} />
+                      <Typography 
+                        sx={{ 
+                          fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                          color: "#f7931e",
+                        }}
+                      >
+                        {time}
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
+                
+                {/* Status */}
+                <Chip
+                  label={translateStatus(service.status)}
+                  size="small"
+                  sx={{
+                    bgcolor: getStatusColor(service.status).bg,
+                    color: getStatusColor(service.status).color,
+                    fontWeight: "600",
+                    fontSize: "0.7rem",
+                    height: 24
+                  }}
+                />
               </Box>
 
               {/* Main Card Content */}
@@ -389,7 +459,7 @@ const ServiceListing: React.FC = () => {
                   alignItems: "flex-start",
                   width: isMobile ? "100%" : "60%"
                 }}>
-                  {/* Provider Avatar with Badge */}
+                  {/* Provider Avatar with Badge - FIXED: Always use employee avatar */}
                   <Badge
                     overlap="circular"
                     anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
@@ -407,8 +477,8 @@ const ServiceListing: React.FC = () => {
                     }
                   >
                     <Avatar 
-                      src={vehicleService && service.carImage ? service.carImage : service.avatar} 
-                      alt={vehicleService && service.carBrand ? `${service.carBrand} ${service.carModel}` : service.name}
+                      src={service.avatar} // Always use employee avatar, not car image
+                      alt={`${service.first_name} ${service.last_name}`}
                       sx={{ 
                         width: { xs: 70, sm: 80 }, 
                         height: { xs: 70, sm: 80 }, 
@@ -452,7 +522,7 @@ const ServiceListing: React.FC = () => {
                       ))}
                     </Box>
                     
-                    {/* Gender and Age */}
+                    {/* Gender (Now properly translated to Lao) */}
                     <Box sx={{ 
                       display: "flex", 
                       alignItems: "center", 
@@ -464,7 +534,7 @@ const ServiceListing: React.FC = () => {
                     }}>
                       <PersonIcon sx={{ fontSize: "0.9rem", color: "#611463", mr: 0.5 }} />
                       <Typography sx={{ fontSize: { xs: "0.8rem", sm: "0.85rem" }, color: "#611463" }}>
-                        {service.gender}
+                        {service.gender} {/* Now properly translated */}
                       </Typography>
                     </Box>
                     
@@ -576,8 +646,6 @@ const ServiceListing: React.FC = () => {
                     position: "relative",
                   }}
                 >
-             
-                  
                   {/* Service Card */}
                   <Paper
                     elevation={0}
@@ -663,6 +731,7 @@ const ServiceListing: React.FC = () => {
         })}
       </Container>
       
+     
       {/* Pagination Buttons */}
       {!ctrl.loading && !ctrl.error && ctrl.allServices.length > 0 && (
         <Stack 
