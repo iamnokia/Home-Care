@@ -87,6 +87,20 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
     setPrivacyDialogOpen(false);
   };
 
+  // New function to handle when user accepts terms in privacy dialog
+  const handleAcceptTerms = () => {
+    setAgreeToTerms(true); // Automatically check the terms checkbox
+    setPrivacyDialogOpen(false); // Close the privacy dialog
+    // Clear any existing error for terms agreement
+    if (errors.agreeToTerms) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.agreeToTerms;
+        return newErrors;
+      });
+    }
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
@@ -651,10 +665,11 @@ const RegisterDialog: React.FC<RegisterDialogProps> = ({ open, onClose, onSwitch
         </DialogContent>
       </Dialog>
 
-      {/* Render the PrivacyDialog component */}
+      {/* Render the PrivacyDialog component with onAccept prop */}
       <PrivacyDialog 
         open={privacyDialogOpen} 
         onClose={handleClosePrivacyDialog} 
+        onAccept={handleAcceptTerms}
       />
     </>
   );

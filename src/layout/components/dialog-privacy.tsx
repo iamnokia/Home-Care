@@ -22,15 +22,25 @@ const ACCENT_ORANGE = "#f7931e";
 interface PrivacyDialogProps {
     open: boolean;
     onClose: () => void;
+    onAccept?: () => void; // New optional prop for accepting terms
 }
 
-const PrivacyDialog: React.FC<PrivacyDialogProps> = ({ open, onClose }) => {
+const PrivacyDialog: React.FC<PrivacyDialogProps> = ({ open, onClose, onAccept }) => {
     const [activeTab, setActiveTab] = useState(0);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setActiveTab(newValue);
+    };
+
+    // Handle the accept button click
+    const handleAcceptClick = () => {
+        if (onAccept) {
+            onAccept(); // Call the onAccept function if provided
+        } else {
+            onClose(); // Otherwise just close the dialog
+        }
     };
 
     // Last updated date
@@ -420,7 +430,7 @@ const PrivacyDialog: React.FC<PrivacyDialogProps> = ({ open, onClose }) => {
                 }}>
                     <Button
                         variant="contained"
-                        onClick={onClose}
+                        onClick={handleAcceptClick}
                         sx={{
                             py: 1,
                             px: 4,
