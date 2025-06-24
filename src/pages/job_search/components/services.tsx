@@ -36,12 +36,12 @@ interface ServiceProvider {
   imageUrl: string;
   rating: number;
   category: string;
-  categoryLao: string; // Add Lao translation
+  categoryLao: string;
   gender: string;
-  genderLao: string; // Add Lao gender translation
+  genderLao: string;
   address: string;
   city: string;
-  cityLao: string; // Add Lao city translation
+  cityLao: string;
   categoryType: string;
   cat_id: number;
   // Car details
@@ -57,7 +57,7 @@ const Services = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [allProviders, setAllProviders] = useState<ServiceProvider[]>([]);
   
-  // Get data from controller (now includes rating functions)
+  // Get data from controller
   const ctrl = useMainController();
 
   // Translation mappings - English to Lao
@@ -92,7 +92,7 @@ const Services = () => {
     'general': 'ທົ່ວໄປ'
   };
 
-  // Gender translation mapping - English to Lao
+  // Gender translation mapping
   const genderTranslation: Record<string, string> = {
     'male': 'ຊາຍ',
     'female': 'ຍິງ',
@@ -108,7 +108,7 @@ const Services = () => {
     'unknown': 'ບໍ່ລະບຸ'
   };
 
-  // City translation mapping - English to Lao (Vientiane Districts)
+  // City translation mapping
   const cityTranslation: Record<string, string> = {
     'chanthabuly': 'ຈັນທະບູລີ',
     'chanthabouly': 'ຈັນທະບູລີ',
@@ -118,74 +118,50 @@ const Services = () => {
     'naxaithong': 'ນາຊາຍທອງ',
     'xaytany': 'ໄຊທານີ',
     'hadxaifong': 'ຫາດຊາຍຟອງ',
-    // General fallbacks
     'vientiane': 'ວຽງຈັນ',
     'vientiane capital': 'ນະຄອນຫຼວງວຽງຈັນ'
   };
 
-  // Function to translate English category to Lao
+  // Translation functions
   const translateCategoryToLao = (englishCategory: string): string => {
     if (!englishCategory) return 'ອື່ນໆ';
-    
     const normalizedCategory = englishCategory.toLowerCase().trim();
-    
-    // Direct match first
     if (categoryTranslation[normalizedCategory]) {
       return categoryTranslation[normalizedCategory];
     }
-    
-    // Partial matching for compound categories
     for (const [key, value] of Object.entries(categoryTranslation)) {
       if (normalizedCategory.includes(key) || key.includes(normalizedCategory)) {
         return value;
       }
     }
-    
-    // If no match found, return the original with a fallback
     return englishCategory || 'ອື່ນໆ';
   };
 
-  // Function to translate English gender to Lao
   const translateGenderToLao = (englishGender: string): string => {
     if (!englishGender) return 'ບໍ່ລະບຸ';
-    
     const normalizedGender = englishGender.toLowerCase().trim();
-    
-    // Direct match
     if (genderTranslation[normalizedGender]) {
       return genderTranslation[normalizedGender];
     }
-    
-    // Partial matching
     for (const [key, value] of Object.entries(genderTranslation)) {
       if (normalizedGender.includes(key) || key.includes(normalizedGender)) {
         return value;
       }
     }
-    
-    // If no match found, return the original with a fallback
     return englishGender || 'ບໍ່ລະບຸ';
   };
 
-  // Function to translate English city to Lao
   const translateCityToLao = (englishCity: string): string => {
     if (!englishCity) return 'ວຽງຈັນ';
-    
     const normalizedCity = englishCity.toLowerCase().trim();
-    
-    // Direct match
     if (cityTranslation[normalizedCity]) {
       return cityTranslation[normalizedCity];
     }
-    
-    // Partial matching
     for (const [key, value] of Object.entries(cityTranslation)) {
       if (normalizedCity.includes(key) || key.includes(normalizedCity)) {
         return value;
       }
     }
-    
-    // If no match found, return the original
     return englishCity || 'ວຽງຈັນ';
   };
 
@@ -245,7 +221,6 @@ const Services = () => {
   const findCarForEmployee = (employeeId: string, cars: CarModel[]): CarModel | undefined => {
     console.log("Finding car for employee ID:", employeeId);
     console.log("Available cars:", cars);
-    
     const car = cars.find(car => String(car.emp_id) === String(employeeId));
     console.log("Found car:", car);
     return car;
@@ -255,7 +230,6 @@ const Services = () => {
   const mapEmployeeToServiceProvider = (employee: EmployeeModel): ServiceProvider => {
     const getCategoryType = (catName: string | undefined): string => {
       const normalizedName = (catName || '').toLowerCase();
-      
       if (normalizedName.includes('cleaning') || normalizedName.includes('ທຳຄວາມສະອາດ')) return 'cleaning';
       if (normalizedName.includes('electrical') || normalizedName.includes('ໄຟຟ້າ')) return 'electrical';
       if (normalizedName.includes('aircon') || normalizedName.includes('air') || normalizedName.includes('ແອ')) return 'aircon';
@@ -267,7 +241,6 @@ const Services = () => {
     };
 
     const categoryType = getCategoryType(employee.cat_name);
-
     let village = 'N/A';
     
     if (employee.address && typeof employee.address === 'string' && employee.address.trim() !== '') {
@@ -275,18 +248,14 @@ const Services = () => {
     }
 
     let carData: CarModel | undefined;
-    
     if (employee.cat_id === 5 && ctrl?.car && ctrl.car.length > 0) {
       console.log(`Checking car data for employee ${employee.id} with cat_id ${employee.cat_id}`);
       carData = findCarForEmployee(employee.id, ctrl.car);
     }
 
-    // Get the actual rating for this employee using the controller function
     const actualRating = ctrl?.getEmployeeRating ? ctrl.getEmployeeRating(employee.id) : 5;
-    
     console.log(`Employee ${employee.id} (${employee.first_name} ${employee.last_name}) rating: ${actualRating}`);
 
-    // Translate category, gender, and city to Lao
     const categoryLao = translateCategoryToLao(employee.cat_name);
     const genderLao = translateGenderToLao(employee.gender);
     const cityLao = translateCityToLao(employee.city);
@@ -299,13 +268,13 @@ const Services = () => {
       price: parseFloat(employee.price?.toString() || '0'),
       imageUrl: employee.avatar,
       rating: actualRating,
-      category: employee.cat_name, // Keep original English category
-      categoryLao: categoryLao, // Add Lao translation
-      gender: employee.gender, // Keep original English gender
-      genderLao: genderLao, // Add Lao gender translation
+      category: employee.cat_name,
+      categoryLao: categoryLao,
+      gender: employee.gender,
+      genderLao: genderLao,
       address: village, 
-      city: employee.city || 'ວຽງຈັນ', // Keep original English city
-      cityLao: cityLao, // Add Lao city translation
+      city: employee.city || 'ວຽງຈັນ',
+      cityLao: cityLao,
       categoryType: categoryType,
       cat_id: employee.cat_id,
     };
@@ -324,7 +293,6 @@ const Services = () => {
   const filterProviders = (providers: ServiceProvider[], query: string, categoryFilter: string | null): ServiceProvider[] => {
     let filtered = [...providers];
 
-    // Apply category filter first
     if (categoryFilter && categoryFilter !== 'all') {
       const categoryType = serviceCategories.find(cat => cat.id === categoryFilter)?.categoryType;
       if (categoryType && categoryType !== 'all') {
@@ -332,7 +300,6 @@ const Services = () => {
       }
     }
 
-    // Apply search filter
     if (query) {
       const normalizedQuery = query.toLowerCase();
       filtered = filtered.filter(provider => {
@@ -340,19 +307,18 @@ const Services = () => {
           provider.name,
           provider.surname,
           provider.address,
-          provider.gender, // Original English gender
-          provider.genderLao, // Lao gender translation
-          provider.category, // Original English category
-          provider.categoryLao, // Lao category translation
+          provider.gender,
+          provider.genderLao,
+          provider.category,
+          provider.categoryLao,
           provider.price.toString(),
-          provider.city, // Original English city
-          provider.cityLao, // Lao city translation
+          provider.city,
+          provider.cityLao,
           provider.carBrand,
           provider.carModel,
           provider.licensePlate,
         ];
 
-        // Check if any searchable field contains the query
         return searchableFields.some(field => 
           field?.toLowerCase().includes(normalizedQuery)
         );
@@ -375,13 +341,11 @@ const Services = () => {
       console.log("Mapped service providers with Lao categories:", mappedProviders);
       setAllProviders(mappedProviders);
       
-      // Apply filters on initial load
       const filtered = filterProviders(mappedProviders, searchQuery, activeCategory);
       setFilteredProviders(filtered);
     }
   }, [ctrl?.loading, ctrl?.data, ctrl?.car, ctrl?.employeeRatings]);
 
-  // Update filtered providers when search query or category changes
   useEffect(() => {
     const filtered = filterProviders(allProviders, searchQuery, activeCategory);
     setFilteredProviders(filtered);
@@ -555,7 +519,6 @@ const Services = () => {
             }}
           />
           
-          {/* Search helper text */}
           <Typography
             variant="body2"
             sx={{
@@ -578,7 +541,7 @@ const Services = () => {
         </Box>
       </Box>
 
-      {/* Services Section with Filter Result Title */}
+      {/* Services Section with Improved Layout */}
       <Box sx={styles.servicesSection}>
         <Box sx={styles.filterResultsContainer}>
           <Box sx={styles.filterTitleContainer}>
@@ -619,45 +582,81 @@ const Services = () => {
         </Box>
 
         {ctrl?.loading ? (
-          <Grid container spacing={3} sx={{ px: { xs: 1, md: 2 } }}>
-            {[...Array(4)].map((_, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
-                <Box sx={{ width: '100%' }}>
-                  <Skeleton variant="rectangular" height={160} sx={{ borderRadius: '8px 8px 0 0' }} />
-                  <Skeleton variant="text" height={30} sx={{ mt: 1 }} />
-                  <Skeleton variant="text" width="60%" />
-                  <Skeleton variant="text" width="40%" />
-                  <Skeleton variant="rectangular" height={36} sx={{ mt: 1, borderRadius: 1 }} />
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
+          <Box sx={{ 
+            maxWidth: '1600px', 
+            mx: 'auto', 
+            px: { xs: 1, md: 2 } 
+          }}>
+            <Grid container spacing={2.5} justifyContent="center">
+              {[...Array(6)].map((_, index) => (
+                <Grid 
+                  item 
+                  xs={12} 
+                  sm={6} 
+                  md={4} 
+                  lg={2} 
+                  xl={2} 
+                  key={index}
+                  sx={{ 
+                    maxWidth: { xs: '100%', sm: '280px' },
+                    mx: 'auto'
+                  }}
+                >
+                  <Box sx={{ width: '100%' }}>
+                    <Skeleton variant="rectangular" height={160} sx={{ borderRadius: '8px 8px 0 0' }} />
+                    <Skeleton variant="text" height={30} sx={{ mt: 1 }} />
+                    <Skeleton variant="text" width="60%" />
+                    <Skeleton variant="text" width="40%" />
+                    <Skeleton variant="rectangular" height={36} sx={{ mt: 1, borderRadius: 1 }} />
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
         ) : (
           <>
             {filteredProviders.length > 0 ? (
-              <Grid container spacing={3} sx={{ px: { xs: 1, md: 2 } }}>
-                {filteredProviders.map((provider) => (
-                  <Grid item xs={12} sm={6} md={3} key={provider.id}>
-                    <ServiceProviderCard
-                      id={provider.id}
-                      name={provider.name}
-                      surname={provider.surname}
-                      price={provider.price}
-                      imageUrl={provider.imageUrl}
-                      rating={provider.rating}
-                      category={provider.categoryLao} // Pass Lao category instead of English
-                      gender={provider.genderLao} // Pass Lao gender instead of English
-                      address={provider.address}
-                      city={provider.cityLao} // Pass Lao city instead of English
-                      cat_id={provider.cat_id}
-                      carId={provider.carId}
-                      carBrand={provider.carBrand}
-                      carModel={provider.carModel}
-                      licensePlate={provider.licensePlate}
-                    />
-                  </Grid>
-                ))}
-              </Grid>
+              <Box sx={{ 
+                maxWidth: '1600px', 
+                mx: 'auto', 
+                px: { xs: 1, md: 2 } 
+              }}>
+                <Grid container spacing={2.5} justifyContent="center">
+                  {filteredProviders.map((provider) => (
+                    <Grid 
+                      item 
+                      xs={12} 
+                      sm={6} 
+                      md={4} 
+                      lg={2.4} 
+                      xl={2} 
+                      key={provider.id}
+                      sx={{ 
+                        maxWidth: { xs: '100%', sm: '280px' },
+                        mx: 'auto'
+                      }}
+                    >
+                      <ServiceProviderCard
+                        id={provider.id}
+                        name={provider.name}
+                        surname={provider.surname}
+                        price={provider.price}
+                        imageUrl={provider.imageUrl}
+                        rating={provider.rating}
+                        category={provider.categoryLao}
+                        gender={provider.genderLao}
+                        address={provider.address}
+                        city={provider.cityLao}
+                        cat_id={provider.cat_id}
+                        carId={provider.carId}
+                        carBrand={provider.carBrand}
+                        carModel={provider.carModel}
+                        licensePlate={provider.licensePlate}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
             ) : (
               <Box sx={{ textAlign: 'center', py: 8 }}>
                 <Typography variant="h6" color="text.secondary">

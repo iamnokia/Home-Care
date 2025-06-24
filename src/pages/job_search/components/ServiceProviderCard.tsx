@@ -112,37 +112,82 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
     <Box
       sx={{
         width: '100%',
+        maxWidth: '280px', // Reduced max width to fit more cards
         border: '1px solid #eee',
         borderRadius: 2,
         overflow: 'hidden',
-        mb: 3,
+        mb: 2.5,
+        mx: 'auto', // Center the card
         boxShadow: '0px 2px 8px rgba(0,0,0,0.05)',
         transition: 'transform 0.3s ease, box-shadow 0.3s ease',
         '&:hover': {
           transform: 'translateY(-5px)',
           boxShadow: '0px 6px 12px rgba(0,0,0,0.1)'
         },
-        cursor: 'pointer'
+        cursor: 'pointer',
+        // Ensure consistent aspect ratio for the entire card
+        display: 'flex',
+        flexDirection: 'column'
       }}
       onClick={handleCardClick}
     >
-      <Box sx={{ height: 200, overflow: 'hidden' }}>
+      {/* Image Container with Fixed Aspect Ratio */}
+      <Box 
+        sx={{ 
+          width: '100%',
+          height: 0,
+          paddingBottom: '55%', // Slightly more compact aspect ratio for denser layout
+          position: 'relative',
+          overflow: 'hidden',
+          backgroundColor: '#f5f5f5' // Fallback background
+        }}
+      >
         <img 
           src={imageUrl || '/api/placeholder/400/300'} 
           alt={name || 'Service Provider'} 
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          style={{ 
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%', 
+            height: '100%', 
+            objectFit: 'cover',
+            transition: 'transform 0.3s ease'
+          }} 
+          onError={(e) => {
+            // Fallback for broken images
+            const target = e.target as HTMLImageElement;
+            target.src = '/api/placeholder/400/300';
+          }}
         />
       </Box>
-      <Box sx={{ p: 2 }}>
+
+      {/* Card Content */}
+      <Box sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Name and Rating Row */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{name || 'N/A'} {surname || ''}</Typography>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontWeight: 'bold',
+              fontSize: { xs: '1rem', sm: '1.1rem' }, // Responsive font size
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              flex: 1,
+              mr: 1
+            }}
+          >
+            {name || 'N/A'} {surname || ''}
+          </Typography>
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center',
             background: 'rgba(255, 215, 0, 0.1)',
             borderRadius: '12px',
             padding: '4px 8px',
-            border: '1px solid rgba(255, 215, 0, 0.3)'
+            border: '1px solid rgba(255, 215, 0, 0.3)',
+            flexShrink: 0
           }}>
             {renderStars()}
             <Typography 
@@ -163,11 +208,23 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, flexWrap: 'wrap' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 2, mb: 0.5 }}>
             <CategoryIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-            <Typography variant="body2" color="text.secondary">{category || 'N/A'}</Typography>
+            <Typography 
+              variant="body2" 
+              color="text.secondary"
+              sx={{
+                fontSize: '0.85rem',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: '120px'
+              }}
+            >
+              {category || 'N/A'}
+            </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <PersonIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
               {gender || 'N/A'}
             </Typography>
           </Box>
@@ -177,25 +234,44 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
         {showCarDetails && carId && (
           <Box 
             sx={{
-              mb: 2,
-              p: 1.5,
+              mb: 1.5,
+              p: 1,
               backgroundColor: '#f5f7ff',
               borderRadius: 1,
               border: '1px dashed rgba(97, 20, 99, 0.2)'
             }}
           >
-            <Typography variant="subtitle2" sx={{ mb: 1, color: '#611463', fontWeight: 600 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, color: '#611463', fontWeight: 600, fontSize: '0.9rem' }}>
               ຂໍ້ມູນລົດ
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
               <DirectionsCarIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                sx={{ 
+                  fontWeight: 500,
+                  fontSize: '0.8rem',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+              >
                 {carBrand || 'N/A'} {carModel || 'N/A'}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
               <BadgeIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-              <Typography variant="body2" color="text.secondary">
+              <Typography 
+                variant="body2" 
+                color="text.secondary"
+                sx={{ 
+                  fontSize: '0.8rem',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+              >
                 {licensePlate || 'N/A'}
               </Typography>
             </Box>
@@ -206,7 +282,7 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
         <Box sx={{
           display: 'flex',
           alignItems: 'center',
-          mb: 2,
+          mb: 1.5,
           p: 1,
           backgroundColor: '#f5f5f5',
           borderRadius: 1,
@@ -214,33 +290,71 @@ const ServiceProviderCard: React.FC<ServiceProviderCardProps> = ({
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 2, mb: { xs: 0.5, sm: 0 }, minWidth: '45%' }}>
             <HomeIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-            <Typography variant="body2" color="text.secondary">{address || 'N/A'}</Typography>
+            <Typography 
+              variant="body2" 
+              color="text.secondary"
+              sx={{
+                fontSize: '0.85rem',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                flex: 1
+              }}
+            >
+              {address || 'N/A'}
+            </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <LocationCityIcon sx={{ fontSize: '0.9rem', color: 'text.secondary', mr: 0.5 }} />
-            <Typography variant="body2" color="text.secondary">{city || 'N/A'}</Typography>
+            <Typography 
+              variant="body2" 
+              color="text.secondary"
+              sx={{
+                fontSize: '0.85rem',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {city || 'N/A'}
+            </Typography>
           </Box>
         </Box>
 
         <Divider sx={{ my: 1 }} />
 
-        <Typography variant="h6" color="warning.main" sx={{ mb: 2 }}>{formatPrice(price)}</Typography>
-        <Button
-          variant="contained"
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-            e.stopPropagation();
-            navigate(`/service-detail/${id}`);
-          }}
-          fullWidth
-          sx={{
-            bgcolor: '#611463',
-            '&:hover': { bgcolor: '#611463' },
-            textTransform: 'none',
-            borderRadius: 10
-          }}
-        >
-          ເບິ່ງລາຍລະອຽດ
-        </Button>
+        {/* Price - Push to bottom */}
+        <Box sx={{ mt: 'auto' }}>
+          <Typography 
+            variant="h6" 
+            color="warning.main" 
+            sx={{ 
+              mb: 1.5,
+              fontSize: { xs: '1rem', sm: '1.1rem' },
+              fontWeight: 'bold'
+            }}
+          >
+            {formatPrice(price)}
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+              e.stopPropagation();
+              navigate(`/service-detail/${id}`);
+            }}
+            fullWidth
+            sx={{
+              bgcolor: '#611463',
+              '&:hover': { bgcolor: '#611463' },
+              textTransform: 'none',
+              borderRadius: 10,
+              fontSize: { xs: '0.85rem', sm: '0.9rem' },
+              py: { xs: 1, sm: 1.1 }
+            }}
+          >
+            ເບິ່ງລາຍລະອຽດ
+          </Button>
+        </Box>
       </Box>
     </Box>
   );
