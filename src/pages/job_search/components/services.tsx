@@ -406,13 +406,14 @@ const Services = () => {
 
       {/* Search Section - Modern Design */}
       <Box sx={{ 
-        mb: 6, 
+        mb: 4,
+        mt:-2, 
         px: { xs: 1, md: 2 },
         display: 'flex',
         justifyContent: 'center'
       }}>
         <Box sx={{
-          maxWidth: '600px',
+          maxWidth: '500px',
           width: '100%',
           position: 'relative',
           '&::before': {

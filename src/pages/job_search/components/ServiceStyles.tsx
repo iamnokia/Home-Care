@@ -72,7 +72,8 @@ export const styles = {
   
     // Section title
     sectionTitle: {
-      mb: 3.5,
+      mb: 3,
+      mt:-1,
       fontWeight: 'bold',
       background: "linear-gradient(135deg, #611463 30%, #9932CC 90%)",
       backgroundSize: "200% 200%",
@@ -80,7 +81,7 @@ export const styles = {
       textFillColor: "transparent",
       WebkitBackgroundClip: "text",
       WebkitTextFillColor: "transparent",
-      fontSize: { xs: "2.2rem", md: "2.8rem" },
+      fontSize: { xs: "1.2rem", md: "2.2rem" },
       letterSpacing: "-0.5px",
       position: "relative",
       animation: "shimmer 6s ease-in-out infinite",

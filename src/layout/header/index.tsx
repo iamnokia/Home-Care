@@ -41,6 +41,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store";
 import { logout, loginSuccess, loginFailed } from "../../store/authenticationSlice";
 import axios from "axios";
+import Swal from 'sweetalert2';
 
 // Page interface
 interface PageItem {
@@ -103,14 +104,36 @@ function ResponsiveAppBar() {
     setLoginDialogOpen(true);
   };
 
-  // Function to handle logout
-  const handleLogout = (): void => {
-    handleCloseUserMenu();
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user_email");
-    dispatch(logout());
-  };
+// Function to handle logout
+const handleLogout = (): void => {
+  Swal.fire({
+    title: 'ແຈ້ງເຕືອນ?',
+    text: "ທ່ານຕ້ອງການອອກຈາກລະບົບແທ້ ຫຼື ບໍ່?",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'ຕົກລົງ',
+    cancelButtonText: 'ຍົກເລີກ'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      handleCloseUserMenu();
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user_email");
+      dispatch(logout());
+      
+      // Optional: Show success message
+      Swal.fire({
+        title: 'ອອກຈາກລະບົບແລ້ວ!',
+        text: 'ທ່ານອອກຈາກລະບົບສຳເລັດ.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }
+  });
+};
 
   // Settings menu items based on login status
   const settings: SettingItem[] = loggedIn

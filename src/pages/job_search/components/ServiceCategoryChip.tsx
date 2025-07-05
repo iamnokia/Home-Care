@@ -8,18 +8,19 @@ const ServiceCategoryChip = ({ icon, title, isActive, onClick }) => {
       label={title}
       onClick={onClick}
       sx={{
-        // Base styling
-        px: { xs: 1.8, md: 2.2 },
-        py: { xs: 3, md: 3.5 },
-        borderRadius: '24px',
+        // Base styling - more compact to match card design
+        px: { xs: 1.2, md: 1.5 },
+        py: { xs: 1.5, md: 2 },
+        borderRadius: '16px', // Smaller border radius for more subtle look
         backgroundColor: isActive
-          ? 'rgba(97, 20, 99, 0.04)'
-          : 'rgba(255, 255, 255, 0.7)',
-        backdropFilter: 'blur(12px)',
+          ? 'rgba(97, 20, 99, 0.06)'
+          : 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(10px)',
+        height: { xs: '36px', md: '40px' }, // Fixed height for consistency
 
         // Border styling - gradient border for active state
         position: 'relative',
-        border: isActive ? 'none' : '1px solid rgba(238, 238, 238, 0.8)',
+        border: isActive ? 'none' : '1px solid rgba(238, 238, 238, 0.9)',
         '&::before': isActive ? {
           content: '""',
           position: 'absolute',
@@ -27,75 +28,95 @@ const ServiceCategoryChip = ({ icon, title, isActive, onClick }) => {
           left: 0,
           right: 0,
           bottom: 0,
-          borderRadius: '24px',
-          padding: '2px',
-          background: 'linear-gradient(45deg, #f7931e, #e44d26, #611463)',
+          borderRadius: '16px',
+          padding: '1.5px',
+          background: 'linear-gradient(45deg, #f7931e, #611463)',
           WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
           WebkitMaskComposite: 'xor',
           maskComposite: 'exclude',
           zIndex: 0,
         } : {},
 
-        // Text styling
-        color: isActive ? '#5D1277' : '#555',
+        // Text styling - more subtle colors
+        color: isActive ? '#611463' : '#666',
 
-        // Shadow effects
+        // Shadow effects - lighter and more subtle
         boxShadow: isActive
-          ? '0 8px 20px rgba(97, 20, 99, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6)'
-          : '0 4px 12px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
+          ? '0 4px 12px rgba(97, 20, 99, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7)'
+          : '0 2px 8px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
 
-        // Icon styling
+        // Icon styling - smaller and more refined
         '& .MuiChip-icon': {
           color: isActive ? '#f7931e' : '#611463',
-          marginLeft: '10px',
-          fontSize: '1.5rem',
-          filter: isActive ? 'drop-shadow(0 2px 3px rgba(247, 147, 30, 0.3))' : 'none',
-          transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          marginLeft: '8px',
+          fontSize: { xs: '1.1rem', md: '1.2rem' }, // Smaller icon
+          filter: isActive ? 'drop-shadow(0 1px 2px rgba(247, 147, 30, 0.2))' : 'none',
+          transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
         },
 
-        // Label styling
+        // Label styling - more compact
         '& .MuiChip-label': {
-          padding: '8px 14px',
-          fontSize: '0.95rem',
-          letterSpacing: '0.02em',
-          fontWeight: isActive ? 600 : 400,
+          padding: { xs: '4px 8px', md: '6px 10px' },
+          fontSize: { xs: '0.8rem', md: '0.85rem' }, // Smaller font
+          letterSpacing: '0.01em',
+          fontWeight: isActive ? 600 : 500,
           position: 'relative',
           zIndex: 1,
         },
 
-        // Hover effects
+        // Hover effects - more subtle
         '&:hover': {
           backgroundColor: isActive
-            ? 'rgba(97, 20, 99, 0.08)'
-            : 'rgba(97, 20, 99, 0.02)',
-          boxShadow: '0 10px 25px rgba(97, 20, 99, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
-          transform: 'translateY(-3px) scale(1.02)',
+            ? 'rgba(97, 20, 99, 0.1)'
+            : 'rgba(97, 20, 99, 0.03)',
+          boxShadow: '0 6px 16px rgba(97, 20, 99, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.7)',
+          transform: 'translateY(-2px) scale(1.01)', // Smaller scale
           cursor: 'pointer',
           '& .MuiChip-icon': {
-            transform: 'scale(1.15) rotate(-5deg)',
+            transform: 'scale(1.1) rotate(-3deg)', // Smaller rotation
             color: isActive ? '#f7931e' : '#8E24AA',
           },
         },
 
-        // Animation properties
-        transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        height: 'auto',
-        m: 1,
+        // Animation properties - smoother
+        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        m: { xs: 0.5, md: 0.8 }, // Smaller margins
 
-        // Active state special glow effect
+        // Active state glow effect - more subtle
         '&::after': isActive ? {
           content: '""',
           position: 'absolute',
-          top: '-2px',
-          left: '-2px',
-          right: '-2px',
-          bottom: '-2px',
-          borderRadius: '26px',
-          background: 'linear-gradient(45deg, rgba(247, 147, 30, 0.4), rgba(97, 20, 99, 0.4))',
-          filter: 'blur(8px)',
-          opacity: 0.4,
+          top: '-1px',
+          left: '-1px',
+          right: '-1px',
+          bottom: '-1px',
+          borderRadius: '17px',
+          background: 'linear-gradient(45deg, rgba(247, 147, 30, 0.2), rgba(97, 20, 99, 0.2))',
+          filter: 'blur(4px)',
+          opacity: 0.3,
           zIndex: -1,
         } : {},
+
+        // Focus states for accessibility
+        '&:focus': {
+          outline: 'none',
+          boxShadow: isActive
+            ? '0 4px 12px rgba(97, 20, 99, 0.15), 0 0 0 3px rgba(97, 20, 99, 0.1)'
+            : '0 2px 8px rgba(0, 0, 0, 0.05), 0 0 0 3px rgba(97, 20, 99, 0.1)',
+        },
+
+        // Responsive adjustments
+        '@media (max-width: 600px)': {
+          minWidth: 'auto',
+          '& .MuiChip-label': {
+            fontSize: '0.75rem',
+            padding: '3px 6px',
+          },
+          '& .MuiChip-icon': {
+            fontSize: '1rem',
+            marginLeft: '6px',
+          },
+        },
       }}
     />
   );
