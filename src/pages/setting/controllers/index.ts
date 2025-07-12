@@ -243,7 +243,7 @@ export const uploadUserAvatar = async (
         formData.append('avatar', file);
 
         const response = await axios.put(
-            `https://homecare-pro.onrender.com/users/upload_avatar/${userData.id}`,
+            `https://homecare-pro.onrender.com/users/users/rename_user/${userData.id}`,
             formData,
             {
                 headers: {

@@ -434,23 +434,7 @@ const SettingsPage = () => {
                                     mb: 2
                                 }}
                             >
-                                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 2 }}>
-                                    <ImageIcon sx={{ color: "primary.main", mr: 1 }} />
-                                    <Typography variant="body2" fontWeight={600} color="primary.main">
-                                        ໄຟລ໌ທີ່ເລືອກ:
-                                    </Typography>
-                                </Box>
-                                <Chip
-                                    label={avatarState.file.name}
-                                    variant="outlined"
-                                    sx={{ 
-                                        mb: 3, 
-                                        maxWidth: "100%",
-                                        borderColor: "secondary.main",
-                                        color: "secondary.main",
-                                        fontWeight: 600
-                                    }}
-                                />
+                    
                                 <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
                                     <Button
                                         variant="contained"
