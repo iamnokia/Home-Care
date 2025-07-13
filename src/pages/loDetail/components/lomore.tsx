@@ -591,59 +591,6 @@ const LocationDetailPage: React.FC = () => {
                 alignItems: "center",
               }}
             >
-              <HouseOutlinedIcon sx={{ mr: 1, color: "#611463" }} />
-              ບ້ານ *
-            </Typography>
-
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="ປ້ອນຊື່ບ້ານເຊັ່ນ: ດົງໂດກ, ໜອງພະຍາ,..."
-              value={ctrl?.placeVillage ?? ""}
-              onChange={(e) => {
-                ctrl?.setVillage(e.target.value);
-                if (e.target.value.trim()) {
-                  ctrl?.setErrors({ ...ctrl?.errors, placeVillage: undefined });
-                }
-              }}
-              error={!!ctrl?.errors.placeVillage}
-              helperText={ctrl?.errors.placeVillage}
-              required
-              sx={{
-                mb: 3,
-                backgroundColor: "#fff",
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  transition: "all 0.2s",
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: alpha("#611463", 0.5),
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#611463",
-                    borderWidth: 2,
-                  },
-                },
-              }}
-              InputProps={{
-                sx: { fontSize: "0.95rem", py: 0.5 },
-                endAdornment: ctrl?.errors.placeVillage && (
-                  <InputAdornment position="end">
-                    <ErrorIcon color="error" />
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontSize: "1rem",
-                mb: 1.5,
-                fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
               <LocationCityOutlinedIcon sx={{ mr: 1, color: "#611463" }} />{" "}
               ເມືອງ *
             </Typography>
@@ -706,6 +653,58 @@ const LocationDetailPage: React.FC = () => {
                   {option.lo}
                 </li>
               )}
+            />
+              <Typography
+              variant="subtitle1"
+              sx={{
+                fontSize: "1rem",
+                mb: 1.5,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <HouseOutlinedIcon sx={{ mr: 1, color: "#611463" }} />
+              ບ້ານ *
+            </Typography>
+
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="ປ້ອນຊື່ບ້ານເຊັ່ນ: ດົງໂດກ, ໜອງພະຍາ,..."
+              value={ctrl?.placeVillage ?? ""}
+              onChange={(e) => {
+                ctrl?.setVillage(e.target.value);
+                if (e.target.value.trim()) {
+                  ctrl?.setErrors({ ...ctrl?.errors, placeVillage: undefined });
+                }
+              }}
+              error={!!ctrl?.errors.placeVillage}
+              helperText={ctrl?.errors.placeVillage}
+              required
+              sx={{
+                mb: 3,
+                backgroundColor: "#fff",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  transition: "all 0.2s",
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: alpha("#611463", 0.5),
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#611463",
+                    borderWidth: 2,
+                  },
+                },
+              }}
+              InputProps={{
+                sx: { fontSize: "0.95rem", py: 0.5 },
+                endAdornment: ctrl?.errors.placeVillage && (
+                  <InputAdornment position="end">
+                    <ErrorIcon color="error" />
+                  </InputAdornment>
+                ),
+              }}
             />
             {/* Phone number field */}
             <Typography
