@@ -19,6 +19,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import Homecare from '../../../assets/icons/HomeCareLogo.png';
 import { useMainController } from '../controllers/index';
 import { useParams } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 interface ServiceStatusProps {
   orderId?: string;
@@ -58,6 +59,70 @@ const ServiceStatus: React.FC<ServiceStatusProps> = ({ orderId }) => {
       setAnimate(true);
     }, 100);
   }, []);
+
+  // Handle Start Button Click with SweetAlert
+  const handleStartWithConfirmation = () => {
+    Swal.fire({
+      title: 'ຢືນຢັນການເລີ່ມຕົ້ນ',
+      text: 'ທ່ານຕ້ອງການຢືນຢັນວ່າພະນັກງານຮອດແລ້ວແທ້ບໍ່',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#00BFA6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'ແມ່ນແລ້ວ',
+      cancelButtonText: 'ຍົກເລີກ',
+      reverseButtons: true,
+      customClass: {
+        popup: 'swal-popup-custom',
+        title: 'swal-title-custom',
+        content: 'swal-content-custom'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleStartClick();
+        Swal.fire({
+          title: 'ເລີ່ມຕົ້ນສຳເລັດ!',
+          text: 'ການບໍລິການໄດ້ເລີ່ມຕົ້ນແລ້ວ',
+          icon: 'success',
+          confirmButtonColor: '#00BFA6',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    });
+  };
+
+  // Handle Complete Button Click with SweetAlert
+  const handleCompleteWithConfirmation = () => {
+    Swal.fire({
+      title: 'ຢືນຢັນການສຳເລັດ',
+      text: 'ທ່ານຕ້ອງການຢືນຢັນວ່າສຳເລັດການບໍລິການແທ້ຫຼືບໍ່',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#00BFA6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'ແມ່ນແລ້ວ',
+      cancelButtonText: 'ຍົກເລີກ',
+      reverseButtons: true,
+      customClass: {
+        popup: 'swal-popup-custom',
+        title: 'swal-title-custom',
+        content: 'swal-content-custom'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleCompleteClick();
+        Swal.fire({
+          title: 'ສຳເລັດແລ້ວ!',
+          text: 'ຂໍຂອບໃຈທີ່ໃຊ້ບໍລິການຂອງເຮົາ',
+          icon: 'success',
+          confirmButtonColor: '#00BFA6',
+          timer: 3000,
+          showConfirmButton: false
+        });
+      }
+    });
+  };
 
   // Step data with icons
   const steps = [
@@ -318,7 +383,7 @@ const ServiceStatus: React.FC<ServiceStatusProps> = ({ orderId }) => {
                       transform: 'translateX(-20px) translateY(-2px)',
                     }
                   }}
-                  onClick={handleStartClick}
+                  onClick={handleStartWithConfirmation}
                 >
                   <FlagIcon fontSize="small" />
                   <Typography 
@@ -530,7 +595,7 @@ const ServiceStatus: React.FC<ServiceStatusProps> = ({ orderId }) => {
                       transform: 'translateX(-20px) translateY(-2px)',
                     }
                   }}
-                  onClick={handleCompleteClick}
+                  onClick={handleCompleteWithConfirmation}
                 >
                   <CheckCircleIcon fontSize="small" />
                   <Typography
@@ -542,7 +607,7 @@ const ServiceStatus: React.FC<ServiceStatusProps> = ({ orderId }) => {
                       fontWeight: 600
                     }}
                   >
-                    ສໍາເລັດ
+                    ສຳເລັດ
                   </Typography>
                 </Paper>
               </Box>

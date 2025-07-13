@@ -238,25 +238,66 @@ export const uploadUserAvatar = async (
             throw new Error("ບໍ່ພົບຂໍ້ມູນການເຂົ້າສູ່ລະບົບ");
         }
 
+        // Validate file type and size
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            throw new Error("ກະລຸນາເລືອກໄຟລ໌ຮູບພາບທີ່ຖືກຕ້ອງ (JPEG, PNG, GIF)");
+        }
+
+        // Check file size (e.g., 5MB limit)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            throw new Error("ຂະໜາດໄຟລ໌ໃຫຍ່ເກີນໄປ ກະລຸນາເລືອກໄຟລ໌ທີ່ນ້ອຍກວ່າ 5MB");
+        }
+
         // Create FormData for file upload
         const formData = new FormData();
         formData.append('avatar', file);
+        
+        // Include current user data to maintain other fields
+        if (userData.username) {
+            formData.append('newUsername', userData.username);
+        }
+        if (userData.firstName) {
+            formData.append('newFirstname', userData.firstName);
+        }
+        if (userData.lastName) {
+            formData.append('newLastname', userData.lastName);
+        }
 
+        // Use the correct endpoint from your API documentation
         const response = await axios.put(
-            `https://homecare-pro.onrender.com/users/users/rename_user/${userData.id}`,
+            `https://homecare-pro.onrender.com/users/rename_user/${userData.id}`,
             formData,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data'
-                }
+                    // Don't set Content-Type manually for FormData
+                    // Let the browser set it with the boundary
+                },
+                timeout: 30000 // 30 second timeout
             }
         );
+
+        // Check if response is successful
+        if (response.status !== 200) {
+            throw new Error(response.data?.message || "ເກີດຄວາມຜິດພາດໃນການອັບໂຫລດ");
+        }
+
+        // Extract avatar URL from response
+        const avatarUrl = response.data?.avatar || 
+                         response.data?.avatarUrl ||
+                         response.data?.data?.avatar ||
+                         response.data?.user?.avatar;
+
+        if (!avatarUrl) {
+            console.warn("No avatar URL returned from server, using existing avatar");
+        }
 
         // Update Redux state with new avatar URL
         const updatedUserData = {
             ...userData,
-            avatar: response.data.avatarUrl || response.data.avatar
+            avatar: avatarUrl || userData.avatar
         };
         
         dispatch(loginSuccess(updatedUserData));
@@ -264,14 +305,31 @@ export const uploadUserAvatar = async (
         return {
             success: true,
             message: "ອັບໂຫລດຮູບໂປຣໄຟລ໌ສຳເລັດແລ້ວ!",
-            avatarUrl: response.data.avatarUrl || response.data.avatar
+            avatarUrl: avatarUrl
         };
 
     } catch (error: any) {
         console.error("Error uploading avatar:", error);
+        
+        // Handle different types of errors
+        let errorMessage = "ເກີດຄວາມຜິດພາດໃນການອັບໂຫລດຮູບພາບ";
+        
+        if (error.response) {
+            // Server responded with error status
+            errorMessage = error.response.data?.message || 
+                          error.response.data?.error || 
+                          `ເຊີບເວີຜິດພາດ: ${error.response.status}`;
+        } else if (error.request) {
+            // Network error
+            errorMessage = "ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບເຊີບເວີໄດ້";
+        } else if (error.message) {
+            // Custom error message
+            errorMessage = error.message;
+        }
+
         return {
             success: false,
-            message: error.response?.data?.message || "ເກີດຄວາມຜິດພາດໃນການອັບໂຫລດຮູບພາບ"
+            message: errorMessage
         };
     }
 };

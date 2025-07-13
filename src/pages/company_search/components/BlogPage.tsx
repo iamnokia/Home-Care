@@ -72,39 +72,7 @@ const ServiceListing: React.FC = () => {
     }
   };
   
-  // Status color mapping
-  const getStatusColor = (status: string) => {
-    switch(status.toLowerCase()) {
-      case 'completed':
-        return { bg: '#e8f5e9', color: '#2e7d32' };
-      case 'pending':
-      case 'not start':
-        return { bg: '#fff8e1', color: '#f57c00' };
-      case 'cancelled':
-        return { bg: '#ffebee', color: '#c62828' };
-      case 'in progress':
-        return { bg: '#e3f2fd', color: '#1565c0' };
-      default:
-        return { bg: '#e8f5e9', color: '#2e7d32' };
-    }
-  };
-  
-  // Translate status to Lao
-  const translateStatus = (status: string): string => {
-    switch(status.toLowerCase()) {
-      case 'completed':
-        return 'ສຳເລັດແລ້ວ';
-      case 'pending':
-      case 'not start':
-        return 'ລໍຖ້າ';
-      case 'cancelled':
-        return 'ຍົກເລີກແລ້ວ';
-      case 'in progress':
-        return 'ກຳລັງດຳເນີນການ';
-      default:
-        return status;
-    }
-  };
+
 
   // Format date and time for better display
   const formatDateTime = (dateString: string): { date: string, time: string } => {
@@ -431,18 +399,6 @@ const ServiceListing: React.FC = () => {
                   )}
                 </Box>
                 
-                {/* Status */}
-                <Chip
-                  label={translateStatus(service.status)}
-                  size="small"
-                  sx={{
-                    bgcolor: getStatusColor(service.status).bg,
-                    color: getStatusColor(service.status).color,
-                    fontWeight: "600",
-                    fontSize: "0.7rem",
-                    height: 24
-                  }}
-                />
               </Box>
 
               {/* Main Card Content */}
