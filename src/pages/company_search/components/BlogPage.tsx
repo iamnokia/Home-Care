@@ -458,26 +458,7 @@ const ServiceListing: React.FC = () => {
                       {service.first_name} {service.last_name}
                     </Typography>
                     
-                    {/* Rating Stars */}
-                    <Box sx={{ display: "flex", mb: 1.5 }}>
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <StarIcon 
-                          key={i} 
-                          sx={{ 
-                            fontSize: 16, 
-                            color: i < service.rating ? '#FFD700' : '#e0e0e0',
-                            mr: 0.3,
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s ease',
-                            '&:hover': {
-                              transform: 'scale(1.2)'
-                            }
-                          }}
-                          onClick={() => ctrl.updateRating(service.id, i + 1)}
-                        />
-                      ))}
-                    </Box>
-                    
+                 
                     {/* Gender (Now properly translated to Lao) */}
                     <Box sx={{ 
                       display: "flex", 

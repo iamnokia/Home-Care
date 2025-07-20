@@ -773,7 +773,7 @@ const SettingsPage = () => {
                                         <Typography variant="body2" color="text.secondary">
                                             {isDarkMode 
                                                 ? "ຮູບແບບມືດເໝາະສຳລັບການໃຊ້ໃນເວລາກາງຄືນ" 
-                                                : "ຮູບແບບແຈ້ງງເໝາະສຳລັບການໃຊ້ໃນເວລາກາງເວັນ"
+                                                : "ຮູບແບບແຈ້ງເໝາະສຳລັບການໃຊ້ໃນເວລາກາງເວັນ"
                                             }
                                         </Typography>
                                     </Paper>
@@ -794,14 +794,14 @@ const SettingsPage = () => {
                                                 <ListItemText
                                                     primary={
                                                         <Typography variant="body1" fontWeight={600}>
-                                                            {isDarkMode ? "ໂໝດມືດ" : "ໂໝດແຈ້ງງ"}
+                                                            {isDarkMode ? "ໂໝດມືດ" : "ໂໝດແຈ້ງ"}
                                                         </Typography>
                                                     }
                                                     secondary={
                                                         <Typography variant="body2" color="text.secondary">
                                                             {isDarkMode 
                                                                 ? "ປົກປ້ອງສາຍຕາໃນສະພາບແວດລ້ອມມືດ"
-                                                                : "ມອງເຫັນໄດ້ຊັດເຈນໃນສະພາບແວດລ້ອມແຈ້ງງ"
+                                                                : "ມອງເຫັນໄດ້ຊັດເຈນໃນສະພາບແວດລ້ອມແຈ້ງ"
                                                             }
                                                         </Typography>
                                                     }
